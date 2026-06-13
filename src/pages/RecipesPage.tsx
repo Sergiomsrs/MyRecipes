@@ -57,25 +57,19 @@ export default function RecipesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-full bg-bg">
             {currentView === "list" && (
                 <>
-                    {/* Header */}
-                    <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-                        <div className="px-4 py-5 flex items-center justify-between">
-                            <div>
-                                <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">AppRecetas</h1>
-                                <p className="text-xs text-gray-500 mt-1 font-medium">Tu recetario personal</p>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-2xl font-bold text-emerald-600">{recipes.length}</div>
-                                <p className="text-xs text-gray-500 font-medium">receta{recipes.length !== 1 ? "s" : ""}</p>
-                            </div>
+                    <div className="page-container pt-4 md:pt-6 pb-24">
+                        <div className="mb-6">
+                            <h1 className="text-xl md:text-2xl font-bold tracking-tight">
+                                <span className="gradient-text">Mis recetas</span>
+                            </h1>
+                            <p className="font-mono text-xs text-text-muted mt-1">
+                                {recipes.length} receta{recipes.length !== 1 ? "s" : ""}
+                            </p>
                         </div>
-                    </div>
 
-                    {/* Content */}
-                    <div className="pt-4 pb-24">
                         <RecipeList
                             recipes={recipes}
                             onView={handleViewRecipe}
@@ -84,44 +78,39 @@ export default function RecipesPage() {
                         />
                     </div>
 
-                    {/* Floating Action Button */}
-                    <button
-                        onClick={() => setCurrentView("create")}
-                        className="fixed bottom-6 right-4 w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-full shadow-xl hover:shadow-2xl hover:shadow-emerald-500/50 transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center text-3xl font-bold z-20"
-                    >
-                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
-                        </svg>
-                    </button>
+                    <div className="fixed bottom-6 left-0 right-0 z-20 pointer-events-none">
+                        <div className="page-container flex justify-end pointer-events-auto">
+                            <button
+                                type="button"
+                                onClick={() => setCurrentView("create")}
+                                className="size-14 btn-gradient rounded-full shadow-lg shadow-accent/25 flex items-center justify-center"
+                                aria-label="Nueva receta"
+                            >
+                                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </>
             )}
 
             {currentView === "create" && (
                 <>
-                    {/* Header */}
-                    <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm px-4 py-3 flex items-center justify-between">
-                        <h1 className="text-lg font-bold text-gray-900">Crear receta</h1>
+                    <div className="page-container pt-4 flex items-center justify-between">
+                        <h1 className="text-lg font-semibold text-text">Nueva receta</h1>
                         <button
+                            type="button"
                             onClick={() => setCurrentView("list")}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
+                            className="p-2 text-text-muted hover:text-text active:text-text transition-colors"
+                            aria-label="Cerrar"
                         >
-                            <svg
-                                className="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
-                    {/* Form */}
                     <RecipeForm
                         onSubmit={handleCreateRecipe}
                         onCancel={() => setCurrentView("list")}
@@ -147,30 +136,20 @@ export default function RecipesPage() {
 
             {currentView === "edit" && selectedRecipe && (
                 <>
-                    {/* Header */}
-                    <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm px-4 py-3 flex items-center justify-between">
-                        <h1 className="text-lg font-bold text-gray-900">Editar receta</h1>
+                    <div className="page-container pt-4 flex items-center justify-between">
+                        <h1 className="text-lg font-semibold text-text">Editar receta</h1>
                         <button
+                            type="button"
                             onClick={() => setCurrentView("detail")}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
+                            className="p-2 text-text-muted hover:text-text active:text-text transition-colors"
+                            aria-label="Cerrar"
                         >
-                            <svg
-                                className="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
-                    {/* Form */}
                     <RecipeForm
                         recipe={selectedRecipe}
                         onSubmit={handleUpdateRecipe}
