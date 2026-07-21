@@ -75,7 +75,7 @@ Construir un proyecto Full Stack moderno que demuestre conocimientos profesional
 
 El proyecto utilizará:
 
-- Java 21
+- Java 17
 - Spring Boot
 - Spring Security
 - JWT
