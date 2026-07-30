@@ -146,6 +146,7 @@ En el futuro estas pruebas podrán integrarse en un pipeline de integración con
 - Mockito
 - Spring Boot Test
 - MockMvc
+- Testcontainers
 
 ---
 

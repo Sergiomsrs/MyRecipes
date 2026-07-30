@@ -32,7 +32,7 @@ La arquitectura del sistema puede representarse mediante el siguiente esquema.
          HTTPS / REST API (JSON)
                     │
                     ▼
-      Spring Boot 3 + Java 17
+      Spring Boot 4.1 + Java 17
                     │
              Spring Data JPA
                     │

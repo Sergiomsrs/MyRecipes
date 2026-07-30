@@ -91,21 +91,29 @@ Su responsabilidad es identificar la receta y mantener la referencia a la versi�
 
 ## RecipeVersion
 
-Representa una fotografía completa de una receta en un momento determinado.
+Representa una fotografía completa e inmutable de una receta en un momento determinado.
 
-Cada nueva versión sustituye a la versión actual como referencia principal, pero las versiones anteriores permanecen almacenadas.
+Cada nueva versión se crea a partir de la versión anterior y pasa a convertirse en la versión actual de la receta. Las versiones anteriores nunca se modifican ni se eliminan, permitiendo consultar la evolución completa de la receta.
+
+### Responsabilidades
+
+- Almacenar el estado completo de una receta en un instante determinado.
+- Mantener la referencia a la receta a la que pertenece.
+- Conservar el historial de cambios mediante versiones inmutables.
 
 ### Atributos principales
 
 - id
-- recipeId
+- recipe
 - versionNumber
 - summaryChanges
 - notes
 - rating
 - createdAt
 
-Cada versión contiene además:
+### Contenido de una versión
+
+Cada versión contiene su propio conjunto de:
 
 - Ingredientes.
 - Pasos.
@@ -120,11 +128,11 @@ Representa un ingrediente perteneciente a una versión concreta de una receta.
 ### Atributos principales
 
 - id
-- recipeVersionId
+- recipeVersion
 - name
 - quantity
 - unit
-- order
+- orderIndex
 
 ---
 
