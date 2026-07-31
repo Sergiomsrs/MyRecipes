@@ -2,14 +2,12 @@ package org.mendez.mr.myrecipesapi.repository;
 
 import org.junit.jupiter.api.Test;
 import org.mendez.mr.myrecipesapi.entity.Recipe;
-import org.mendez.mr.myrecipesapi.entity.RecipeVersion;
 import org.mendez.mr.myrecipesapi.enums.RecipeCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
