@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "photos")
+@Table(name = "photos", indexes = {
+        @Index(name = "idx_photo_recipe_version", columnList = "recipe_id")
+})
 public class Photo {
 
     @Id

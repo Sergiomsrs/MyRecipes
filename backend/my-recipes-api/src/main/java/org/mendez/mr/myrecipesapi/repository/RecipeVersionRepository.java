@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface RecipeVersionRepository extends JpaRepository<RecipeVersion, UUID> {
     List<RecipeVersion> findByRecipeId(UUID id);
+    List<RecipeVersion> findByRecipeIdOrderByVersionNumber(UUID recipeId);
+
 }

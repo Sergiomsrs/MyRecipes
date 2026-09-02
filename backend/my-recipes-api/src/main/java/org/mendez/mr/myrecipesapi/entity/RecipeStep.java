@@ -6,7 +6,12 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "recipe_steps")
+@Table(name = "recipe_steps", indexes = {
+        @Index(
+                name = "idx_recipe_step_recipe_version",
+                columnList = "recipe_version_id"
+        )
+})
 public class RecipeStep {
 
     @Id

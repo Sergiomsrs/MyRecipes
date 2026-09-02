@@ -7,7 +7,12 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Table(name = "recipe_ingredients")
+@Table(name = "recipe_ingredients", indexes = {
+        @Index(
+                name = "idx_recipe_ingredient_recipe_version",
+                columnList = "recipe_version_id"
+        )
+})
 public class RecipeIngredient {
 
     @Id

@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "recipe_versions")
+@Table(name = "recipe_versions", indexes = {
+        @Index(name = "idx_recipe_version_recipe", columnList = "recipe_id")
+})
 @EntityListeners(AuditingEntityListener.class)
 public class RecipeVersion {
 
