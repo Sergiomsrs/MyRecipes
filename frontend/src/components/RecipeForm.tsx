@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { categories, categoryLabels } from "../constants/categories";
+import { categories, categoryMeta } from "../constants/categories";
 import type {
     IngredientForm,
     Recipe,
-    RecipeCategory,
     RecipeFormData,
 } from "../types/recipe";
 
@@ -139,23 +138,30 @@ export default function RecipeForm({
             <div className="py-5 border-b border-border">
                 <div className="lg:grid lg:grid-cols-2 lg:gap-8">
                     <div>
-                        <label className="section-label block mb-2">Categoría</label>
-                        <select
-                            value={formData.category}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    category: e.target.value as RecipeCategory,
-                                })
-                            }
-                            className="input-field input-field--block"
-                        >
-                            {categories.map((category) => (
-                                <option key={category} value={category}>
-                                    {categoryLabels[category]}
-                                </option>
-                            ))}
-                        </select>
+                        <label className="section-label block mb-3">Categoría</label>
+                        <div className="flex flex-wrap gap-2">
+                            {categories.map((category) => {
+                                const meta = categoryMeta[category];
+                                const selected = formData.category === category;
+                                return (
+                                    <button
+                                        key={category}
+                                        type="button"
+                                        onClick={() =>
+                                            setFormData({ ...formData, category })
+                                        }
+                                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors border ${
+                                            selected
+                                                ? "bg-accent/10 border-accent/50 text-accent-strong"
+                                                : "bg-surface border-border text-text-muted hover:border-accent/40 hover:text-text"
+                                        }`}
+                                    >
+                                        <span>{meta.emoji}</span>
+                                        {meta.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                     <div className="flex-1 pt-5 lg:pt-0">
                         <label className="section-label block mb-2">Descripción</label>
@@ -315,13 +321,13 @@ export default function RecipeForm({
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 py-3 text-text-muted font-medium active:text-text transition-colors"
+                    className="flex-1 py-3 btn-outline"
                 >
                     Cancelar
                 </button>
                 <button
                     type="submit"
-                    className="flex-1 py-3 btn-gradient"
+                    className="flex-1 py-3 btn-primary"
                 >
                     {editing ? "Guardar" : "Crear receta"}
                 </button>

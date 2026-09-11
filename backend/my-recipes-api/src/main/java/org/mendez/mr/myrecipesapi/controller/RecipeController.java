@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeRequest;
 
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
+import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
 import org.mendez.mr.myrecipesapi.dto.UpdateRecipeRequest;
 import org.mendez.mr.myrecipesapi.service.RecipeService;
 import org.springframework.http.HttpStatus;
@@ -62,6 +63,14 @@ public class RecipeController {
             @Valid @RequestBody UpdateRecipeRequest request
     ) {
         return ResponseEntity.ok(recipeService.updateRecipe(id, request));
+    }
+
+    @GetMapping("/{id}/versions/current")
+    public ResponseEntity<RecipeVersionResponse> getCurrentVersion(
+            @PathVariable UUID id,
+            @RequestParam UUID userId
+    ) {
+        return ResponseEntity.ok(recipeService.getCurrentVersion(id, userId));
     }
 
     @DeleteMapping("/{id}")

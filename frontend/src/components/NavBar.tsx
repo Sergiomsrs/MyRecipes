@@ -10,7 +10,7 @@ function navLinkClass({ isActive }: { isActive: boolean }) {
     return `text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${
         isActive
             ? "text-accent bg-accent/10"
-            : "text-text-muted hover:text-text active:text-text"
+            : "text-text-muted hover:text-text active:text-text hover:bg-surface-raised"
     }`;
 }
 
@@ -20,8 +20,11 @@ export default function NavBar() {
     return (
         <header className="sticky top-0 z-30 bg-bg/90 backdrop-blur-md border-b border-border w-full">
             <nav className="page-container flex items-center justify-between h-14 md:h-16 gap-4">
-                <Link to="/" className="font-bold text-lg md:text-xl tracking-tight shrink-0">
-                    <span className="gradient-text">Cuaderno</span>
+                <Link
+                    to="/"
+                    className="font-serif font-semibold text-lg md:text-xl tracking-tight shrink-0"
+                >
+                    Cuaderno
                 </Link>
 
                 <div className="flex items-center gap-1 md:gap-2">
@@ -34,6 +37,8 @@ export default function NavBar() {
                             </li>
                         ))}
                     </ul>
+
+                    <div className="w-px h-5 bg-border ml-1 hidden md:block" />
 
                     <button
                         type="button"

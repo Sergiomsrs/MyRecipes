@@ -47,6 +47,39 @@ export interface Attempt {
     notes?: string;
 }
 
+export interface RecipeIngredient {
+    id: string;
+    name: string;
+    quantity: number;
+    unit: string;
+    orderIndex: number;
+}
+
+export interface RecipeStep {
+    id: string;
+    order: number;
+    description: string;
+}
+
+export interface Photo {
+    id: string;
+    url: string;
+    caption?: string;
+}
+
+export interface RecipeVersion {
+    id: string;
+    recipeId: string;
+    versionNumber: number;
+    summaryChanges?: string;
+    notes?: string;
+    rating?: number;
+    createdAt: string;
+    ingredients: RecipeIngredient[];
+    steps: RecipeStep[];
+    photos: Photo[];
+}
+
 export interface CreateIngredientPayload {
     name: string;
     quantity: number;

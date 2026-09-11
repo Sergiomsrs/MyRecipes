@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import * as api from "../api/recipes";
 import { USER_ID } from "../config";
-import type { Attempt, Recipe, RecipeFormData } from "../types/recipe";
+import type {
+    Attempt,
+    Recipe,
+    RecipeFormData,
+    RecipeVersion,
+} from "../types/recipe";
 
 const ATTEMPTS_KEY = "recipe_attempts";
 
@@ -102,6 +107,13 @@ export function useRecipes() {
         return recipes.find((recipe) => recipe.id === id);
     };
 
+    const getCurrentVersion = useCallback(
+        (recipeId: string): Promise<RecipeVersion> => {
+            return api.getCurrentVersion(recipeId);
+        },
+        []
+    );
+
     const addAttempt = (recipeId: string, rating?: number, notes?: string) => {
         const newAttempt: Attempt = {
             id: Date.now().toString(),
@@ -127,6 +139,7 @@ export function useRecipes() {
         updateRecipe,
         deleteRecipe,
         getRecipe,
+        getCurrentVersion,
         attempts,
         addAttempt,
     };

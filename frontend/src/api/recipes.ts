@@ -2,6 +2,7 @@ import { API_BASE, USER_ID } from "../config";
 import type {
     CreateRecipePayload,
     Recipe,
+    RecipeVersion,
     UpdateRecipePayload,
 } from "../types/recipe";
 
@@ -46,6 +47,10 @@ export function getRecipes(): Promise<Recipe[]> {
 
 export function getRecipe(id: string): Promise<Recipe> {
     return request<Recipe>(`/${id}?userId=${USER_ID}`);
+}
+
+export function getCurrentVersion(id: string): Promise<RecipeVersion> {
+    return request<RecipeVersion>(`/${id}/versions/current?userId=${USER_ID}`);
 }
 
 export function createRecipe(payload: CreateRecipePayload): Promise<Recipe> {

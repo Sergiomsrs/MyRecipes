@@ -37,7 +37,7 @@ export default function AttemptModal({
 
                     <div className="px-5 md:px-6 pb-6 pt-2 md:pt-6">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-semibold text-text">
+                            <h2 className="font-serif font-semibold text-lg text-text">
                                 ¿Cómo salió esta vez?
                             </h2>
                             <button
@@ -60,7 +60,7 @@ export default function AttemptModal({
                                         type="button"
                                         onClick={() => setRating(star)}
                                         className={`text-3xl transition-colors ${
-                                            star <= rating ? "text-accent-orange" : "text-border"
+                                            star <= rating ? "text-accent-amber" : "text-border"
                                         }`}
                                     >
                                         ★
@@ -87,14 +87,14 @@ export default function AttemptModal({
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="flex-1 py-3 text-text-muted font-medium hover:text-text active:text-text transition-colors"
+                                className="flex-1 py-3 btn-outline"
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="button"
                                 onClick={handleSubmit}
-                                className="flex-1 py-3 btn-gradient"
+                                className="flex-1 py-3 btn-primary"
                             >
                                 Guardar
                             </button>

@@ -5,6 +5,7 @@ import org.mendez.mr.myrecipesapi.dto.CreateRecipeIngredientRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeStepRequest;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
+import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
 import org.mendez.mr.myrecipesapi.dto.UpdateRecipeRequest;
 import org.mendez.mr.myrecipesapi.entity.Photo;
 import org.mendez.mr.myrecipesapi.entity.Recipe;
@@ -113,6 +114,20 @@ public class RecipeServiceImpl implements RecipeService {
         recipe.setCategory(request.category());
 
         return RecipeMapper.toResponse(recipeRepository.save(recipe));
+    }
+
+    @Override
+    public RecipeVersionResponse getCurrentVersion(UUID recipeId, UUID userId) {
+
+        Recipe recipe = findOwned(recipeId, userId);
+
+        RecipeVersion version = recipeVersionRepository
+                .findById(recipe.getCurrentVersionId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Version not found for recipe with id " + recipeId
+                ));
+
+        return RecipeMapper.toVersionResponse(version);
     }
 
     @Override

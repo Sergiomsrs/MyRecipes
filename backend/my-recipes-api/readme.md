@@ -66,6 +66,7 @@ Base URL: `http://localhost:8080` · Prefijo: `/api/v1/recipes` · Sin autentica
 | GET | `/api/v1/recipes/{id}` | `userId` (UUID, query) | Detalle de una receta |
 | POST | `/api/v1/recipes` | body | Crear receta (con ingredientes, pasos, fotos) |
 | PUT | `/api/v1/recipes/{id}` | body | Actualizar receta |
+| GET | `/api/v1/recipes/{id}/versions/current` | `userId` (UUID, query) | Versión actual (ingredientes, pasos, fotos) |
 | DELETE | `/api/v1/recipes/{id}` | `userId` (UUID, query) | Eliminar receta → 204 |
 
 ### Categorías
@@ -117,6 +118,10 @@ Devuelve la versión actual completa: `{ id, recipeId, versionNumber, summaryCha
 ```
 
 **5. Eliminar (DELETE `/api/v1/recipes/{id}?userId=...`) → 204** (sin body)
+
+**6. Versión actual (GET `/api/v1/recipes/{id}/versions/current?userId=...`) → 200**
+
+Devuelve la versión actual completa: `{ id, recipeId, versionNumber, summaryChanges, notes, rating, createdAt, ingredients[], steps[], photos[] }`.
 
 ### Validaciones del body
 

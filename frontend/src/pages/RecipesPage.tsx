@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Recipe, RecipeFormData } from "../types/recipe";
+import type { Recipe, RecipeFormData, RecipeVersion } from "../types/recipe";
 import { useRecipes } from "../hooks/useRecipes";
 import RecipeList from "../components/RecipeList";
 import RecipeForm from "../components/RecipeForm";
@@ -17,11 +17,14 @@ export default function RecipesPage() {
         updateRecipe,
         deleteRecipe,
         getRecipe,
+        getCurrentVersion,
         attempts,
         addAttempt,
     } = useRecipes();
     const [currentView, setCurrentView] = useState<View>("list");
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+    const [currentVersion, setCurrentVersion] = useState<RecipeVersion | null>(null);
+    const [isVersionLoading, setIsVersionLoading] = useState(false);
     const [showAttemptModal, setShowAttemptModal] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
@@ -47,9 +50,21 @@ export default function RecipesPage() {
         }
     };
 
-    const handleViewRecipe = (recipe: Recipe) => {
+    const handleViewRecipe = async (recipe: Recipe) => {
         setSelectedRecipe(recipe);
+        setCurrentVersion(null);
         setCurrentView("detail");
+        setIsVersionLoading(true);
+        try {
+            const version = await getCurrentVersion(recipe.id);
+            setCurrentVersion(version);
+        } catch (err) {
+            setFormError(
+                err instanceof Error ? err.message : "No se pudo cargar la receta completa"
+            );
+        } finally {
+            setIsVersionLoading(false);
+        }
     };
 
     const handleEditRecipe = (recipe: Recipe) => {
@@ -95,7 +110,7 @@ export default function RecipesPage() {
                     <div className="size-12 rounded-xl bg-surface border border-border flex items-center justify-center mb-4">
                         <span className="text-2xl">⚠️</span>
                     </div>
-                    <p className="font-semibold text-text mb-2">
+                    <p className="font-serif font-semibold text-lg text-text mb-2">
                         No se pudieron cargar las recetas
                     </p>
                     <p className="text-text-muted text-sm leading-relaxed max-w-xs mb-6">
@@ -117,7 +132,7 @@ export default function RecipesPage() {
         <div className="min-h-full bg-bg">
             {formError && (
                 <div className="page-container pt-4">
-                    <p className="text-sm text-accent-pink bg-accent-pink/5 border border-accent-pink/20 rounded-lg px-4 py-2.5">
+                    <p className="text-sm text-accent-pink bg-accent-pink/10 border border-accent-pink/30 rounded-xl px-4 py-3">
                         {formError}
                     </p>
                 </div>
@@ -125,13 +140,13 @@ export default function RecipesPage() {
 
             {currentView === "list" && (
                 <>
-                    <div className="page-container pt-4 md:pt-6 pb-24">
-                        <div className="mb-6">
-                            <h1 className="text-xl md:text-2xl font-bold tracking-tight">
+                    <div className="page-container pt-6 md:pt-8 pb-24">
+                        <div className="mb-8">
+                            <h1 className="font-serif font-semibold text-2xl md:text-3xl tracking-tight">
                                 <span className="gradient-text">Mis recetas</span>
                             </h1>
-                            <p className="font-mono text-xs text-text-muted mt-1">
-                                {recipes.length} receta{recipes.length !== 1 ? "s" : ""}
+                            <p className="font-mono text-xs text-text-muted mt-2">
+                                {recipes.length} receta{recipes.length !== 1 ? "s" : ""} en tu cuaderno
                             </p>
                         </div>
 
@@ -164,7 +179,7 @@ export default function RecipesPage() {
             {currentView === "create" && (
                 <>
                     <div className="page-container pt-4 flex items-center justify-between">
-                        <h1 className="text-lg font-semibold text-text">Nueva receta</h1>
+                        <h1 className="font-serif font-semibold text-xl text-text">Nueva receta</h1>
                         <button
                             type="button"
                             onClick={() => {
@@ -195,6 +210,8 @@ export default function RecipesPage() {
                 <>
                     <RecipeDetail
                         recipe={selectedRecipe}
+                        version={currentVersion}
+                        isVersionLoading={isVersionLoading}
                         attempts={selectedAttempts}
                         onEdit={handleEditRecipe}
                         onBack={() => setCurrentView("list")}
@@ -211,7 +228,7 @@ export default function RecipesPage() {
             {currentView === "edit" && selectedRecipe && (
                 <>
                     <div className="page-container pt-4 flex items-center justify-between">
-                        <h1 className="text-lg font-semibold text-text">Editar receta</h1>
+                        <h1 className="font-serif font-semibold text-xl text-text">Editar receta</h1>
                         <button
                             type="button"
                             onClick={() => {
