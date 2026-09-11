@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "photos", indexes = {
-        @Index(name = "idx_photo_recipe_version", columnList = "recipe_id")
+        @Index(name = "idx_photo_recipe_version", columnList = "recipe_version_id")
 })
 public class Photo {
 

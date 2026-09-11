@@ -1,68 +1,101 @@
-import { useState, useEffect } from "react";
-import type { Recipe, RecipeFormData } from "../types/recipe";
+import { useCallback, useEffect, useState } from "react";
+import * as api from "../api/recipes";
+import { USER_ID } from "../config";
+import type { Attempt, Recipe, RecipeFormData } from "../types/recipe";
 
-const STORAGE_KEY = "recipes_app";
+const ATTEMPTS_KEY = "recipe_attempts";
+
+function loadAttempts(): Record<string, Attempt[]> {
+    try {
+        const stored = localStorage.getItem(ATTEMPTS_KEY);
+        return stored ? JSON.parse(stored) : {};
+    } catch {
+        return {};
+    }
+}
+
+function saveAttempts(attempts: Record<string, Attempt[]>) {
+    try {
+        localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(attempts));
+    } catch {
+        // localStorage no disponible
+    }
+}
 
 export function useRecipes() {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [attempts, setAttempts] =
+        useState<Record<string, Attempt[]>>(loadAttempts);
 
-    // Cargar recetas del localStorage
-    useEffect(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            try {
-                setRecipes(JSON.parse(stored));
-            } catch {
-                console.error("Error al cargar recetas");
-            }
+    const loadRecipes = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const data = await api.getRecipes();
+            setRecipes(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Error al cargar las recetas");
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, []);
 
-    // Guardar recetas en localStorage
-    const saveRecipes = (updatedRecipes: Recipe[]) => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedRecipes));
-        setRecipes(updatedRecipes);
-    };
+    useEffect(() => {
+        loadRecipes();
+    }, [loadRecipes]);
 
-    const createRecipe = (data: RecipeFormData) => {
-        const newRecipe: Recipe = {
-            id: Date.now().toString(),
-            name: data.name,
+    const createRecipe = async (data: RecipeFormData): Promise<Recipe> => {
+        const created = await api.createRecipe({
+            userId: USER_ID,
+            title: data.title,
             description: data.description,
-            ingredients: data.ingredients,
-            steps: data.steps,
-            attempts: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        };
-
-        const updatedRecipes = [...recipes, newRecipe];
-        saveRecipes(updatedRecipes);
-        return newRecipe;
+            category: data.category,
+            notes: data.notes,
+            rating: data.rating,
+            ingredients: data.ingredients
+                .filter((ing) => ing.name.trim() && ing.quantity.trim())
+                .map((ing, index) => ({
+                    name: ing.name.trim(),
+                    quantity: parseFloat(ing.quantity),
+                    unit: ing.unit.trim(),
+                    orderIndex: index + 1,
+                })),
+            steps: data.steps
+                .filter((step) => step.description.trim())
+                .sort((a, b) => a.order - b.order)
+                .map((step) => ({
+                    order: step.order,
+                    description: step.description.trim(),
+                })),
+        });
+        setRecipes((current) => [...current, created]);
+        return created;
     };
 
-    const updateRecipe = (id: string, data: RecipeFormData) => {
-        const updatedRecipes = recipes.map((recipe) =>
-            recipe.id === id
-                ? {
-                    ...recipe,
-                    name: data.name,
-                    description: data.description,
-                    ingredients: data.ingredients,
-                    steps: data.steps,
-                    updatedAt: new Date().toISOString(),
-                }
-                : recipe
+    const updateRecipe = async (id: string, data: RecipeFormData): Promise<Recipe> => {
+        const updated = await api.updateRecipe(id, {
+            userId: USER_ID,
+            title: data.title,
+            description: data.description,
+            category: data.category,
+        });
+        setRecipes((current) =>
+            current.map((recipe) => (recipe.id === id ? updated : recipe))
         );
-
-        saveRecipes(updatedRecipes);
+        return updated;
     };
 
-    const deleteRecipe = (id: string) => {
-        const updatedRecipes = recipes.filter((recipe) => recipe.id !== id);
-        saveRecipes(updatedRecipes);
+    const deleteRecipe = async (id: string): Promise<void> => {
+        await api.deleteRecipe(id);
+        setRecipes((current) => current.filter((recipe) => recipe.id !== id));
+        setAttempts((current) => {
+            const next = { ...current };
+            delete next[id];
+            saveAttempts(next);
+            return next;
+        });
     };
 
     const getRecipe = (id: string) => {
@@ -70,33 +103,31 @@ export function useRecipes() {
     };
 
     const addAttempt = (recipeId: string, rating?: number, notes?: string) => {
-        const updatedRecipes = recipes.map((recipe) =>
-            recipe.id === recipeId
-                ? {
-                    ...recipe,
-                    attempts: [
-                        ...recipe.attempts,
-                        {
-                            id: Date.now().toString(),
-                            date: new Date().toISOString(),
-                            rating,
-                            notes,
-                        },
-                    ],
-                }
-                : recipe
-        );
-
-        saveRecipes(updatedRecipes);
+        const newAttempt: Attempt = {
+            id: Date.now().toString(),
+            date: new Date().toISOString(),
+            rating,
+            notes,
+        };
+        setAttempts((current) => {
+            const next = {
+                ...current,
+                [recipeId]: [...(current[recipeId] || []), newAttempt],
+            };
+            saveAttempts(next);
+            return next;
+        });
     };
 
     return {
         recipes,
         isLoading,
+        error,
         createRecipe,
         updateRecipe,
         deleteRecipe,
         getRecipe,
+        attempts,
         addAttempt,
     };
 }

@@ -1,7 +1,9 @@
-import type { Recipe } from "../types/recipe";
+import type { Attempt, Recipe } from "../types/recipe";
+import { categoryLabels } from "../constants/categories";
 
 interface RecipeDetailProps {
     recipe: Recipe;
+    attempts: Attempt[];
     onEdit: (recipe: Recipe) => void;
     onBack: () => void;
     onAddAttempt: () => void;
@@ -9,6 +11,7 @@ interface RecipeDetailProps {
 
 export default function RecipeDetail({
     recipe,
+    attempts,
     onEdit,
     onBack,
     onAddAttempt,
@@ -38,16 +41,16 @@ export default function RecipeDetail({
 
             <div className="page-container py-4 md:py-6">
                 <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight mb-2">
-                    <span className="gradient-text">{recipe.name}</span>
+                    <span className="gradient-text">{recipe.title}</span>
                 </h1>
+                <p className="font-mono text-xs text-text-muted mb-3">
+                    {categoryLabels[recipe.category]}
+                </p>
                 {recipe.description && (
                     <p className="text-text-muted text-sm md:text-base leading-relaxed max-w-2xl">
                         {recipe.description}
                     </p>
                 )}
-                <p className="font-mono text-xs text-text-muted mt-4">
-                    {recipe.attempts.length} intento{recipe.attempts.length !== 1 ? "s" : ""} registrado{recipe.attempts.length !== 1 ? "s" : ""}
-                </p>
 
                 <button
                     type="button"
@@ -59,49 +62,15 @@ export default function RecipeDetail({
             </div>
 
             <div className="page-container pb-6">
-                <div className="lg:grid lg:grid-cols-2 lg:gap-6">
-                    <div className="py-5 lg:py-0">
-                        <p className="section-label mb-3">Ingredientes</p>
-                        <div className="card p-4 space-y-2">
-                            {recipe.ingredients.map((ingredient) => (
-                                <div
-                                    key={ingredient.id}
-                                    className="flex justify-between items-baseline gap-4 text-sm"
-                                >
-                                    <span className="text-text">{ingredient.name}</span>
-                                    <span className="font-mono text-xs text-text-muted shrink-0">
-                                        {ingredient.quantity}
-                                        {ingredient.unit && ` ${ingredient.unit}`}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="py-5 lg:py-0">
-                        <p className="section-label mb-3">Preparación</p>
-                        <div className="card p-4 space-y-4">
-                            {recipe.steps
-                                .sort((a, b) => a.order - b.order)
-                                .map((step, index) => (
-                                    <div key={step.id} className="flex gap-3">
-                                        <span className="flex items-center justify-center size-6 bg-accent/20 text-accent rounded-md text-xs font-mono font-medium shrink-0 mt-0.5">
-                                            {index + 1}
-                                        </span>
-                                        <p className="text-sm text-text-muted leading-relaxed pt-0.5">
-                                            {step.description}
-                                        </p>
-                                    </div>
-                                ))}
-                        </div>
-                    </div>
-                </div>
-
-                {recipe.attempts.length > 0 && (
-                    <div className="py-5">
-                        <p className="section-label mb-3">Historial</p>
+                <div className="py-5">
+                    <p className="section-label mb-3">Historial</p>
+                    {attempts.length === 0 ? (
+                        <p className="text-sm text-text-muted">
+                            Aún no has registrado intentos para esta receta.
+                        </p>
+                    ) : (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            {recipe.attempts
+                            {attempts
                                 .sort(
                                     (a, b) =>
                                         new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -133,8 +102,8 @@ export default function RecipeDetail({
                                     </div>
                                 ))}
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             <div className="fixed-bar md:hidden">

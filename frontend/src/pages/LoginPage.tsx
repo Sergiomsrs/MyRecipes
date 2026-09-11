@@ -5,7 +5,8 @@ export default function LoginPage() {
                 <span className="gradient-text">Iniciar sesión</span>
             </h1>
             <p className="text-sm text-text-muted text-center">
-                Próximamente. Por ahora tus recetas se guardan en tu navegador.
+                Próximamente. Por ahora las recetas se guardan en el servidor y los
+                intentos en tu navegador.
             </p>
         </div>
     );

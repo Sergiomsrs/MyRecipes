@@ -41,6 +41,14 @@ public class RecipeVersion {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @OrderBy("orderIndex ASC")
+    private List<RecipeIngredient> ingredients = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "recipeVersion",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     @OrderBy("order ASC")
     private List<RecipeStep> steps = new ArrayList<>();
 
@@ -96,6 +104,30 @@ public class RecipeVersion {
 
     public Integer getRating() {
         return rating;
+    }
+
+    public List<RecipeIngredient> getIngredients() {
+        return ingredients;
+    }
+
+    public List<RecipeStep> getSteps() {
+        return steps;
+    }
+
+    public List<Photo> getPhotos() {
+        return photos;
+    }
+
+    public void addIngredient(RecipeIngredient ingredient) {
+        ingredients.add(ingredient);
+    }
+
+    public void addStep(RecipeStep step) {
+        steps.add(step);
+    }
+
+    public void addPhoto(Photo photo) {
+        photos.add(photo);
     }
 
     public Instant getCreatedAt() {

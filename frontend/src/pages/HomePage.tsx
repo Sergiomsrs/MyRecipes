@@ -347,7 +347,7 @@ export default function HomePage() {
                         Empezar ahora
                     </Link>
                     <p className="font-mono text-xs text-text-muted mt-6">
-                        Sin registros · solo en tu navegador
+                        Recetas en el servidor · intentos en tu navegador
                     </p>
                 </div>
             </section>

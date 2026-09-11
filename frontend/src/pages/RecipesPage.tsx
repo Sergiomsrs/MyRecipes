@@ -9,24 +9,41 @@ import AttemptModal from "../components/AttemptModal";
 type View = "list" | "create" | "detail" | "edit";
 
 export default function RecipesPage() {
-    const { recipes, createRecipe, updateRecipe, deleteRecipe, getRecipe, addAttempt } = useRecipes();
+    const {
+        recipes,
+        isLoading,
+        error,
+        createRecipe,
+        updateRecipe,
+        deleteRecipe,
+        getRecipe,
+        attempts,
+        addAttempt,
+    } = useRecipes();
     const [currentView, setCurrentView] = useState<View>("list");
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
     const [showAttemptModal, setShowAttemptModal] = useState(false);
+    const [formError, setFormError] = useState<string | null>(null);
 
-    const handleCreateRecipe = (data: RecipeFormData) => {
-        createRecipe(data);
-        setCurrentView("list");
+    const handleCreateRecipe = async (data: RecipeFormData) => {
+        setFormError(null);
+        try {
+            await createRecipe(data);
+            setCurrentView("list");
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : "No se pudo crear la receta");
+        }
     };
 
-    const handleUpdateRecipe = (data: RecipeFormData) => {
-        if (selectedRecipe) {
-            updateRecipe(selectedRecipe.id, data);
-            const updatedRecipe = getRecipe(selectedRecipe.id);
-            if (updatedRecipe) {
-                setSelectedRecipe(updatedRecipe);
-            }
+    const handleUpdateRecipe = async (data: RecipeFormData) => {
+        setFormError(null);
+        if (!selectedRecipe) return;
+        try {
+            await updateRecipe(selectedRecipe.id, data);
+            setSelectedRecipe(getRecipe(selectedRecipe.id) || null);
             setCurrentView("detail");
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : "No se pudo guardar la receta");
         }
     };
 
@@ -40,24 +57,72 @@ export default function RecipesPage() {
         setCurrentView("edit");
     };
 
-    const handleDeleteRecipe = (id: string) => {
-        deleteRecipe(id);
-        setCurrentView("list");
+    const handleDeleteRecipe = async (id: string) => {
+        setFormError(null);
+        try {
+            await deleteRecipe(id);
+            setCurrentView("list");
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : "No se pudo eliminar la receta");
+        }
     };
 
     const handleAddAttempt = (rating?: number, notes?: string) => {
         if (selectedRecipe) {
             addAttempt(selectedRecipe.id, rating, notes);
-            const updatedRecipe = getRecipe(selectedRecipe.id);
-            if (updatedRecipe) {
-                setSelectedRecipe(updatedRecipe);
-            }
             setShowAttemptModal(false);
         }
     };
 
+    const attemptsCount = Object.fromEntries(
+        Object.entries(attempts).map(([id, list]) => [id, list.length])
+    );
+
+    const selectedAttempts = selectedRecipe ? (attempts[selectedRecipe.id] || []) : [];
+
+    if (isLoading) {
+        return (
+            <div className="min-h-full bg-bg flex items-center justify-center py-24">
+                <p className="text-text-muted">Cargando recetas...</p>
+            </div>
+        );
+    }
+
+    if (error && currentView === "list") {
+        return (
+            <div className="min-h-full bg-bg">
+                <div className="page-container pt-16 flex flex-col items-center justify-center text-center">
+                    <div className="size-12 rounded-xl bg-surface border border-border flex items-center justify-center mb-4">
+                        <span className="text-2xl">⚠️</span>
+                    </div>
+                    <p className="font-semibold text-text mb-2">
+                        No se pudieron cargar las recetas
+                    </p>
+                    <p className="text-text-muted text-sm leading-relaxed max-w-xs mb-6">
+                        {error}
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        className="px-5 py-2.5 btn-gradient"
+                    >
+                        Reintentar
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-full bg-bg">
+            {formError && (
+                <div className="page-container pt-4">
+                    <p className="text-sm text-accent-pink bg-accent-pink/5 border border-accent-pink/20 rounded-lg px-4 py-2.5">
+                        {formError}
+                    </p>
+                </div>
+            )}
+
             {currentView === "list" && (
                 <>
                     <div className="page-container pt-4 md:pt-6 pb-24">
@@ -72,6 +137,7 @@ export default function RecipesPage() {
 
                         <RecipeList
                             recipes={recipes}
+                            attemptsCount={attemptsCount}
                             onView={handleViewRecipe}
                             onEdit={handleEditRecipe}
                             onDelete={handleDeleteRecipe}
@@ -101,7 +167,10 @@ export default function RecipesPage() {
                         <h1 className="text-lg font-semibold text-text">Nueva receta</h1>
                         <button
                             type="button"
-                            onClick={() => setCurrentView("list")}
+                            onClick={() => {
+                                setFormError(null);
+                                setCurrentView("list");
+                            }}
                             className="p-2 text-text-muted hover:text-text active:text-text transition-colors"
                             aria-label="Cerrar"
                         >
@@ -112,8 +181,12 @@ export default function RecipesPage() {
                     </div>
 
                     <RecipeForm
+                        mode="create"
                         onSubmit={handleCreateRecipe}
-                        onCancel={() => setCurrentView("list")}
+                        onCancel={() => {
+                            setFormError(null);
+                            setCurrentView("list");
+                        }}
                     />
                 </>
             )}
@@ -122,6 +195,7 @@ export default function RecipesPage() {
                 <>
                     <RecipeDetail
                         recipe={selectedRecipe}
+                        attempts={selectedAttempts}
                         onEdit={handleEditRecipe}
                         onBack={() => setCurrentView("list")}
                         onAddAttempt={() => setShowAttemptModal(true)}
@@ -140,7 +214,10 @@ export default function RecipesPage() {
                         <h1 className="text-lg font-semibold text-text">Editar receta</h1>
                         <button
                             type="button"
-                            onClick={() => setCurrentView("detail")}
+                            onClick={() => {
+                                setFormError(null);
+                                setCurrentView("detail");
+                            }}
                             className="p-2 text-text-muted hover:text-text active:text-text transition-colors"
                             aria-label="Cerrar"
                         >
@@ -152,8 +229,12 @@ export default function RecipesPage() {
 
                     <RecipeForm
                         recipe={selectedRecipe}
+                        mode="edit"
                         onSubmit={handleUpdateRecipe}
-                        onCancel={() => setCurrentView("detail")}
+                        onCancel={() => {
+                            setFormError(null);
+                            setCurrentView("detail");
+                        }}
                     />
                 </>
             )}

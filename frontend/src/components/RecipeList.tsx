@@ -1,8 +1,10 @@
 import type { Recipe } from "../types/recipe";
 import { useState } from "react";
+import { categoryLabels } from "../constants/categories";
 
 interface RecipeListProps {
     recipes: Recipe[];
+    attemptsCount?: Record<string, number>;
     onView: (recipe: Recipe) => void;
     onEdit: (recipe: Recipe) => void;
     onDelete: (id: string) => void;
@@ -10,6 +12,7 @@ interface RecipeListProps {
 
 export default function RecipeList({
     recipes,
+    attemptsCount,
     onView,
     onEdit,
     onDelete,
@@ -35,15 +38,11 @@ export default function RecipeList({
     return (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {recipes.map((recipe) => {
-                const lastAttempt = recipe.attempts[recipe.attempts.length - 1];
+                const count = attemptsCount?.[recipe.id] ?? 0;
                 const attemptLabel =
-                    recipe.attempts.length === 0
+                    count === 0
                         ? "Sin intentos"
-                        : `${recipe.attempts.length} intento${recipe.attempts.length !== 1 ? "s" : ""}${
-                              lastAttempt
-                                  ? ` · ${new Date(lastAttempt.date).toLocaleDateString("es-ES", { month: "short", year: "numeric" })}`
-                                  : ""
-                          }`;
+                        : `${count} intento${count !== 1 ? "s" : ""}`;
 
                 return (
                     <div key={recipe.id} className="relative">
@@ -53,9 +52,12 @@ export default function RecipeList({
                             className="card w-full h-full text-left p-4 hover:border-accent/40 active:border-accent/50 transition-colors"
                         >
                             <h3 className="font-semibold text-text mb-1 pr-8">
-                                {recipe.name}
+                                {recipe.title}
                             </h3>
                             <p className="font-mono text-xs text-text-muted">
+                                {categoryLabels[recipe.category]}
+                            </p>
+                            <p className="font-mono text-xs text-text-muted mt-1">
                                 {attemptLabel}
                             </p>
                         </button>
@@ -96,7 +98,7 @@ export default function RecipeList({
                                             setOpenMenuId(null);
                                             if (
                                                 window.confirm(
-                                                    `¿Eliminar la receta "${recipe.name}"?`
+                                                    `¿Eliminar la receta "${recipe.title}"?`
                                                 )
                                             ) {
                                                 onDelete(recipe.id);
