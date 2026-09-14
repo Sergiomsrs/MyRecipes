@@ -1,6 +1,7 @@
 package org.mendez.mr.myrecipesapi.service;
 
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeRequest;
+import org.mendez.mr.myrecipesapi.dto.CreateVersionRequest;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
 import org.mendez.mr.myrecipesapi.dto.UpdateRecipeRequest;
@@ -19,6 +20,8 @@ public interface RecipeService {
     RecipeResponse updateRecipe(UUID recipeId, UpdateRecipeRequest request);
 
     RecipeVersionResponse getCurrentVersion(UUID recipeId, UUID userId);
+
+    RecipeVersionResponse createVersion(UUID recipeId, CreateVersionRequest request);
 
     void deleteRecipe(UUID recipeId, UUID userId);
 

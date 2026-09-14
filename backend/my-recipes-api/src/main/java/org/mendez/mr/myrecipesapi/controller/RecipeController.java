@@ -2,6 +2,7 @@ package org.mendez.mr.myrecipesapi.controller;
 
 import jakarta.validation.Valid;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeRequest;
+import org.mendez.mr.myrecipesapi.dto.CreateVersionRequest;
 
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
@@ -71,6 +72,15 @@ public class RecipeController {
             @RequestParam UUID userId
     ) {
         return ResponseEntity.ok(recipeService.getCurrentVersion(id, userId));
+    }
+
+    @PostMapping("/{id}/versions")
+    public ResponseEntity<RecipeVersionResponse> createVersion(
+            @PathVariable UUID id,
+            @Valid @RequestBody CreateVersionRequest request
+    ) {
+        RecipeVersionResponse response = recipeService.createVersion(id, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{id}")

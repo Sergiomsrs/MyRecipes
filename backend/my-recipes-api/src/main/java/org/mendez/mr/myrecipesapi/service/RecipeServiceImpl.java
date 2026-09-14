@@ -4,6 +4,7 @@ import org.mendez.mr.myrecipesapi.dto.CreatePhotoRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeIngredientRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeStepRequest;
+import org.mendez.mr.myrecipesapi.dto.CreateVersionRequest;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
 import org.mendez.mr.myrecipesapi.dto.UpdateRecipeRequest;
@@ -126,6 +127,62 @@ public class RecipeServiceImpl implements RecipeService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Version not found for recipe with id " + recipeId
                 ));
+
+        return RecipeMapper.toVersionResponse(version);
+    }
+
+    @Override
+    public RecipeVersionResponse createVersion(UUID recipeId, CreateVersionRequest request) {
+
+        Recipe recipe = findOwned(recipeId, request.userId());
+
+        List<RecipeVersion> existingVersions =
+                recipeVersionRepository.findByRecipeIdOrderByVersionNumber(recipeId);
+
+        int nextVersionNumber = existingVersions.isEmpty()
+                ? 1
+                : existingVersions.get(existingVersions.size() - 1).getVersionNumber() + 1;
+
+        RecipeVersion version = new RecipeVersion(
+                recipe,
+                nextVersionNumber,
+                request.summaryChanges(),
+                request.notes(),
+                request.rating()
+        );
+
+        for (CreateRecipeIngredientRequest ingredient : request.ingredients()) {
+            version.addIngredient(new RecipeIngredient(
+                    version,
+                    ingredient.name(),
+                    ingredient.quantity(),
+                    ingredient.unit(),
+                    ingredient.orderIndex()
+            ));
+        }
+
+        for (CreateRecipeStepRequest step : request.steps()) {
+            version.addStep(new RecipeStep(
+                    version,
+                    step.order(),
+                    step.description()
+            ));
+        }
+
+        if (request.photos() != null) {
+            for (CreatePhotoRequest photo : request.photos()) {
+                version.addPhoto(new Photo(
+                        version,
+                        photo.url(),
+                        photo.caption()
+                ));
+            }
+        }
+
+        version = recipeVersionRepository.save(version);
+
+        recipe.setCurrentVersionId(version.getId());
+        recipeRepository.save(recipe);
 
         return RecipeMapper.toVersionResponse(version);
     }
