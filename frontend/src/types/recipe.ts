@@ -40,13 +40,6 @@ export interface RecipeFormData {
     rating?: number;
 }
 
-export interface Attempt {
-    id: string;
-    date: string;
-    rating?: number;
-    notes?: string;
-}
-
 export interface RecipeIngredient {
     id: string;
     name: string;
@@ -103,6 +96,16 @@ export interface CreateRecipePayload {
     description: string;
     category: RecipeCategory;
     summaryChanges?: string;
+    notes?: string;
+    rating?: number;
+    ingredients: CreateIngredientPayload[];
+    steps: CreateStepPayload[];
+    photos?: CreatePhotoPayload[];
+}
+
+export interface CreateVersionPayload {
+    userId: string;
+    summaryChanges: string;
     notes?: string;
     rating?: number;
     ingredients: CreateIngredientPayload[];

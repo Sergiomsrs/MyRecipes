@@ -1,6 +1,7 @@
 import { API_BASE, USER_ID } from "../config";
 import type {
     CreateRecipePayload,
+    CreateVersionPayload,
     Recipe,
     RecipeVersion,
     UpdateRecipePayload,
@@ -72,4 +73,14 @@ export function updateRecipe(
 
 export function deleteRecipe(id: string): Promise<void> {
     return request<void>(`/${id}?userId=${USER_ID}`, { method: "DELETE" });
+}
+
+export function createVersion(
+    recipeId: string,
+    payload: CreateVersionPayload
+): Promise<RecipeVersion> {
+    return request<RecipeVersion>(`/${recipeId}/versions`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
 }

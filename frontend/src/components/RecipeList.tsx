@@ -4,7 +4,6 @@ import { categoryMeta } from "../constants/categories";
 
 interface RecipeListProps {
     recipes: Recipe[];
-    attemptsCount?: Record<string, number>;
     onView: (recipe: Recipe) => void;
     onEdit: (recipe: Recipe) => void;
     onDelete: (id: string) => void;
@@ -12,7 +11,6 @@ interface RecipeListProps {
 
 export default function RecipeList({
     recipes,
-    attemptsCount,
     onView,
     onEdit,
     onDelete,
@@ -29,7 +27,7 @@ export default function RecipeList({
                     Tu cuaderno está vacío
                 </p>
                 <p className="text-text-muted text-sm leading-relaxed max-w-xs">
-                    Crea tu primera receta y empieza a registrar cada intento.
+                    Crea tu primera receta y empieza a documentar cada versión.
                 </p>
             </div>
         );
@@ -38,12 +36,7 @@ export default function RecipeList({
     return (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recipes.map((recipe) => {
-                const count = attemptsCount?.[recipe.id] ?? 0;
                 const meta = categoryMeta[recipe.category];
-                const attemptLabel =
-                    count === 0
-                        ? "Sin intentos"
-                        : `${count} intento${count !== 1 ? "s" : ""}`;
                 const updatedLabel = new Date(recipe.updatedAt).toLocaleDateString(
                     "es-ES",
                     { day: "numeric", month: "short", year: "numeric" }
@@ -68,8 +61,6 @@ export default function RecipeList({
                                 {recipe.title}
                             </h3>
                             <div className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-text-muted">
-                                <span>{attemptLabel}</span>
-                                <span aria-hidden="true">·</span>
                                 <span>Actualizada {updatedLabel}</span>
                             </div>
                         </button>

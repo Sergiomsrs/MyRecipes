@@ -4,7 +4,7 @@ import { useRecipes } from "../hooks/useRecipes";
 import RecipeList from "../components/RecipeList";
 import RecipeForm from "../components/RecipeForm";
 import RecipeDetail from "../components/RecipeDetail";
-import AttemptModal from "../components/AttemptModal";
+import NewVersionModal from "../components/NewVersionModal";
 
 type View = "list" | "create" | "detail" | "edit";
 
@@ -18,14 +18,13 @@ export default function RecipesPage() {
         deleteRecipe,
         getRecipe,
         getCurrentVersion,
-        attempts,
-        addAttempt,
+        createVersion,
     } = useRecipes();
     const [currentView, setCurrentView] = useState<View>("list");
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
     const [currentVersion, setCurrentVersion] = useState<RecipeVersion | null>(null);
     const [isVersionLoading, setIsVersionLoading] = useState(false);
-    const [showAttemptModal, setShowAttemptModal] = useState(false);
+    const [showNewVersionModal, setShowNewVersionModal] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
     const handleCreateRecipe = async (data: RecipeFormData) => {
@@ -82,18 +81,17 @@ export default function RecipesPage() {
         }
     };
 
-    const handleAddAttempt = (rating?: number, notes?: string) => {
-        if (selectedRecipe) {
-            addAttempt(selectedRecipe.id, rating, notes);
-            setShowAttemptModal(false);
+    const handleCreateVersion = async (summaryChanges: string, data: RecipeFormData) => {
+        setFormError(null);
+        if (!selectedRecipe) return;
+        try {
+            const newVersion = await createVersion(selectedRecipe.id, summaryChanges, data);
+            setCurrentVersion(newVersion);
+            setShowNewVersionModal(false);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : "No se pudo crear la nueva versión");
         }
     };
-
-    const attemptsCount = Object.fromEntries(
-        Object.entries(attempts).map(([id, list]) => [id, list.length])
-    );
-
-    const selectedAttempts = selectedRecipe ? (attempts[selectedRecipe.id] || []) : [];
 
     if (isLoading) {
         return (
@@ -152,7 +150,6 @@ export default function RecipesPage() {
 
                         <RecipeList
                             recipes={recipes}
-                            attemptsCount={attemptsCount}
                             onView={handleViewRecipe}
                             onEdit={handleEditRecipe}
                             onDelete={handleDeleteRecipe}
@@ -212,16 +209,18 @@ export default function RecipesPage() {
                         recipe={selectedRecipe}
                         version={currentVersion}
                         isVersionLoading={isVersionLoading}
-                        attempts={selectedAttempts}
                         onEdit={handleEditRecipe}
                         onBack={() => setCurrentView("list")}
-                        onAddAttempt={() => setShowAttemptModal(true)}
+                        onNewVersion={() => setShowNewVersionModal(true)}
                     />
-                    <AttemptModal
-                        isOpen={showAttemptModal}
-                        onClose={() => setShowAttemptModal(false)}
-                        onSubmit={handleAddAttempt}
-                    />
+                    {currentVersion && (
+                        <NewVersionModal
+                            isOpen={showNewVersionModal}
+                            currentVersion={currentVersion}
+                            onClose={() => setShowNewVersionModal(false)}
+                            onSubmit={handleCreateVersion}
+                        />
+                    )}
                 </>
             )}
 
