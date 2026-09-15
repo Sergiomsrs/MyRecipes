@@ -6,11 +6,13 @@ interface User {
     token: string;
     role: string;
     userId: string;
+    email: string;
 }
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
+    isLoading: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
 }
@@ -38,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             token: data.token,
             role: data.role,
             userId: data.userId,
+            email: email,
         };
         sessionStorage.setItem("token", data.token);
         sessionStorage.setItem("user", JSON.stringify(newUser));
@@ -55,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             value={{
                 user,
                 isAuthenticated: !!user,
+                isLoading: false,
                 login,
                 logout,
             }}

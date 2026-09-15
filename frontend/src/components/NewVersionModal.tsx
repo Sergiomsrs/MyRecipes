@@ -3,7 +3,6 @@ import type {
     IngredientForm,
     RecipeFormData,
     RecipeVersion,
-    StepForm,
 } from "../types/recipe";
 
 interface NewVersionModalProps {
@@ -133,22 +132,35 @@ export default function NewVersionModal({
             <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-4 pointer-events-none">
                 <div className="card w-full md:max-w-2xl max-h-[90vh] rounded-t-2xl md:rounded-2xl border-b-0 md:border-b pointer-events-auto overflow-y-auto">
                     <div className="flex justify-center pt-3 pb-1 md:hidden">
-                        <div className="w-10 h-1 bg-border rounded-full" />
+                        <div className="w-10 h-1 bg-outline-variant rounded-full" />
                     </div>
 
-                    <form onSubmit={handleSubmit} className="px-5 md:px-6 pb-6 pt-2 md:pt-6">
+                    <form
+                        onSubmit={handleSubmit}
+                        className="px-5 md:px-6 pb-6 pt-2 md:pt-6"
+                    >
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="font-serif font-semibold text-lg text-text">
+                            <h2 className="font-serif font-semibold text-lg text-on-surface">
                                 Nueva versión
                             </h2>
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="p-2 text-text-muted hover:text-text active:text-text transition-colors"
+                                className="p-2 text-on-surface-variant hover:text-on-surface transition-colors"
                                 aria-label="Cerrar"
                             >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                <svg
+                                    className="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
                                 </svg>
                             </button>
                         </div>
@@ -175,7 +187,11 @@ export default function NewVersionModal({
                                             type="text"
                                             value={ingredient.name}
                                             onChange={(e) =>
-                                                updateIngredient(ingredient.id, "name", e.target.value)
+                                                updateIngredient(
+                                                    ingredient.id,
+                                                    "name",
+                                                    e.target.value
+                                                )
                                             }
                                             className="input-field input-field--block"
                                             placeholder="Nombre del ingrediente"
@@ -185,7 +201,11 @@ export default function NewVersionModal({
                                                 type="text"
                                                 value={ingredient.quantity}
                                                 onChange={(e) =>
-                                                    updateIngredient(ingredient.id, "quantity", e.target.value)
+                                                    updateIngredient(
+                                                        ingredient.id,
+                                                        "quantity",
+                                                        e.target.value
+                                                    )
                                                 }
                                                 className="input-field input-field--block"
                                                 placeholder="Cantidad (ej: 500)"
@@ -194,19 +214,35 @@ export default function NewVersionModal({
                                                 type="text"
                                                 value={ingredient.unit}
                                                 onChange={(e) =>
-                                                    updateIngredient(ingredient.id, "unit", e.target.value)
+                                                    updateIngredient(
+                                                        ingredient.id,
+                                                        "unit",
+                                                        e.target.value
+                                                    )
                                                 }
                                                 className="input-field input-field--block"
                                                 placeholder="Unidad (ej: g)"
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => removeIngredient(ingredient.id)}
-                                                className="p-2 text-text-muted active:text-accent-pink transition-colors shrink-0"
+                                                onClick={() =>
+                                                    removeIngredient(ingredient.id)
+                                                }
+                                                className="p-2 text-on-surface-variant active:text-error transition-colors shrink-0"
                                                 aria-label="Eliminar ingrediente"
                                             >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
                                                 </svg>
                                             </button>
                                         </div>
@@ -216,7 +252,7 @@ export default function NewVersionModal({
                             <button
                                 type="button"
                                 onClick={addIngredient}
-                                className="mt-4 text-sm text-accent font-medium active:opacity-80 transition-opacity"
+                                className="mt-4 text-sm text-primary font-semibold active:opacity-80 transition-opacity"
                             >
                                 + Añadir ingrediente
                             </button>
@@ -228,13 +264,18 @@ export default function NewVersionModal({
                                 {formData.steps
                                     .sort((a, b) => a.order - b.order)
                                     .map((step, index) => (
-                                        <div key={step.id} className="flex gap-3 items-start">
-                                            <span className="flex items-center justify-center size-6 bg-accent/20 text-accent rounded-md text-xs font-mono font-medium shrink-0 mt-2.5">
+                                        <div
+                                            key={step.id}
+                                            className="flex gap-3 items-start"
+                                        >
+                                            <span className="flex items-center justify-center size-6 bg-primary-fixed text-primary rounded-md text-xs font-mono font-medium shrink-0 mt-2.5">
                                                 {index + 1}
                                             </span>
                                             <textarea
                                                 value={step.description}
-                                                onChange={(e) => updateStep(step.id, e.target.value)}
+                                                onChange={(e) =>
+                                                    updateStep(step.id, e.target.value)
+                                                }
                                                 className="input-field min-w-0 flex-1 resize-none"
                                                 placeholder="Describe este paso"
                                                 rows={2}
@@ -242,11 +283,21 @@ export default function NewVersionModal({
                                             <button
                                                 type="button"
                                                 onClick={() => removeStep(step.id)}
-                                                className="p-2 text-text-muted active:text-accent-pink transition-colors shrink-0 mt-1.5"
+                                                className="p-2 text-on-surface-variant active:text-error transition-colors shrink-0 mt-1.5"
                                                 aria-label="Eliminar paso"
                                             >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
                                                 </svg>
                                             </button>
                                         </div>
@@ -255,7 +306,7 @@ export default function NewVersionModal({
                             <button
                                 type="button"
                                 onClick={addStep}
-                                className="mt-4 text-sm text-accent font-medium active:opacity-80 transition-opacity"
+                                className="mt-4 text-sm text-primary font-semibold active:opacity-80 transition-opacity"
                             >
                                 + Añadir paso
                             </button>
@@ -275,18 +326,25 @@ export default function NewVersionModal({
                                         onChange={(e) =>
                                             setFormData({
                                                 ...formData,
-                                                rating: e.target.value ? Number(e.target.value) : undefined,
+                                                rating: e.target.value
+                                                    ? Number(e.target.value)
+                                                    : undefined,
                                             })
                                         }
                                         className="input-field input-field--block"
                                     />
                                 </div>
                                 <div className="pt-5 lg:pt-0">
-                                    <label className="section-label block mb-2">Notas</label>
+                                    <label className="section-label block mb-2">
+                                        Notas
+                                    </label>
                                     <textarea
                                         value={formData.notes}
                                         onChange={(e) =>
-                                            setFormData({ ...formData, notes: e.target.value })
+                                            setFormData({
+                                                ...formData,
+                                                notes: e.target.value,
+                                            })
                                         }
                                         className="input-field input-field--block resize-none"
                                         rows={2}
@@ -304,10 +362,7 @@ export default function NewVersionModal({
                             >
                                 Cancelar
                             </button>
-                            <button
-                                type="submit"
-                                className="flex-1 py-3 btn-primary"
-                            >
+                            <button type="submit" className="flex-1 py-3 btn-primary">
                                 Guardar versión
                             </button>
                         </div>

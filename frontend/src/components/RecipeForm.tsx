@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { categories, categoryMeta } from "../constants/categories";
-import type {
-    IngredientForm,
-    Recipe,
-    RecipeFormData,
-} from "../types/recipe";
+import type { IngredientForm, Recipe, RecipeFormData } from "../types/recipe";
 
 interface RecipeFormProps {
     recipe?: Recipe;
@@ -24,9 +20,7 @@ export default function RecipeForm({
         title: recipe?.title || "",
         description: recipe?.description || "",
         category: recipe?.category || "MAIN_COURSE",
-        ingredients: [
-            { id: "1", name: "", quantity: "", unit: "" },
-        ],
+        ingredients: [{ id: "1", name: "", quantity: "", unit: "" }],
         steps: [{ id: "1", order: 1, description: "" }],
         notes: "",
         rating: 5,
@@ -122,7 +116,7 @@ export default function RecipeForm({
 
     return (
         <form onSubmit={handleSubmit} className="page-container pb-6">
-            <div className="py-5 border-b border-border">
+            <div className="py-5 border-b border-outline-variant">
                 <label className="section-label block mb-2">Título *</label>
                 <input
                     type="text"
@@ -135,7 +129,7 @@ export default function RecipeForm({
                 />
             </div>
 
-            <div className="py-5 border-b border-border">
+            <div className="py-5 border-b border-outline-variant">
                 <div className="lg:grid lg:grid-cols-2 lg:gap-8">
                     <div>
                         <label className="section-label block mb-3">Categoría</label>
@@ -150,10 +144,10 @@ export default function RecipeForm({
                                         onClick={() =>
                                             setFormData({ ...formData, category })
                                         }
-                                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors border ${
+                                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors ${
                                             selected
-                                                ? "bg-accent/10 border-accent/50 text-accent-strong"
-                                                : "bg-surface border-border text-text-muted hover:border-accent/40 hover:text-text"
+                                                ? `${meta.bgClass} ring-1 ring-current/20`
+                                                : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container"
                                         }`}
                                     >
                                         <span>{meta.emoji}</span>
@@ -183,8 +177,8 @@ export default function RecipeForm({
 
             {!editing && (
                 <>
-                    <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:border-b lg:border-border">
-                        <div className="py-5 border-b lg:border-b-0 border-border">
+                    <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:border-b lg:border-outline-variant">
+                        <div className="py-5 border-b lg:border-b-0 border-outline-variant">
                             <h3 className="section-label mb-4">Ingredientes *</h3>
                             <div className="space-y-4">
                                 {formData.ingredients.map((ingredient) => (
@@ -193,7 +187,11 @@ export default function RecipeForm({
                                             type="text"
                                             value={ingredient.name}
                                             onChange={(e) =>
-                                                updateIngredient(ingredient.id, "name", e.target.value)
+                                                updateIngredient(
+                                                    ingredient.id,
+                                                    "name",
+                                                    e.target.value
+                                                )
                                             }
                                             className="input-field input-field--block"
                                             placeholder="Nombre del ingrediente"
@@ -203,7 +201,11 @@ export default function RecipeForm({
                                                 type="text"
                                                 value={ingredient.quantity}
                                                 onChange={(e) =>
-                                                    updateIngredient(ingredient.id, "quantity", e.target.value)
+                                                    updateIngredient(
+                                                        ingredient.id,
+                                                        "quantity",
+                                                        e.target.value
+                                                    )
                                                 }
                                                 className="input-field input-field--block"
                                                 placeholder="Cantidad (ej: 500)"
@@ -212,19 +214,35 @@ export default function RecipeForm({
                                                 type="text"
                                                 value={ingredient.unit}
                                                 onChange={(e) =>
-                                                    updateIngredient(ingredient.id, "unit", e.target.value)
+                                                    updateIngredient(
+                                                        ingredient.id,
+                                                        "unit",
+                                                        e.target.value
+                                                    )
                                                 }
                                                 className="input-field input-field--block"
                                                 placeholder="Unidad (ej: g)"
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => removeIngredient(ingredient.id)}
-                                                className="p-2 text-text-muted active:text-accent-pink transition-colors shrink-0"
+                                                onClick={() =>
+                                                    removeIngredient(ingredient.id)
+                                                }
+                                                className="p-2 text-on-surface-variant active:text-error transition-colors shrink-0"
                                                 aria-label="Eliminar ingrediente"
                                             >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
                                                 </svg>
                                             </button>
                                         </div>
@@ -234,7 +252,7 @@ export default function RecipeForm({
                             <button
                                 type="button"
                                 onClick={addIngredient}
-                                className="mt-4 text-sm text-accent font-medium active:opacity-80 transition-opacity"
+                                className="mt-4 text-sm text-primary font-semibold active:opacity-80 transition-opacity"
                             >
                                 + Añadir ingrediente
                             </button>
@@ -246,13 +264,18 @@ export default function RecipeForm({
                                 {formData.steps
                                     .sort((a, b) => a.order - b.order)
                                     .map((step, index) => (
-                                        <div key={step.id} className="flex gap-3 items-start">
-                                            <span className="flex items-center justify-center size-6 bg-accent/20 text-accent rounded-md text-xs font-mono font-medium shrink-0 mt-2.5">
+                                        <div
+                                            key={step.id}
+                                            className="flex gap-3 items-start"
+                                        >
+                                            <span className="flex items-center justify-center size-6 bg-primary-fixed text-primary rounded-md text-xs font-mono font-medium shrink-0 mt-2.5">
                                                 {index + 1}
                                             </span>
                                             <textarea
                                                 value={step.description}
-                                                onChange={(e) => updateStep(step.id, e.target.value)}
+                                                onChange={(e) =>
+                                                    updateStep(step.id, e.target.value)
+                                                }
                                                 className="input-field min-w-0 flex-1 resize-none"
                                                 placeholder="Describe este paso"
                                                 rows={2}
@@ -260,11 +283,21 @@ export default function RecipeForm({
                                             <button
                                                 type="button"
                                                 onClick={() => removeStep(step.id)}
-                                                className="p-2 text-text-muted active:text-accent-pink transition-colors shrink-0 mt-1.5"
+                                                className="p-2 text-on-surface-variant active:text-error transition-colors shrink-0 mt-1.5"
                                                 aria-label="Eliminar paso"
                                             >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                <svg
+                                                    className="w-5 h-5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
                                                 </svg>
                                             </button>
                                         </div>
@@ -273,14 +306,14 @@ export default function RecipeForm({
                             <button
                                 type="button"
                                 onClick={addStep}
-                                className="mt-4 text-sm text-accent font-medium active:opacity-80 transition-opacity"
+                                className="mt-4 text-sm text-primary font-semibold active:opacity-80 transition-opacity"
                             >
                                 + Añadir paso
                             </button>
                         </div>
                     </div>
 
-                    <div className="py-5 border-b border-border">
+                    <div className="py-5 border-b border-outline-variant">
                         <div className="lg:grid lg:grid-cols-2 lg:gap-8">
                             <div>
                                 <label className="section-label block mb-2">
@@ -294,7 +327,9 @@ export default function RecipeForm({
                                     onChange={(e) =>
                                         setFormData({
                                             ...formData,
-                                            rating: e.target.value ? Number(e.target.value) : undefined,
+                                            rating: e.target.value
+                                                ? Number(e.target.value)
+                                                : undefined,
                                         })
                                     }
                                     className="input-field input-field--block"
@@ -325,10 +360,7 @@ export default function RecipeForm({
                 >
                     Cancelar
                 </button>
-                <button
-                    type="submit"
-                    className="flex-1 py-3 btn-primary"
-                >
+                <button type="submit" className="flex-1 py-3 btn-primary">
                     {editing ? "Guardar" : "Crear receta"}
                 </button>
             </div>

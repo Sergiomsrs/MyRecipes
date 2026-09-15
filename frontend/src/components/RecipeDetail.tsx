@@ -1,7 +1,4 @@
-import type {
-    Recipe,
-    RecipeVersion,
-} from "../types/recipe";
+import type { Recipe, RecipeVersion } from "../types/recipe";
 import { categoryMeta } from "../constants/categories";
 
 interface RecipeDetailProps {
@@ -34,49 +31,58 @@ export default function RecipeDetail({
     });
 
     return (
-        <div className="pb-28 md:pb-8">
+        <div className="pb-24 md:pb-8">
             <div className="page-container pt-4 flex items-center justify-between">
                 <button
                     type="button"
                     onClick={onBack}
-                    className="flex items-center gap-1.5 p-2 -ml-2 text-text-muted hover:text-text active:text-text transition-colors"
+                    className="flex items-center gap-1.5 p-2 -ml-2 text-on-surface-variant hover:text-on-surface transition-colors"
                     aria-label="Volver"
                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 19l-7-7 7-7"
+                        />
                     </svg>
                     <span className="text-sm font-medium">Recetas</span>
                 </button>
                 <button
                     type="button"
                     onClick={() => onEdit(recipe)}
-                    className="text-sm font-medium text-accent-strong hover:opacity-80 active:opacity-80 transition-opacity"
+                    className="text-sm font-semibold text-primary hover:opacity-80 transition-opacity"
                 >
                     Editar
                 </button>
             </div>
 
             <div className="page-container py-5 md:py-8">
-                <span className="chip mb-4">
-                    <span
-                        className="category-dot"
-                        style={{ backgroundColor: meta.color }}
-                    />
-                    <span>{meta.emoji}</span>
-                    {meta.label}
+                <span
+                    className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full mb-4 ${meta.bgClass}`}
+                >
+                    {meta.emoji} {meta.label}
                 </span>
                 <h1 className="font-serif font-semibold text-3xl md:text-4xl lg:text-5xl tracking-tight leading-tight mb-5">
                     {recipe.title}
                 </h1>
                 {recipe.description && (
-                    <p className="text-text-muted text-base md:text-lg leading-relaxed max-w-2xl">
+                    <p className="text-on-surface-variant text-base md:text-lg leading-relaxed max-w-2xl">
                         {recipe.description}
                     </p>
                 )}
-                <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-text-muted mt-5">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-on-surface-variant mt-5">
                     {version && (
-                        <span>
-                            Versión {version.versionNumber}
+                        <span className="inline-flex items-center gap-1">
+                            <span className="px-1.5 py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-semibold">
+                                v{version.versionNumber}
+                            </span>
                         </span>
                     )}
                     <span aria-hidden="true">·</span>
@@ -96,12 +102,12 @@ export default function RecipeDetail({
 
             <div className="page-container pb-6">
                 {isVersionLoading ? (
-                    <p className="py-5 text-sm text-text-muted">
+                    <p className="py-5 text-sm text-on-surface-variant">
                         Cargando ingredientes y pasos...
                     </p>
                 ) : version ? (
                     <>
-                        <div className="lg:grid lg:grid-cols-2 lg:gap-8 py-5 border-t border-border">
+                        <div className="lg:grid lg:grid-cols-2 lg:gap-8 py-5 border-t border-outline-variant">
                             <div>
                                 <p className="section-label mb-4">Ingredientes</p>
                                 <div className="card p-5 space-y-3">
@@ -112,8 +118,10 @@ export default function RecipeDetail({
                                                 key={ingredient.id}
                                                 className="flex justify-between items-baseline gap-4 text-sm"
                                             >
-                                                <span className="text-text">{ingredient.name}</span>
-                                                <span className="font-mono text-xs text-text-muted shrink-0">
+                                                <span className="text-on-surface">
+                                                    {ingredient.name}
+                                                </span>
+                                                <span className="font-mono text-xs text-on-surface-variant shrink-0">
                                                     {ingredient.quantity} {ingredient.unit}
                                                 </span>
                                             </div>
@@ -128,10 +136,10 @@ export default function RecipeDetail({
                                         .sort((a, b) => a.order - b.order)
                                         .map((step, index) => (
                                             <div key={step.id} className="flex gap-3">
-                                                <span className="flex items-center justify-center size-6 bg-accent/10 text-accent-strong rounded-full text-xs font-serif font-semibold shrink-0 mt-0.5">
+                                                <span className="flex items-center justify-center size-6 bg-primary-fixed text-primary rounded-full text-xs font-serif font-semibold shrink-0 mt-0.5">
                                                     {index + 1}
                                                 </span>
-                                                <p className="text-sm text-text-muted leading-relaxed pt-0.5">
+                                                <p className="text-sm text-on-surface-variant leading-relaxed pt-0.5">
                                                     {step.description}
                                                 </p>
                                             </div>
@@ -141,20 +149,20 @@ export default function RecipeDetail({
                         </div>
 
                         {(version.rating || version.notes) && (
-                            <div className="py-5 border-t border-border">
+                            <div className="py-5 border-t border-outline-variant">
                                 <p className="section-label mb-3">Notas de la versión</p>
                                 <div className="card p-5 space-y-3">
                                     {version.rating && (
-                                        <p className="text-sm text-text">
+                                        <p className="text-sm text-on-surface">
                                             Valoración:{" "}
-                                            <span className="text-accent-amber font-semibold">
+                                            <span className="text-tertiary font-semibold">
                                                 {version.rating}/10
                                             </span>
                                         </p>
                                     )}
                                     {version.notes && (
-                                        <p className="text-sm text-text-muted leading-relaxed">
-                                            {version.notes}
+                                        <p className="text-sm text-on-surface-variant leading-relaxed italic">
+                                            "{version.notes}"
                                         </p>
                                     )}
                                 </div>
@@ -162,10 +170,12 @@ export default function RecipeDetail({
                         )}
 
                         {version.summaryChanges && (
-                            <div className="py-5 border-t border-border">
-                                <p className="section-label mb-3">Cambios en esta versión</p>
+                            <div className="py-5 border-t border-outline-variant">
+                                <p className="section-label mb-3">
+                                    Cambios en esta versión
+                                </p>
                                 <div className="card p-5">
-                                    <p className="text-sm text-text-muted leading-relaxed">
+                                    <p className="text-sm text-on-surface-variant leading-relaxed">
                                         {version.summaryChanges}
                                     </p>
                                 </div>
@@ -173,7 +183,7 @@ export default function RecipeDetail({
                         )}
                     </>
                 ) : (
-                    <p className="py-5 text-sm text-text-muted">
+                    <p className="py-5 text-sm text-on-surface-variant">
                         No se pudieron cargar los ingredientes y pasos.
                     </p>
                 )}

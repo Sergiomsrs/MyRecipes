@@ -56,13 +56,14 @@ export default function HomePage() {
                             Tu cuaderno de cocina
                         </span>
                         <h1 className="font-serif font-semibold text-[2rem] md:text-5xl leading-[1.1] tracking-tight mb-6">
-                            Tus recetas <span className="gradient-text">evolucionan contigo</span>
+                            Tus recetas{" "}
+                            <span className="gradient-text">evolucionan contigo</span>
                         </h1>
-                        <p className="text-text-muted text-base md:text-lg leading-relaxed mb-6">
+                        <p className="text-on-surface-variant text-base md:text-lg leading-relaxed mb-6">
                             Pruebas, ajustas un ingrediente, cambias el tiempo de
                             cocción... y un día sale increíble.{" "}
-                            <span className="text-text font-medium">
-                                Cuaderno guarda exactamente qué hiciste
+                            <span className="text-on-surface font-medium">
+                                MyRecipes guarda exactamente qué hiciste
                             </span>{" "}
                             para que nunca pierdas la versión que mejor funcionó.
                         </p>
@@ -75,7 +76,7 @@ export default function HomePage() {
                         <img
                             src={heroImage}
                             alt="Recetario ilustrado"
-                            className="w-full rounded-2xl border border-border shadow-lg shadow-accent/10"
+                            className="w-full rounded-2xl shadow-lg shadow-primary/10"
                         />
                     </div>
                 </div>
@@ -87,20 +88,20 @@ export default function HomePage() {
             <section className="landing-section">
                 <div className="page-container">
                     <p className="section-label mb-3">Cómo funciona</p>
-                    <h2 className="font-serif font-semibold text-3xl md:text-4xl tracking-tight text-text mb-10">
+                    <h2 className="font-serif font-semibold text-3xl md:text-4xl tracking-tight mb-10">
                         Tres pasos. Sin complicaciones.
                     </h2>
 
                     <div className="grid gap-5 md:grid-cols-3">
                         {steps.map((step) => (
                             <div key={step.number} className="card p-6">
-                                <span className="inline-flex items-center justify-center size-9 bg-accent/10 text-accent-strong rounded-full font-serif font-semibold text-base mb-4">
+                                <span className="inline-flex items-center justify-center size-9 bg-primary-fixed text-primary rounded-full font-serif font-semibold text-base mb-4">
                                     {step.number}
                                 </span>
-                                <h3 className="font-serif font-semibold text-text text-lg mb-2">
+                                <h3 className="font-serif font-semibold text-on-surface text-lg mb-2">
                                     {step.title}
                                 </h3>
-                                <p className="text-sm text-text-muted leading-relaxed">
+                                <p className="text-sm text-on-surface-variant leading-relaxed">
                                     {step.description}
                                 </p>
                             </div>
@@ -110,7 +111,7 @@ export default function HomePage() {
             </section>
 
             {/* Ejemplo */}
-            <section className="landing-section bg-surface-raised/50">
+            <section className="landing-section bg-surface-container-low/50">
                 <div className="page-container">
                     <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
                         <div className="mb-8 lg:mb-0">
@@ -118,10 +119,10 @@ export default function HomePage() {
                             <h2 className="font-serif font-semibold text-3xl md:text-4xl tracking-tight mb-4">
                                 Tortilla de patatas
                             </h2>
-                            <p className="text-text-muted leading-relaxed">
+                            <p className="text-on-surface-variant leading-relaxed">
                                 Meses después seguirás sabiendo exactamente qué
                                 versión te funcionó. Este es el historial que
-                                guarda Cuaderno por cada receta.
+                                guarda MyRecipes por cada receta.
                             </p>
                         </div>
 
@@ -131,26 +132,26 @@ export default function HomePage() {
                                     key={entry.attempt}
                                     className={`card p-5 ${
                                         entry.highlight
-                                            ? "border-accent/50 bg-accent/5"
+                                            ? "bg-primary-fixed/30 ring-1 ring-primary/30"
                                             : ""
                                     }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="font-mono text-xs text-accent">
+                                        <span className="font-mono text-xs text-primary font-semibold">
                                             Intento #{entry.attempt}
                                         </span>
                                         <span className="text-xl">{entry.mood}</span>
                                     </div>
-                                    <p className="font-medium text-text mb-2">
+                                    <p className="font-medium text-on-surface mb-2">
                                         {entry.label}
                                     </p>
                                     <ul className="space-y-1">
                                         {entry.changes.map((change) => (
                                             <li
                                                 key={change}
-                                                className="text-sm text-text-muted flex items-center gap-2"
+                                                className="text-sm text-on-surface-variant flex items-center gap-2"
                                             >
-                                                <span className="size-1.5 rounded-full bg-accent" />
+                                                <span className="size-1.5 rounded-full bg-primary" />
                                                 {change}
                                             </li>
                                         ))}
@@ -166,16 +167,17 @@ export default function HomePage() {
             <section className="landing-section gradient-glow pb-20">
                 <div className="page-container max-w-2xl mx-auto text-center">
                     <h2 className="font-serif font-semibold text-3xl md:text-4xl tracking-tight mb-4">
-                        Tu mejor receta aún está <span className="gradient-text">evolucionando</span>
+                        Tu mejor receta aún está{" "}
+                        <span className="gradient-text">evolucionando</span>
                     </h2>
-                    <p className="text-text-muted text-base md:text-lg leading-relaxed mb-8">
+                    <p className="text-on-surface-variant text-base md:text-lg leading-relaxed mb-8">
                         Empieza a registrar cada intento y construye tu propio
                         historial culinario.
                     </p>
                     <Link to="/recipes" className="btn-primary max-w-xs mx-auto">
                         Empezar ahora
                     </Link>
-                    <p className="font-mono text-xs text-text-muted mt-6">
+                    <p className="font-mono text-xs text-on-surface-variant mt-6">
                         Recetas en el servidor · intentos en tu navegador
                     </p>
                 </div>
