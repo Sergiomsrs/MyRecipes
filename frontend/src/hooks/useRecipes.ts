@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import * as api from "../api/recipes";
-import { USER_ID } from "../config";
 import type {
     Recipe,
     RecipeFormData,
@@ -31,7 +30,6 @@ export function useRecipes() {
 
     const createRecipe = async (data: RecipeFormData): Promise<Recipe> => {
         const created = await api.createRecipe({
-            userId: USER_ID,
             title: data.title,
             description: data.description,
             category: data.category,
@@ -59,7 +57,6 @@ export function useRecipes() {
 
     const updateRecipe = async (id: string, data: RecipeFormData): Promise<Recipe> => {
         const updated = await api.updateRecipe(id, {
-            userId: USER_ID,
             title: data.title,
             description: data.description,
             category: data.category,
@@ -92,7 +89,6 @@ export function useRecipes() {
         data: RecipeFormData
     ): Promise<RecipeVersion> => {
         const version = await api.createVersion(recipeId, {
-            userId: USER_ID,
             summaryChanges,
             notes: data.notes,
             rating: data.rating,

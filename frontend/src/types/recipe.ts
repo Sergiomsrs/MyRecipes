@@ -91,7 +91,6 @@ export interface CreatePhotoPayload {
 }
 
 export interface CreateRecipePayload {
-    userId: string;
     title: string;
     description: string;
     category: RecipeCategory;
@@ -104,7 +103,6 @@ export interface CreateRecipePayload {
 }
 
 export interface CreateVersionPayload {
-    userId: string;
     summaryChanges: string;
     notes?: string;
     rating?: number;
@@ -114,7 +112,6 @@ export interface CreateVersionPayload {
 }
 
 export interface UpdateRecipePayload {
-    userId: string;
     title: string;
     description: string;
     category: RecipeCategory;

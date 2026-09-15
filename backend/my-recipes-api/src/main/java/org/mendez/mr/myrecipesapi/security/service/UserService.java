@@ -6,6 +6,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -27,11 +28,23 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public Optional<User> findById(UUID id) {
+        return userRepository.findById(id);
+    }
+
     public boolean authenticateUser(String email, String rawPassword) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent()) {
             return passwordEncoder.matches(rawPassword, userOpt.get().getPassword());
         }
         return false;
+    }
+
+    public void changePassword(User user, String rawCurrentPassword, String rawNewPassword) {
+        if (!passwordEncoder.matches(rawCurrentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("La contraseña actual es incorrecta");
+        }
+        user.setPassword(passwordEncoder.encode(rawNewPassword));
+        userRepository.save(user);
     }
 }

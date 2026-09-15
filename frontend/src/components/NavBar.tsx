@@ -1,4 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../context/ThemeContext";
 
 const links = [
@@ -16,6 +17,7 @@ function navLinkClass({ isActive }: { isActive: boolean }) {
 
 export default function NavBar() {
     const { theme, toggleTheme } = useTheme();
+    const { user, isAuthenticated, logout } = useAuth();
 
     return (
         <header className="sticky top-0 z-30 bg-bg/90 backdrop-blur-md border-b border-border w-full">
@@ -37,6 +39,49 @@ export default function NavBar() {
                             </li>
                         ))}
                     </ul>
+
+                    <div className="w-px h-5 bg-border ml-1 hidden md:block" />
+
+                    {isAuthenticated ? (
+                        <>
+                            <NavLink
+                                to="/profile"
+                                className={({ isActive }) =>
+                                    `text-sm font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                                        isActive
+                                            ? "text-accent bg-accent/10"
+                                            : "text-text-muted hover:text-text active:text-text hover:bg-surface-raised"
+                                    }`
+                                }
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                    />
+                                </svg>
+                                <span className="hidden md:inline truncate max-w-[120px]">
+                                    {user?.email}
+                                </span>
+                            </NavLink>
+                            <button
+                                type="button"
+                                onClick={logout}
+                                className="text-sm font-medium px-3 py-1.5 rounded-lg text-text-muted hover:text-text active:text-text hover:bg-surface-raised transition-colors"
+                            >
+                                Salir
+                            </button>
+                        </>
+                    ) : (
+                        <NavLink
+                            to="/login"
+                            className={({ isActive }) => navLinkClass({ isActive })}
+                        >
+                            Entrar
+                        </NavLink>
+                    )}
 
                     <div className="w-px h-5 bg-border ml-1 hidden md:block" />
 

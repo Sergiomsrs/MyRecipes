@@ -1,4 +1,4 @@
-import { API_BASE, USER_ID } from "../config";
+import api from "./axios";
 import type {
     CreateRecipePayload,
     CreateVersionPayload,
@@ -7,80 +7,49 @@ import type {
     UpdateRecipePayload,
 } from "../types/recipe";
 
-interface ApiErrorBody {
-    timestamp: string;
-    status: number;
-    error: string;
-    message: string;
-    path: string;
+const RECIPES_BASE = "/api/v1/recipes";
+
+export async function getRecipes(): Promise<Recipe[]> {
+    const { data } = await api.get<Recipe[]>(RECIPES_BASE);
+    return data;
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(`${API_BASE}${path}`, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...options?.headers,
-        },
-    });
-
-    if (!response.ok) {
-        let message = `Error ${response.status}`;
-        try {
-            const body = (await response.json()) as ApiErrorBody;
-            message = body.message || message;
-        } catch {
-            // respuesta sin cuerpo JSON
-        }
-        throw new Error(message);
-    }
-
-    if (response.status === 204) {
-        return undefined as T;
-    }
-
-    return (await response.json()) as T;
+export async function getRecipe(id: string): Promise<Recipe> {
+    const { data } = await api.get<Recipe>(`${RECIPES_BASE}/${id}`);
+    return data;
 }
 
-export function getRecipes(): Promise<Recipe[]> {
-    return request<Recipe[]>(`?userId=${USER_ID}`);
+export async function getCurrentVersion(id: string): Promise<RecipeVersion> {
+    const { data } = await api.get<RecipeVersion>(
+        `${RECIPES_BASE}/${id}/versions/current`
+    );
+    return data;
 }
 
-export function getRecipe(id: string): Promise<Recipe> {
-    return request<Recipe>(`/${id}?userId=${USER_ID}`);
+export async function createRecipe(payload: CreateRecipePayload): Promise<Recipe> {
+    const { data } = await api.post<Recipe>(RECIPES_BASE, payload);
+    return data;
 }
 
-export function getCurrentVersion(id: string): Promise<RecipeVersion> {
-    return request<RecipeVersion>(`/${id}/versions/current?userId=${USER_ID}`);
-}
-
-export function createRecipe(payload: CreateRecipePayload): Promise<Recipe> {
-    return request<Recipe>("", {
-        method: "POST",
-        body: JSON.stringify(payload),
-    });
-}
-
-export function updateRecipe(
+export async function updateRecipe(
     id: string,
     payload: UpdateRecipePayload
 ): Promise<Recipe> {
-    return request<Recipe>(`/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-    });
+    const { data } = await api.put<Recipe>(`${RECIPES_BASE}/${id}`, payload);
+    return data;
 }
 
-export function deleteRecipe(id: string): Promise<void> {
-    return request<void>(`/${id}?userId=${USER_ID}`, { method: "DELETE" });
+export async function deleteRecipe(id: string): Promise<void> {
+    await api.delete(`${RECIPES_BASE}/${id}`);
 }
 
-export function createVersion(
+export async function createVersion(
     recipeId: string,
     payload: CreateVersionPayload
 ): Promise<RecipeVersion> {
-    return request<RecipeVersion>(`/${recipeId}/versions`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-    });
+    const { data } = await api.post<RecipeVersion>(
+        `${RECIPES_BASE}/${recipeId}/versions`,
+        payload
+    );
+    return data;
 }
