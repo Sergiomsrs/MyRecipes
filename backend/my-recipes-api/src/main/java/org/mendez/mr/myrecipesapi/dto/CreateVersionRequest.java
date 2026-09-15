@@ -5,16 +5,11 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
-import java.util.UUID;
 
 public record CreateVersionRequest(
-
-        @NotNull(message = "userId es obligatorio")
-        UUID userId,
 
         @NotBlank(message = "summaryChanges es obligatorio")
         @Size(max = 500, message = "summaryChanges no puede superar 500 caracteres")

@@ -5,12 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.mendez.mr.myrecipesapi.enums.RecipeCategory;
 
-import java.util.UUID;
-
 public record UpdateRecipeRequest(
-
-        @NotNull(message = "userId es obligatorio")
-        UUID userId,
 
         @NotBlank(message = "title es obligatorio")
         @Size(max = 150, message = "title no puede superar 150 caracteres")

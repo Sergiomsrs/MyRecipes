@@ -35,9 +35,8 @@ class RecipeServiceTest {
     @Autowired
     private RecipeVersionRepository recipeVersionRepository;
 
-    private CreateRecipeRequest buildRequest(UUID userId) {
+    private CreateRecipeRequest buildRequest() {
         return new CreateRecipeRequest(
-                userId,
                 "Tortilla de patatas",
                 "Receta tradicional",
                 RecipeCategory.MAIN_COURSE,
@@ -61,7 +60,7 @@ class RecipeServiceTest {
 
         UUID userId = UUID.randomUUID();
 
-        RecipeResponse response = recipeService.createRecipe(buildRequest(userId));
+        RecipeResponse response = recipeService.createRecipe(buildRequest(), userId);
 
         assertThat(response.id()).isNotNull();
         assertThat(response.userId()).isEqualTo(userId);
@@ -94,8 +93,8 @@ class RecipeServiceTest {
 
         UUID userId = UUID.randomUUID();
 
-        recipeService.createRecipe(buildRequest(userId));
-        recipeService.createRecipe(buildRequest(userId));
+        recipeService.createRecipe(buildRequest(), userId);
+        recipeService.createRecipe(buildRequest(), userId);
 
         List<RecipeResponse> recipes = recipeService.getRecipes(userId);
 

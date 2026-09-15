@@ -51,10 +51,10 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public RecipeResponse createRecipe(CreateRecipeRequest request) {
+    public RecipeResponse createRecipe(CreateRecipeRequest request, UUID userId) {
 
         Recipe recipe = new Recipe(
-                request.userId(),
+                userId,
                 request.title(),
                 request.description(),
                 request.category()
@@ -62,41 +62,7 @@ public class RecipeServiceImpl implements RecipeService {
 
         recipe = recipeRepository.save(recipe);
 
-        RecipeVersion version = new RecipeVersion(
-                recipe,
-                1,
-                request.summaryChanges(),
-                request.notes(),
-                request.rating()
-        );
-
-        for (CreateRecipeIngredientRequest ingredient : request.ingredients()) {
-            version.addIngredient(new RecipeIngredient(
-                    version,
-                    ingredient.name(),
-                    ingredient.quantity(),
-                    ingredient.unit(),
-                    ingredient.orderIndex()
-            ));
-        }
-
-        for (CreateRecipeStepRequest step : request.steps()) {
-            version.addStep(new RecipeStep(
-                    version,
-                    step.order(),
-                    step.description()
-            ));
-        }
-
-        if (request.photos() != null) {
-            for (CreatePhotoRequest photo : request.photos()) {
-                version.addPhoto(new Photo(
-                        version,
-                        photo.url(),
-                        photo.caption()
-                ));
-            }
-        }
+        RecipeVersion version = createFirstVersion(recipe, request);
 
         version = recipeVersionRepository.save(version);
 
@@ -106,9 +72,9 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public RecipeResponse updateRecipe(UUID recipeId, UpdateRecipeRequest request) {
+    public RecipeResponse updateRecipe(UUID recipeId, UpdateRecipeRequest request, UUID userId) {
 
-        Recipe recipe = findOwned(recipeId, request.userId());
+        Recipe recipe = findOwned(recipeId, userId);
 
         recipe.setTitle(request.title());
         recipe.setDescription(request.description());
@@ -132,9 +98,9 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public RecipeVersionResponse createVersion(UUID recipeId, CreateVersionRequest request) {
+    public RecipeVersionResponse createVersion(UUID recipeId, CreateVersionRequest request, UUID userId) {
 
-        Recipe recipe = findOwned(recipeId, request.userId());
+        Recipe recipe = findOwned(recipeId, userId);
 
         List<RecipeVersion> existingVersions =
                 recipeVersionRepository.findByRecipeIdOrderByVersionNumber(recipeId);
@@ -204,5 +170,45 @@ public class RecipeServiceImpl implements RecipeService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Recipe not found with id " + recipeId
                 ));
+    }
+
+    private RecipeVersion createFirstVersion(Recipe recipe, CreateRecipeRequest request) {
+        RecipeVersion version = new RecipeVersion(
+                recipe,
+                1,
+                request.summaryChanges(),
+                request.notes(),
+                request.rating()
+        );
+
+        for (CreateRecipeIngredientRequest ingredient : request.ingredients()) {
+            version.addIngredient(new RecipeIngredient(
+                    version,
+                    ingredient.name(),
+                    ingredient.quantity(),
+                    ingredient.unit(),
+                    ingredient.orderIndex()
+            ));
+        }
+
+        for (CreateRecipeStepRequest step : request.steps()) {
+            version.addStep(new RecipeStep(
+                    version,
+                    step.order(),
+                    step.description()
+            ));
+        }
+
+        if (request.photos() != null) {
+            for (CreatePhotoRequest photo : request.photos()) {
+                version.addPhoto(new Photo(
+                        version,
+                        photo.url(),
+                        photo.caption()
+                ));
+            }
+        }
+
+        return version;
     }
 }

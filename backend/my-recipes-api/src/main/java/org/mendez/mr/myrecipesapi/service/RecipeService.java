@@ -15,14 +15,13 @@ public interface RecipeService {
 
     RecipeResponse getRecipe(UUID recipeId, UUID userId);
 
-    RecipeResponse createRecipe(CreateRecipeRequest request);
+    RecipeResponse createRecipe(CreateRecipeRequest request, UUID userId);
 
-    RecipeResponse updateRecipe(UUID recipeId, UpdateRecipeRequest request);
+    RecipeResponse updateRecipe(UUID recipeId, UpdateRecipeRequest request, UUID userId);
 
     RecipeVersionResponse getCurrentVersion(UUID recipeId, UUID userId);
 
-    RecipeVersionResponse createVersion(UUID recipeId, CreateVersionRequest request);
+    RecipeVersionResponse createVersion(UUID recipeId, CreateVersionRequest request, UUID userId);
 
     void deleteRecipe(UUID recipeId, UUID userId);
-
 }
