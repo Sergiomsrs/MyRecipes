@@ -63,28 +63,14 @@ Este flujo representa el funcionamiento habitual de la aplicación.
 La primera versión de MyRecipes estará formada por las siguientes pantallas.
 
 ```
-/
-
-Login
-
-Registro
-
-Dashboard
-
-Listado de recetas
-
-Nueva receta
-
-Detalle de receta
-
-Nueva versión
-
-Historial de versiones
-
-Detalle de versión
-
-Perfil de usuario
+/                   → HomePage (pública)
+/login              → LoginPage (pública, redirige a /recipes si ya autenticado)
+/recipes            → RecipesPage (protegida)
+/profile            → UserProfilePage (protegida)
+*                   → NotFoundPage
 ```
+
+Las rutas protegidas utilizan un componente `ProtectedRoute` que redirige a `/login` si el usuario no está autenticado.
 
 Cada pantalla tendrá una única responsabilidad claramente definida.
 
@@ -94,13 +80,25 @@ Cada pantalla tendrá una única responsabilidad claramente definida.
 
 El usuario podrá:
 
-- Crear una cuenta.
 - Iniciar sesión.
 - Cerrar sesión.
 
-Una vez autenticado accederá directamente al Dashboard.
+### Implementación actual
 
-Las sesiones se mantendrán mediante JWT.
+La autenticación se gestiona mediante un `AuthContext` que expone:
+
+- `user`: datos del usuario autenticado (token, role, userId).
+- `isAuthenticated`: indicador de si hay sesión activa.
+- `login(email, password)`: llama a `POST /api/auth/login` y almacena el token.
+- `logout()`: limpia el token y redirige a `/login`.
+
+El token JWT se almacena en `sessionStorage` (se borra al cerrar la pestaña).
+
+Las peticiones HTTP se realizan mediante **Axios**, que incluye automáticamente el header `Authorization: Bearer <token>` en cada petición mediante un interceptor.
+
+Si el backend retorna un error 401, el interceptor limpia el token y redirige a `/login`.
+
+La página de login muestra un formulario con email y contraseña, maneja errores de credenciales y redirige a `/recipes` si ya hay sesión activa.
 
 ---
 
@@ -267,13 +265,31 @@ Las fotografías estarán siempre asociadas a una versión concreta.
 
 # 7.13 Perfil de usuario
 
-El usuario dispondrá de una pantalla para gestionar su información personal.
+El usuario dispondrá de una pantalla (`/profile`) para consultar su información y gestionar su contraseña.
 
-Desde ella podrá:
+### Datos mostrados
 
-- Modificar su nombre.
-- Cambiar su contraseña.
-- Eliminar su cuenta.
+- Email.
+- Rol.
+- ID de usuario.
+
+### Cambiar contraseña
+
+El formulario permite cambiar la contraseña proporcionando:
+
+- Contraseña actual (obligatoria para verificar identidad).
+- Nueva contraseña (mínimo 6 caracteres).
+- Confirmación de la nueva contraseña.
+
+La petición se realiza a `PUT /api/users/me/password`.
+
+Si la contraseña actual es incorrecta, se muestra un mensaje de error.
+
+### NavBar
+
+La barra de navegación muestra un icono de usuario con el email del usuario autenticado, que enlaza directamente a la pantalla de perfil.
+
+Cuando no hay sesión activa, se muestra únicamente un enlace "Entrar" que lleva a `/login`.
 
 ---
 

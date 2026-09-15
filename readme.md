@@ -78,7 +78,8 @@ Nunca perderás una mejora realizada anteriormente.
 - TypeScript
 - Vite
 - React Router
-- TanStack Query
+- Axios
+- Tailwind CSS
 
 ## Backend
 
@@ -126,7 +127,7 @@ El frontend consume exclusivamente la API REST.
 
 Actualmente el proyecto se encuentra en fase de desarrollo.
 
-En este momento ya se ha completado:
+### Completado
 
 - Diseño funcional.
 - Arquitectura.
@@ -135,8 +136,20 @@ En este momento ya se ha completado:
 - Estrategia de seguridad.
 - Estrategia de testing.
 - Infraestructura de despliegue.
+- Backend: Spring Boot con CRUD de recetas y versiones.
+- Backend: Spring Security con JWT (login, registro, filtros).
+- Backend: Endpoints de usuario (perfil, cambio de contraseña).
+- Frontend: CRUD de recetas con versionado.
+- Frontend: Sistema de login/logout con JWT.
+- Frontend: Rutas protegidas.
+- Frontend: Página de perfil de usuario.
 
-El siguiente paso será comenzar la implementación del backend y del frontend.
+### Próximos pasos
+
+- Testing automatizado.
+- Despliegue en producción.
+- Fotografías y almacenamiento.
+- Búsqueda y filtros.
 
 ---
 

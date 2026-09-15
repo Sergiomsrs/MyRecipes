@@ -19,6 +19,8 @@ La configuración se realiza mediante variables de entorno en `src/main/resource
 | `DB_URL` | URL de conexión JDBC a PostgreSQL | `jdbc:postgresql://localhost:5432/recipes` |
 | `DB_USERNAME` | Usuario de la base de datos | `postgres` |
 | `DB_PASSWORD` | Contraseña de la base de datos | `postgres` |
+| `jwt.secret` | Clave secreta para JWT | valor por defecto para dev |
+| `jwt.expiration` | Expiración del token en ms | `3600000` (1 hora) |
 
 Para usar una base distinta (por ejemplo, la de Supabase), exporta las variables antes de arrancar:
 
@@ -40,7 +42,11 @@ Esto significa que Hibernate crea/actualiza tablas automáticamente al arrancar,
 
 Cuando el modelo de datos se estabilice, se migrará a Flyway (ver roadmap/ADRs en `docs/`).
 
-> **Nota sobre autenticación**: de momento no hay Spring Security ni JWT. Las peticiones identifican al usuario mediante el campo `userId` (uuid) que ya envían los DTOs. Se integrará la autenticación real en un paso posterior.
+## Autenticación
+
+El backend incluye Spring Security con JWT. Los endpoints de recetas y usuarios requieren un header `Authorization: Bearer <token>`.
+
+Los endpoints de autenticación (`/api/auth/**`) son públicos.
 
 ## Cómo arrancar el backend
 
@@ -58,16 +64,36 @@ Por defecto arrancará en `http://localhost:8080`.
 
 ## API - Endpoints
 
-Base URL: `http://localhost:8080` · Prefijo: `/api/v1/recipes` · Sin autenticación · `Content-Type: application/json`
+### Autenticación (públicos)
 
-| Método | Ruta | Params/Query | Descripción |
+Base URL: `http://localhost:8080` · Prefijo: `/api/auth` · `Content-Type: application/json`
+
+| Método | Ruta | Body | Descripción |
 |---|---|---|---|
-| GET | `/api/v1/recipes` | `userId` (UUID, query) | Lista recetas del usuario |
-| GET | `/api/v1/recipes/{id}` | `userId` (UUID, query) | Detalle de una receta |
-| POST | `/api/v1/recipes` | body | Crear receta (con ingredientes, pasos, fotos) |
-| PUT | `/api/v1/recipes/{id}` | body | Actualizar receta |
-| GET | `/api/v1/recipes/{id}/versions/current` | `userId` (UUID, query) | Versión actual (ingredientes, pasos, fotos) |
-| DELETE | `/api/v1/recipes/{id}` | `userId` (UUID, query) | Eliminar receta → 204 |
+| POST | `/api/auth/register` | `{ email, password }` | Registrar usuario → token + role + userId |
+| POST | `/api/auth/login` | `{ email, password }` | Iniciar sesión → token + role + userId |
+
+### Usuarios (requieren JWT)
+
+| Método | Ruta | Body | Descripción |
+|---|---|---|---|
+| GET | `/api/users/me` | — | Obtener perfil del usuario autenticado |
+| PUT | `/api/users/me/password` | `{ currentPassword, newPassword }` | Cambiar contraseña |
+
+### Recetas (requieren JWT)
+
+Base URL: `http://localhost:8080` · Prefijo: `/api/v1/recipes` · `Content-Type: application/json`
+
+El `userId` se obtiene automáticamente del token JWT.
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/api/v1/recipes` | Listar recetas del usuario |
+| GET | `/api/v1/recipes/{id}` | Detalle de una receta |
+| POST | `/api/v1/recipes` | Crear receta (con ingredientes, pasos, fotos) |
+| PUT | `/api/v1/recipes/{id}` | Actualizar receta |
+| DELETE | `/api/v1/recipes/{id}` | Eliminar receta → 204 |
+| GET | `/api/v1/recipes/{id}/versions/current` | Versión actual |
 
 ### Categorías
 
@@ -75,10 +101,34 @@ El campo `category` acepta uno de estos valores: `STARTER`, `MAIN_COURSE`, `DESS
 
 ### Ejemplos para Postman
 
-**1. Crear receta (POST `/api/v1/recipes`) → 201**
+**1. Registrar usuario (POST `/api/auth/register`) → 200**
 ```json
 {
-    "userId": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "test@email.com",
+    "password": "password123"
+}
+```
+
+**2. Iniciar sesión (POST `/api/auth/login`) → 200**
+```json
+{
+    "email": "test@email.com",
+    "password": "password123"
+}
+```
+
+Respuesta: `{ "token": "eyJhbGci...", "role": "USER", "userId": "uuid" }`
+
+A partir de aquí, todas las peticiones requieren el header:
+```
+Authorization: Bearer eyJhbGci...
+```
+
+**3. Obtener perfil (GET `/api/users/me`) → 200**
+
+**4. Crear receta (POST `/api/v1/recipes`) → 201**
+```json
+{
     "title": "Spaghetti a la carbonara",
     "description": "Pasta con salsa de huevo, queso y panceta",
     "category": "MAIN_COURSE",
@@ -99,38 +149,29 @@ El campo `category` acepta uno de estos valores: `STARTER`, `MAIN_COURSE`, `DESS
 }
 ```
 
-**2. Listar (GET `/api/v1/recipes?userId=550e8400-e29b-41d4-a716-446655440000`) → 200**
+**5. Listar (GET `/api/v1/recipes`) → 200**
 
-Devuelve un array con objetos: `{ id, userId, title, description, category, currentVersionId, createdAt, updatedAt }`
-
-**3. Detalle (GET `/api/v1/recipes/{id}?userId=...`) → 200**
-
-Devuelve la versión actual completa: `{ id, recipeId, versionNumber, summaryChanges, notes, rating, createdAt, ingredients[], steps[], photos[] }`
-
-**4. Actualizar (PUT `/api/v1/recipes/{id}`) → 200**
+**6. Actualizar (PUT `/api/v1/recipes/{id}`) → 200**
 ```json
 {
-    "userId": "550e8400-e29b-41d4-a716-446655440000",
     "title": "Carbonara clásica",
     "description": "Receta tradicional romana",
     "category": "MAIN_COURSE"
 }
 ```
 
-**5. Eliminar (DELETE `/api/v1/recipes/{id}?userId=...`) → 204** (sin body)
+**7. Eliminar (DELETE `/api/v1/recipes/{id}`) → 204** (sin body)
 
-**6. Versión actual (GET `/api/v1/recipes/{id}/versions/current?userId=...`) → 200**
-
-Devuelve la versión actual completa: `{ id, recipeId, versionNumber, summaryChanges, notes, rating, createdAt, ingredients[], steps[], photos[] }`.
+**8. Versión actual (GET `/api/v1/recipes/{id}/versions/current`) → 200**
 
 ### Validaciones del body
 
-- `userId`: obligatorio, UUID
 - `title`: obligatorio, máx 150 · `description`: máx 1000 · `notes`: máx 1000 · `summaryChanges`: máx 500
 - `rating`: entre 1 y 10
 - `ingredients` (mín 1): `name` máx 150, `quantity` decimal obligatorio, `unit` máx 50, `orderIndex` int obligatorio
 - `steps` (mín 1): `order` int obligatorio, `description` máx 2000
 - `photos` (opcional): `url` máx 1000 obligatorio, `caption` máx 255
+- El `userId` se obtiene del token JWT, no se envía en el body
 
 ### Errores
 

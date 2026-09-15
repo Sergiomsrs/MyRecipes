@@ -97,58 +97,121 @@ Cada recurso tendrá una responsabilidad claramente definida.
 
 # 6.5 Autenticación
 
+Los endpoints de autenticación se encuentran bajo `/api/auth/` y son los únicos endpoints públicos de la API.
+
 ## Registro
 
 ```
-POST /api/v1/auth/register
+POST /api/auth/register
 ```
 
 Permite crear una nueva cuenta de usuario.
+
+**Body:**
+
+```json
+{
+    "email": "usuario@email.com",
+    "password": "contraseña123"
+}
+```
+
+**Respuesta (200):**
+
+```json
+{
+    "token": "eyJhbGci...",
+    "role": "USER",
+    "userId": "uuid"
+}
+```
 
 ---
 
 ## Inicio de sesión
 
 ```
-POST /api/v1/auth/login
+POST /api/auth/login
 ```
 
 Devuelve un JWT válido para autenticarse en el resto de la aplicación.
 
----
+**Body:**
 
-## Usuario autenticado
-
+```json
+{
+    "email": "usuario@email.com",
+    "password": "contraseña123"
+}
 ```
-GET /api/v1/auth/me
-```
 
-Devuelve la información del usuario autenticado.
+**Respuesta (200):**
+
+```json
+{
+    "token": "eyJhbGci...",
+    "role": "USER",
+    "userId": "uuid"
+}
+```
 
 ---
 
 # 6.6 Usuarios
 
+Los endpoints de usuario se encuentran bajo `/api/users/` y requieren autenticación JWT.
+
 ## Obtener perfil
 
 ```
-GET /api/v1/users/me
+GET /api/users/me
+```
+
+Devuelve los datos del usuario autenticado.
+
+**Respuesta (200):**
+
+```json
+{
+    "userId": "uuid",
+    "email": "usuario@email.com",
+    "role": "USER"
+}
 ```
 
 ---
 
-## Actualizar perfil
+## Cambiar contraseña
 
 ```
-PUT /api/v1/users/me
+PUT /api/users/me/password
 ```
 
----
+Permite al usuario cambiar su contraseña. Requiere la contraseña actual.
 
-## Eliminar cuenta
+**Body:**
 
+```json
+{
+    "currentPassword": "contraseña123",
+    "newPassword": "nuevaContraseña456"
+}
 ```
-DELETE /api/v1/users/me
+
+**Respuesta (200):**
+
+```json
+{
+    "message": "Contraseña actualizada correctamente"
+}
+```
+
+**Respuesta (400):** si la contraseña actual es incorrecta.
+
+```json
+{
+    "message": "La contraseña actual es incorrecta"
+}
 ```
 
 ---
@@ -158,6 +221,10 @@ DELETE /api/v1/users/me
 La entidad **Recipe** representa únicamente la información general de una receta.
 
 El contenido completo de la receta se encuentra en su versión actual.
+
+Los endpoints de recetas se encuentran bajo `/api/v1/recipes` y requieren autenticación JWT.
+
+El `userId` se obtiene automáticamente del token JWT, no es necesario enviarlo en las peticiones.
 
 ## Obtener todas las recetas
 

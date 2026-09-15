@@ -60,11 +60,14 @@ Cada usuario únicamente tendrá acceso a sus propias recetas.
 
 ### Atributos principales
 
-- id
-- name
-- email
-- password
-- createdAt
+- id (UUID, auto-generado)
+- email (único, obligatorio)
+- password (hash BCrypt, obligatorio)
+- role (por defecto "USER")
+
+### Nota
+
+El diseño inicial contemplaba un campo `name` y `createdAt`, pero se ha simplificado para la primera versión. El email funciona como identificador principal del usuario.
 
 ---
 

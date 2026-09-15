@@ -26,49 +26,64 @@ El diseño de la aplicación seguirá los siguientes principios:
 
 # 8.3 Autenticación
 
-La autenticación se implementará mediante JSON Web Tokens (JWT).
+La autenticación se implementa mediante JSON Web Tokens (JWT) utilizando Spring Security.
 
-El flujo será el siguiente:
-
-```
-Usuario
-
-↓
-
-Login
-
-↓
-
-Spring Security
-
-↓
-
-JWT
-
-↓
-
-Frontend almacena el token
-
-↓
-
-Peticiones autenticadas
-```
-
-Cada petición protegida incluirá:
+### Flujo de autenticación
 
 ```
-Authorization: Bearer <token>
+Usuario introduce credenciales
+
+↓
+
+POST /api/auth/login
+
+↓
+
+Spring Security valida credenciales (BCrypt)
+
+↓
+
+JwtService genera token (expiración: 1 hora)
+
+↓
+
+Frontend almacena token en sessionStorage
+
+↓
+
+Axios agrega Authorization: Bearer <token> a cada petición
+
+↓
+
+JwtAuthenticationFilter valida token en cada petición
+
+↓
+
+SecurityContextHolder con userId, email, role
 ```
 
-El backend validará el token antes de ejecutar cualquier operación.
+### Implementación backend
+
+- **Filtro JWT** (`JwtAuthenticationFilter`): se ejecuta antes de cada petición, lee el header `Authorization`, extrae y valida el token, y establece el contexto de seguridad.
+- **JwtService**: genera tokens con claims `sub` (userId), `email`, `role`. Utiliza JJWT 0.12.6.
+- **SecurityConfig**: CSRF deshabilitado, sesiones STATELESS, rutas `/api/auth/**` públicas, resto autenticado.
+
+### Implementación frontend
+
+- **AuthContext**: gestiona estado de autenticación, `login()` y `logout()`.
+- **Axios interceptor**: agrega header `Authorization: Bearer <token>` automáticamente.
+- **Interceptor de respuesta**: si recibe 401, limpia token y redirige a `/login`.
+- **Almacenamiento**: token y datos de usuario en `sessionStorage` (se borra al cerrar pestaña).
 
 ---
 
 # 8.4 Autorización
 
-Todos los recursos estarán protegidos.
+Todos los recursos están protegidos excepto `/api/auth/**` y `/health`.
 
 Cada usuario únicamente podrá acceder a sus propias recetas.
+
+El `userId` se obtiene del token JWT en el backend mediante `SecurityContextHolder`, nunca se envía desde el frontend.
 
 Antes de realizar cualquier operación, el backend comprobará que el recurso solicitado pertenece al usuario autenticado.
 
@@ -118,18 +133,21 @@ Las validaciones del frontend mejorarán la experiencia del usuario, pero nunca 
 
 # 8.7 Protección de la API
 
-La API seguirá una estrategia de acceso basada en rutas públicas y privadas.
+La API sigue una estrategia de acceso basada en rutas públicas y privadas.
 
 ## Endpoints públicos
 
-- Registro.
-- Inicio de sesión.
+- `POST /api/auth/registro`
+- `POST /api/auth/login`
+- `GET /health`
 
 ## Endpoints protegidos
 
-Todos los demás.
+Todos los demás: `/api/v1/recipes/**`, `/api/users/**`.
 
-Spring Security bloqueará cualquier petición que no incluya un JWT válido.
+Spring Security bloquea cualquier petición que no incluya un JWT válido en el header `Authorization: Bearer <token>`.
+
+El filtro JWT se ejecuta antes de `UsernamePasswordAuthenticationFilter` y establece el contexto de seguridad con las authorities `ROLE_USER` o `ROLE_ADMIN`.
 
 ---
 
