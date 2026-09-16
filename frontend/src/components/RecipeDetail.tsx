@@ -154,7 +154,7 @@ export default function RecipeDetail({
 
                     {/* Main content */}
                     <div className="pb-6 min-w-0">
-                        {/* Timeline — mobile (compact) */}
+                        {/* Timeline — mobile (collapsible accordion) */}
                         {versions.length > 1 && (
                             <div className="lg:hidden mb-4">
                                 <VersionTimeline
@@ -163,6 +163,7 @@ export default function RecipeDetail({
                                     selectedVersionId={selectedVersionId}
                                     onSelectVersion={onSelectVersion}
                                     isLoading={isTimelineLoading}
+                                    collapsible
                                 />
                             </div>
                         )}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { RecipeVersion } from "../types/recipe";
 
 interface VersionTimelineProps {
@@ -6,6 +7,7 @@ interface VersionTimelineProps {
     selectedVersionId: string;
     onSelectVersion: (version: RecipeVersion) => void;
     isLoading: boolean;
+    collapsible?: boolean;
 }
 
 export default function VersionTimeline({
@@ -14,10 +16,15 @@ export default function VersionTimeline({
     selectedVersionId,
     onSelectVersion,
     isLoading,
+    collapsible = false,
 }: VersionTimelineProps) {
+    const [isExpanded, setIsExpanded] = useState(false);
+
     const sorted = [...versions].sort(
         (a, b) => b.versionNumber - a.versionNumber
     );
+
+    const selectedVersion = sorted.find((v) => v.id === selectedVersionId);
 
     if (isLoading) {
         return (
@@ -33,30 +40,96 @@ export default function VersionTimeline({
         return null;
     }
 
+    const formatDate = (dateStr: string) =>
+        new Date(dateStr).toLocaleDateString("es-ES", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
+
+    /* Collapsed view for mobile accordion */
+    if (collapsible && !isExpanded && selectedVersion) {
+        return (
+            <button
+                type="button"
+                onClick={() => setIsExpanded(true)}
+                className="w-full flex items-center justify-between gap-3 card px-4 py-3 text-left"
+                aria-expanded={false}
+                aria-label="Mostrar historial de versiones"
+            >
+                <div className="min-w-0">
+                    <div className="flex items-baseline gap-2">
+                        <span className="font-mono text-xs font-semibold text-primary">
+                            v{selectedVersion.versionNumber}
+                        </span>
+                        {selectedVersion.id === currentVersionId && (
+                            <span className="text-[10px] font-mono font-semibold text-primary bg-primary-fixed/60 px-1.5 py-0.5 rounded-full">
+                                actual
+                            </span>
+                        )}
+                    </div>
+                    <p className="text-xs text-on-surface-variant leading-snug truncate mt-0.5">
+                        {selectedVersion.summaryChanges || "Versión inicial"}
+                        {selectedVersion.rating && (
+                            <span className="ml-2 text-tertiary font-semibold">
+                                {selectedVersion.rating}/10
+                            </span>
+                        )}
+                    </p>
+                </div>
+                <svg
+                    className="w-4 h-4 text-on-surface-variant shrink-0 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                    />
+                </svg>
+            </button>
+        );
+    }
+
+    /* Full timeline (desktop sidebar OR expanded mobile accordion) */
     return (
         <nav aria-label="Historial de versiones">
-            <p className="section-label mb-3">Historial</p>
+            <div className="flex items-center justify-between mb-3">
+                <p className="section-label">Historial</p>
+                {collapsible && (
+                    <button
+                        type="button"
+                        onClick={() => setIsExpanded(false)}
+                        className="text-xs text-primary font-semibold hover:underline"
+                        aria-expanded={true}
+                    >
+                        Ocultar
+                    </button>
+                )}
+            </div>
             <div className="relative">
                 {/* Vertical line */}
                 <div className="absolute left-[7px] top-2 bottom-2 w-px bg-outline-variant" />
 
                 <ul className="space-y-1">
                     {sorted.map((version) => {
-                        const isCurrent = version.id === currentVersionId;
-                        const isSelected = version.id === selectedVersionId;
-                        const date = new Date(
-                            version.createdAt
-                        ).toLocaleDateString("es-ES", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                        });
+                        const isCurrent =
+                            version.id === currentVersionId;
+                        const isSelected =
+                            version.id === selectedVersionId;
+                        const date = formatDate(version.createdAt);
 
                         return (
                             <li key={version.id}>
                                 <button
                                     type="button"
-                                    onClick={() => onSelectVersion(version)}
+                                    onClick={() => {
+                                        onSelectVersion(version);
+                                        if (collapsible) setIsExpanded(false);
+                                    }}
                                     className={`relative w-full text-left pl-6 py-2.5 pr-3 rounded-lg transition-colors ${
                                         isSelected
                                             ? "bg-primary-fixed/40"
