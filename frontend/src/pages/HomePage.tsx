@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import heroImage from "../assets/hero.png";
+import HeroIllustration from "../components/HeroIllustration";
 
 const steps = [
     {
@@ -73,11 +73,7 @@ export default function HomePage() {
                     </div>
 
                     <div className="hidden lg:block">
-                        <img
-                            src={heroImage}
-                            alt="Recetario ilustrado"
-                            className="w-full rounded-2xl shadow-lg shadow-primary/10"
-                        />
+                        <HeroIllustration className="w-full" />
                     </div>
                 </div>
             </section>
