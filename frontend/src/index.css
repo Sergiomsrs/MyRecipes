@@ -334,24 +334,14 @@ body {
 
 /* Glass header */
 .glass-header {
-    background: color-mix(in srgb, var(--color-surface) 85%, transparent);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 1px 8px rgba(26, 28, 30, 0.04);
-}
-
-[data-theme="dark"] .glass-header {
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-outline-variant);
 }
 
 /* Glass nav */
 .glass-nav {
-    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 -2px 12px rgba(26, 28, 30, 0.05);
-}
-
-[data-theme="dark"] .glass-nav {
-    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-outline-variant);
 }
 
 /* Filter pill */

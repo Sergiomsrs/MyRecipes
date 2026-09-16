@@ -20,7 +20,7 @@ export default function Header() {
 
     return (
         <header className="fixed top-0 inset-x-0 z-50 glass-header pt-[env(safe-area-inset-top,0px)]">
-            <div className="h-16 px-4 max-w-7xl mx-auto flex items-center justify-between gap-2">
+            <div className="h-16 px-4 md:px-8 lg:px-10 max-w-[74rem] mx-auto flex items-center justify-between gap-2">
                 <Link to="/" className="flex items-center gap-2 min-w-0 shrink-0">
                     <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
                         <svg className="w-5 h-5 text-on-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
