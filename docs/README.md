@@ -20,6 +20,7 @@ El objetivo de esta documentación es describir el diseño de la aplicación ant
 | 10-infraestructura-despliegue.md | Infraestructura y estrategia de despliegue. |
 | 11-roadmap.md | Evolución prevista del proyecto. |
 | 12-decisiones-arquitectura.md | Registro de decisiones arquitectónicas (ADR). |
+| 13-branding.md | Informe de estrategia y branding de marca. |
 
 ## Estado
 

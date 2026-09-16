@@ -4,21 +4,21 @@ import HeroIllustration from "../components/HeroIllustration";
 const steps = [
     {
         number: "1",
-        title: "Guarda tu receta",
+        title: "Apunta lo que sabes",
         description:
-            "Apunta ingredientes, pasos y notas iniciales de cómo la haces.",
+            "Ingredientes, pasos, lo que sea. La primera versión nunca es la definitiva, y eso está bien.",
     },
     {
         number: "2",
-        title: "Registra cada intento",
+        title: "Cocina y anota qué cambiaste",
         description:
-            "Cada vez que cocines, anota qué cambiaste y cómo salió.",
+            "La próxima vez que cocines, apunta qué ajustaste. Un gramo de sal, cinco minutos menos. Eso es un dato, no un error.",
     },
     {
         number: "3",
-        title: "Consulta tu evolución",
+        title: "Busca la que mejor funcionó",
         description:
-            "Recupera en segundos la versión exacta que mejor te funcionó.",
+            "Sin adivinar. Sin memoria. La versión que salió increíble está aquí, con todos los cambios que hiciste para lograrla.",
     },
 ];
 
@@ -56,8 +56,8 @@ export default function HomePage() {
                             Tu cuaderno de cocina
                         </span>
                         <h1 className="font-serif font-semibold text-[2rem] md:text-5xl leading-[1.1] tracking-tight mb-6">
-                            Tus recetas{" "}
-                            <span className="gradient-text">evolucionan contigo</span>
+                            La receta es solo el borrador.{" "}
+                            <span className="gradient-text">La ejecución es tuya.</span>
                         </h1>
                         <p className="text-on-surface-variant text-base md:text-lg leading-relaxed mb-6">
                             Pruebas, ajustas un ingrediente, cambias el tiempo de
@@ -75,6 +75,21 @@ export default function HomePage() {
                     <div className="hidden lg:block">
                         <HeroIllustration className="w-full" />
                     </div>
+                </div>
+            </section>
+
+            <hr className="landing-divider" />
+
+            {/* Manifiesto */}
+            <section className="landing-section">
+                <div className="page-container max-w-2xl">
+                    <blockquote className="border-l-2 border-primary pl-6 py-1">
+                        <p className="font-serif text-lg md:text-xl text-on-surface-variant leading-relaxed italic">
+                            Un plato perfecto no sale a la primera. Requiere
+                            probar, corregir un gramo de sal, ajustar cinco minutos
+                            de horno y volver a intentarlo la semana que viene.
+                        </p>
+                    </blockquote>
                 </div>
             </section>
 

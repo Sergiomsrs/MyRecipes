@@ -4,15 +4,15 @@
 
   <defs>
     <linearGradient id="book" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0F4A3C"/>
-      <stop offset="100%" stop-color="#1F6A56"/>
+      <stop offset="0%" stop-color="#3a5233"/>
+      <stop offset="100%" stop-color="#4c6544"/>
     </linearGradient>
   </defs>
 
   <!-- Book -->
   <rect x="86" y="60" width="298" height="352" rx="44" fill="url(#book)"/>
   <path d="M342 60h42c23 0 42 19 42 42v268c0 18-14 32-32 32h-52z" fill="#D9E3D6"/>
-  <path d="M366 74h20c15 0 26 12 26 27v252c0 15-11 27-26 27h-20z" fill="#86A993"/>
+  <path d="M366 74h20c15 0 26 12 26 27v252c0 15-11 27-26 27h-20z" fill="#6b8a5f"/>
 
   <!-- Chef hat -->
   <path d="M176 177c-23 0-42-18-42-41 0-20 14-37 33-41 7-31 49-39 68-14 18-18 51-12 61 12 22 0 40 18 40 40 0 17-10 32-25 38l-8 54H185z" fill="#FFF7E8"/>
@@ -35,7 +35,7 @@
   <path d="M132 394h35v58l-17-13-18 13z" fill="#F47F2A"/>
 
   <!-- History badge -->
-  <circle cx="365" cy="362" r="88" fill="#184F42" stroke="#0C3D33" stroke-width="8"/>
+  <circle cx="365" cy="362" r="88" fill="#3a5233" stroke="#2d3f27" stroke-width="8"/>
   <path d="M327 338a48 48 0 1 1-7 54" fill="none" stroke="#FFF7E8" stroke-width="16" stroke-linecap="round"/>
   <path d="M314 333l31-4-12 29z" fill="#FFF7E8"/>
   <path d="M365 329v36l23 18" fill="none" stroke="#FFF7E8" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>

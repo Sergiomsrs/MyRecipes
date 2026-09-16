@@ -32,6 +32,10 @@ export default function HeroIllustration({ className }: { className?: string }) 
             {/* Left page - recipe title */}
             <rect x="112" y="62" width="80" height="6" rx="3" fill="#9f3c16" opacity="0.8" />
 
+            {/* Left page - version badge */}
+            <rect x="160" y="60" width="28" height="10" rx="5" fill="#4c6544" opacity="0.6" />
+            <text x="174" y="68" textAnchor="middle" fill="#ffffff" fontSize="6" fontFamily="monospace" fontWeight="600">v1.3</text>
+
             {/* Left page - text lines */}
             <rect x="100" y="80" width="96" height="4" rx="2" fill="#dec0b7" opacity="0.6" />
             <rect x="100" y="92" width="88" height="4" rx="2" fill="#dec0b7" opacity="0.6" />
@@ -72,6 +76,10 @@ export default function HeroIllustration({ className }: { className?: string }) 
             {/* Right page - lines below pot */}
             <rect x="228" y="184" width="64" height="4" rx="2" fill="#dec0b7" opacity="0.5" />
             <rect x="228" y="196" width="56" height="4" rx="2" fill="#dec0b7" opacity="0.5" />
+
+            {/* Right page - version note */}
+            <rect x="228" y="210" width="52" height="9" rx="4.5" fill="#9f3c16" opacity="0.12" />
+            <text x="254" y="217" textAnchor="middle" fill="#9f3c16" fontSize="5.5" fontFamily="monospace" fontWeight="500" opacity="0.7">v1.2 → v1.3</text>
 
             {/* Herb decoration - top left */}
             <g opacity="0.7">
