@@ -44,7 +44,7 @@ export default function BottomNav({ onFabClick }: BottomNavProps) {
                     <button
                         type="button"
                         onClick={handleFabClick}
-                        className="w-12 h-12 -mt-4 flex items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_4px_12px_rgba(159,60,22,0.3)] hover:bg-primary-container transition-all active:scale-95"
+                        className="w-12 h-12 -mt-4 flex items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_4px_12px_rgba(200,90,50,0.3)] hover:bg-primary-container transition-all active:scale-95"
                         aria-label="Nueva receta"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
