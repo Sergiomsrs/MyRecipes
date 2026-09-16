@@ -64,6 +64,14 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.getCurrentVersion(id, userId));
     }
 
+    @GetMapping("/{id}/versions")
+    public ResponseEntity<List<RecipeVersionResponse>> getVersions(
+            @PathVariable UUID id
+    ) {
+        UUID userId = getCurrentUserId();
+        return ResponseEntity.ok(recipeService.getVersions(id, userId));
+    }
+
     @PostMapping("/{id}/versions")
     public ResponseEntity<RecipeVersionResponse> createVersion(
             @PathVariable UUID id,

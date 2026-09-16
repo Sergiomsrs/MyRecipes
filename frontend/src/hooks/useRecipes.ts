@@ -83,6 +83,13 @@ export function useRecipes() {
         []
     );
 
+    const getVersions = useCallback(
+        (recipeId: string): Promise<RecipeVersion[]> => {
+            return api.getVersions(recipeId);
+        },
+        []
+    );
+
     const createVersion = async (
         recipeId: string,
         summaryChanges: string,
@@ -120,6 +127,7 @@ export function useRecipes() {
         deleteRecipe,
         getRecipe,
         getCurrentVersion,
+        getVersions,
         createVersion,
     };
 }

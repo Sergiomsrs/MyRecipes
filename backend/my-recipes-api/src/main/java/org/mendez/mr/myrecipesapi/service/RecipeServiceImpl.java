@@ -165,6 +165,17 @@ public class RecipeServiceImpl implements RecipeService {
         recipeRepository.delete(recipe);
     }
 
+    @Override
+    public List<RecipeVersionResponse> getVersions(UUID recipeId, UUID userId) {
+
+        findOwned(recipeId, userId);
+
+        List<RecipeVersion> versions =
+                recipeVersionRepository.findByRecipeIdOrderByVersionNumber(recipeId);
+
+        return RecipeMapper.toVersionResponse(versions);
+    }
+
     private Recipe findOwned(UUID recipeId, UUID userId) {
         return recipeRepository.findByIdAndUserId(recipeId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(

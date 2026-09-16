@@ -27,6 +27,7 @@ export default function RecipesPage() {
         deleteRecipe,
         getRecipe,
         getCurrentVersion,
+        getVersions,
         createVersion,
     } = useRecipes();
     const { user } = useAuth();
@@ -34,6 +35,9 @@ export default function RecipesPage() {
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
     const [currentVersion, setCurrentVersion] = useState<RecipeVersion | null>(null);
     const [isVersionLoading, setIsVersionLoading] = useState(false);
+    const [versions, setVersions] = useState<RecipeVersion[]>([]);
+    const [selectedVersionId, setSelectedVersionId] = useState<string>("");
+    const [isTimelineLoading, setIsTimelineLoading] = useState(false);
     const [showNewVersionModal, setShowNewVersionModal] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [activeFilter, setActiveFilter] = useState<FilterType>("all");
@@ -86,14 +90,44 @@ export default function RecipesPage() {
     const handleViewRecipe = async (recipe: Recipe) => {
         setSelectedRecipe(recipe);
         setCurrentVersion(null);
+        setVersions([]);
+        setSelectedVersionId("");
         setCurrentView("detail");
         setIsVersionLoading(true);
+        setIsTimelineLoading(true);
         try {
-            const version = await getCurrentVersion(recipe.id);
+            const [version, allVersions] = await Promise.all([
+                getCurrentVersion(recipe.id),
+                getVersions(recipe.id),
+            ]);
             setCurrentVersion(version);
+            setSelectedVersionId(version.id);
+            setVersions(allVersions);
         } catch (err) {
             setFormError(
                 err instanceof Error ? err.message : "No se pudo cargar la receta completa"
+            );
+        } finally {
+            setIsVersionLoading(false);
+            setIsTimelineLoading(false);
+        }
+    };
+
+    const handleSelectVersion = (version: RecipeVersion) => {
+        setSelectedVersionId(version.id);
+        setCurrentVersion(version);
+    };
+
+    const handleBackToCurrentVersion = async () => {
+        if (!selectedRecipe) return;
+        setIsVersionLoading(true);
+        try {
+            const version = await getCurrentVersion(selectedRecipe.id);
+            setCurrentVersion(version);
+            setSelectedVersionId(version.id);
+        } catch (err) {
+            setFormError(
+                err instanceof Error ? err.message : "No se pudo cargar la versión actual"
             );
         } finally {
             setIsVersionLoading(false);
@@ -121,6 +155,8 @@ export default function RecipesPage() {
         try {
             const newVersion = await createVersion(selectedRecipe.id, summaryChanges, data);
             setCurrentVersion(newVersion);
+            setSelectedVersionId(newVersion.id);
+            setVersions((current) => [...current, newVersion]);
             setShowNewVersionModal(false);
         } catch (err) {
             setFormError(err instanceof Error ? err.message : "No se pudo crear la nueva versión");
@@ -346,6 +382,12 @@ export default function RecipesPage() {
                         recipe={selectedRecipe}
                         version={currentVersion}
                         isVersionLoading={isVersionLoading}
+                        versions={versions}
+                        currentVersionId={currentVersion?.id || ""}
+                        selectedVersionId={selectedVersionId}
+                        isTimelineLoading={isTimelineLoading}
+                        onSelectVersion={handleSelectVersion}
+                        onBackToCurrentVersion={handleBackToCurrentVersion}
                         onEdit={handleEditRecipe}
                         onBack={() => setCurrentView("list")}
                         onNewVersion={() => setShowNewVersionModal(true)}

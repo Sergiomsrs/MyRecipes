@@ -26,6 +26,13 @@ export async function getCurrentVersion(id: string): Promise<RecipeVersion> {
     return data;
 }
 
+export async function getVersions(recipeId: string): Promise<RecipeVersion[]> {
+    const { data } = await api.get<RecipeVersion[]>(
+        `${RECIPES_BASE}/${recipeId}/versions`
+    );
+    return data;
+}
+
 export async function createRecipe(payload: CreateRecipePayload): Promise<Recipe> {
     const { data } = await api.post<Recipe>(RECIPES_BASE, payload);
     return data;

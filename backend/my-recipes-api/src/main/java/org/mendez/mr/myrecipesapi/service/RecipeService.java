@@ -23,5 +23,7 @@ public interface RecipeService {
 
     RecipeVersionResponse createVersion(UUID recipeId, CreateVersionRequest request, UUID userId);
 
+    List<RecipeVersionResponse> getVersions(UUID recipeId, UUID userId);
+
     void deleteRecipe(UUID recipeId, UUID userId);
 }
