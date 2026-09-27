@@ -2,6 +2,7 @@ package org.mendez.mr.myrecipesapi.security.controller;
 
 import jakarta.validation.Valid;
 import org.mendez.mr.myrecipesapi.entity.User;
+import org.mendez.mr.myrecipesapi.exception.BadRequestException;
 import org.mendez.mr.myrecipesapi.repository.UserRepository;
 import org.mendez.mr.myrecipesapi.security.dto.AuthResponse;
 import org.mendez.mr.myrecipesapi.security.dto.LoginRequest;
@@ -37,7 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
@@ -59,7 +60,7 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.email())) {
-            return ResponseEntity.badRequest().build();
+            throw new BadRequestException("El email ya está registrado");
         }
 
         User user = new User(request.email(), request.password(), "USER");

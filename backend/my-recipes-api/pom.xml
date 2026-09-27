@@ -101,6 +101,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <!-- devtools se excluye automáticamente del jar empaquetado (excludeDevtools=true) -->
             </plugin>
         </plugins>
     </build>

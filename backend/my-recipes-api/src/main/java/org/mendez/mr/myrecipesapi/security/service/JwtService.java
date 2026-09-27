@@ -16,6 +16,8 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
+    private static final int MIN_SECRET_BYTES = 32;
+
     private final SecretKey secretKey;
     private final long expirationTimeMs;
 
@@ -23,6 +25,17 @@ public class JwtService {
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration}") long expirationTimeMs
     ) {
+        int secretLength = secret == null ? 0 : secret.getBytes(StandardCharsets.UTF_8).length;
+        if (secretLength < MIN_SECRET_BYTES) {
+            throw new IllegalStateException(
+                    "JWT_SECRET debe tener al menos " + MIN_SECRET_BYTES
+                            + " bytes (actual: " + secretLength + "). "
+                            + "Genera uno con: openssl rand -base64 48"
+            );
+        }
+        if (expirationTimeMs <= 0) {
+            throw new IllegalStateException("jwt.expiration debe ser mayor que 0 (milisegundos)");
+        }
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationTimeMs = expirationTimeMs;
     }

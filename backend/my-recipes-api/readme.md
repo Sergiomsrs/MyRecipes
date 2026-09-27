@@ -12,35 +12,40 @@ El backend no requiere ninguna infraestructura local (no hay Docker ni servicios
 
 ### Variables de entorno
 
-La configuración se realiza mediante variables de entorno en `src/main/resources/application.properties`. Cada variable tiene un valor por defecto válido para desarrollo local:
+La configuración se lee de variables de entorno (ver `.env.example`). Las variables sin valor por defecto son **obligatorias**: si faltan, la aplicación no arranca.
 
-| Variable | Descripción | Valor por defecto |
+| Variable | Descripción | Por defecto |
 |---|---|---|
-| `DB_URL` | URL de conexión JDBC a PostgreSQL | `jdbc:postgresql://localhost:5432/recipes` |
-| `DB_USERNAME` | Usuario de la base de datos | `postgres` |
-| `DB_PASSWORD` | Contraseña de la base de datos | `postgres` |
-| `jwt.secret` | Clave secreta para JWT | valor por defecto para dev |
-| `jwt.expiration` | Expiración del token en ms | `3600000` (1 hora) |
+| `DB_HOST` | Host de PostgreSQL (Supabase) | — (obligatoria) |
+| `DB_PORT` | Puerto (5432 sesión / 6543 pooler de Supabase) | — (obligatoria) |
+| `DB_NAME` | Nombre de la base de datos | — (obligatoria) |
+| `DB_USERNAME` | Usuario de la base de datos | — (obligatoria) |
+| `DB_PASSWORD` | Contraseña de la base de datos | — (obligatoria) |
+| `DB_POOL_SIZE` | Tamaño del pool Hikari | `5` |
+| `JWT_SECRET` | Clave secreta JWT, mínimo 32 bytes (`openssl rand -base64 48`) | — (obligatoria) |
+| `JWT_EXPIRATION` | Expiración del token en ms | `3600000` (1 hora) |
+| `CORS_ALLOWED_ORIGINS` | Orígenes permitidos, separados por coma (sin path ni `/` final) | `http://localhost:5173,http://localhost:4200,https://sergiomsrs.github.io` |
+| `LOG_LEVEL_ROOT` / `LOG_LEVEL_APP` | Nivel de logging | `INFO` |
+| `RATE_LIMIT_AUTH_ENABLED` / `RATE_LIMIT_AUTH_LIMIT` / `RATE_LIMIT_AUTH_WINDOW_MS` | Rate limit de `/api/auth/**` (10 peticiones/min por IP) | `true` / `10` / `60000` |
 
-Para usar una base distinta (por ejemplo, la de Supabase), exporta las variables antes de arrancar:
+Para desarrollo local, exporta las variables antes de arrancar:
 
 ```bash
-export DB_URL="jdbc:postgresql://<host>:5432/postgres"
+export DB_HOST="db.xxxx.supabase.co"
+export DB_PORT="5432"
+export DB_NAME="postgres"
 export DB_USERNAME="postgres"
 export DB_PASSWORD="<password>"
+export JWT_SECRET="$(openssl rand -base64 48)"
 ```
 
 ### Esquema de base de datos
 
-El proyecto **no usa Flyway todavía** (fase temprana, el modelo de datos aún cambia con frecuencia). El esquema se gestiona con Hibernate mediante:
+El esquema se gestiona **manualmente** sobre Supabase: `spring.jpa.hibernate.ddl-auto=none`, así que la aplicación **no crea ni modifica tablas al arrancar**.
 
-```properties
-spring.jpa.hibernate.ddl-auto=update
-```
-
-Esto significa que Hibernate crea/actualiza tablas automáticamente al arrancar, pero **no elimina columnas obsoletas**. Si necesitas limpiar el esquema, hazlo manualmente contra tu base de datos.
-
-Cuando el modelo de datos se estabilice, se migrará a Flyway (ver roadmap/ADRs en `docs/`).
+- Si cambias una entidad, aplica el cambio con SQL en el editor de Supabase.
+- Para comprobar que el esquema coincide con las entidades, ejecuta `docs/verify-schema.sql` en el SQL Editor (solo lectura).
+- Cuando el modelo se estabilice, se migrará a Flyway (ver roadmap/ADRs en `docs/`).
 
 ## Autenticación
 
@@ -59,8 +64,18 @@ Por defecto arrancará en `http://localhost:8080`.
 
 ## Verificar que funciona
 
-- Comprueba en consola que Hibernate ha creado/actualizado las tablas sin errores.
-- Llama a un endpoint básico (por ejemplo, el de crear o listar recetas) y confirma que responde correctamente.
+- Llama a `GET /health` (público): devuelve `{"status":"UP"}` si la BD responde, `503` si no.
+- Registra un usuario y haz login: `POST /api/auth/register` → `POST /api/auth/login`.
+- Con el token, lista tus recetas: `GET /api/v1/recipes`.
+
+## Despliegue (Dokploy)
+
+- **Imagen**: `Dockerfile` multi-etapa; expone el puerto `8080` e incluye un `HEALTHCHECK` contra `/actuator/health`.
+- **Healthcheck en Dokploy**: ruta `/health` o `/actuator/health` (ambos públicos; comprueban la conexión a la BD).
+- **Variables**: configurar en Dokploy las de `.env.example`. Las que ya estén dadas de alta no cambian de nombre.
+- **HTTPS**: Traefik de Dokploy se encarga del TLS; `server.forward-headers-strategy=framework` está activo para que la app conozca el esquema real.
+- **Supabase**: `sslmode=require` está fijado en la URL JDBC. Usa el pooler de Supabase (`DB_PORT=6543` en modo transacción) o el modo sesión (`5432`), nunca el directo desde un VPS.
+- **Rate limit**: `/api/auth/**` limita a 10 peticiones por minuto y IP (configurable).
 
 ## API - Endpoints
 
@@ -175,4 +190,16 @@ Authorization: Bearer eyJhbGci...
 
 ### Errores
 
-Formato: `{ timestamp, status, error, message, path }`. 404 para receta inexistente, 400 para validaciones.
+Formato: `{ timestamp, status, error, message, path }`.
+
+| Código | Cuándo |
+|---|---|
+| `400` | Validación de campos, cuerpo malformado, email ya registrado |
+| `401` | Token ausente, expirado o malformado; credenciales incorrectas |
+| `403` | Usuario autenticado sin permiso sobre el recurso |
+| `404` | Receta/versión inexistente, de otro usuario, o endpoint inexistente |
+| `405` | Método HTTP no soportado por el endpoint |
+| `406` | Cabecera `Accept` no soportada |
+| `415` | Cabecera `Content-Type` distinta de `application/json` |
+| `429` | Rate limit superado en `/api/auth/**` (cabecera `Retry-After`) |
+| `500` | Error no controlado (se registra con stacktrace en los logs) |
