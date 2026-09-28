@@ -26,7 +26,8 @@ La configuración se lee de variables de entorno (ver `.env.example`). Las varia
 | `JWT_EXPIRATION` | Expiración del token en ms | `3600000` (1 hora) |
 | `CORS_ALLOWED_ORIGINS` | Orígenes permitidos, separados por coma (sin path ni `/` final) | `http://localhost:5173,http://localhost:4200,https://sergiomsrs.github.io` |
 | `LOG_LEVEL_ROOT` / `LOG_LEVEL_APP` | Nivel de logging | `INFO` |
-| `RATE_LIMIT_AUTH_ENABLED` / `RATE_LIMIT_AUTH_LIMIT` / `RATE_LIMIT_AUTH_WINDOW_MS` | Rate limit de `/api/auth/**` (10 peticiones/min por IP) | `true` / `10` / `60000` |
+| `RATE_LIMIT_AUTH_ENABLED` / `RATE_LIMIT_AUTH_LIMIT` / `RATE_LIMIT_AUTH_WINDOW_MS` | Rate limit de `/api/auth/**` (10 peticiones/min por cliente) | `true` / `10` / `60000` |
+| `RATE_LIMIT_AUTH_TRUSTED_PROXIES` | IPs o CIDR de proxies de confianza desde los que se acepta `X-Forwarded-For` | `127.0.0.0/8,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7` |
 
 Para desarrollo local, exporta las variables antes de arrancar:
 
@@ -75,7 +76,7 @@ Por defecto arrancará en `http://localhost:8080`.
 - **Variables**: configurar en Dokploy las de `.env.example`. Las que ya estén dadas de alta no cambian de nombre.
 - **HTTPS**: Traefik de Dokploy se encarga del TLS; `server.forward-headers-strategy=framework` está activo para que la app conozca el esquema real.
 - **Supabase**: `sslmode=require` está fijado en la URL JDBC. Usa el pooler de Supabase (`DB_PORT=6543` en modo transacción) o el modo sesión (`5432`), nunca el directo desde un VPS.
-- **Rate limit**: `/api/auth/**` limita a 10 peticiones por minuto y IP (configurable).
+- **Rate limit**: `/api/auth/**` limita a 10 peticiones por minuto y cliente (configurable). La IP del cliente se toma de `X-Forwarded-For` solo cuando la conexión llega desde un proxy de confianza (`RATE_LIMIT_AUTH_TRUSTED_PROXIES`); si no, se ignora la cabecera y se usa la IP de conexión real. Si el proxy no sustituye el `X-Forwarded-For` que envía el cliente, esa IP puede seguir siendo manipulable: haz que el proxy reemplace la cabecera.
 
 ## API - Endpoints
 
@@ -185,7 +186,7 @@ Authorization: Bearer eyJhbGci...
 - `rating`: entre 1 y 10
 - `ingredients` (mín 1): `name` máx 150, `quantity` decimal obligatorio, `unit` máx 50, `orderIndex` int obligatorio
 - `steps` (mín 1): `order` int obligatorio, `description` máx 2000
-- `photos` (opcional): `url` máx 1000 obligatorio, `caption` máx 255
+- `photos` (opcional): `url` máx 1000 obligatorio y debe empezar por `http://` o `https://`, `caption` máx 255
 - El `userId` se obtiene del token JWT, no se envía en el body
 
 ### Errores
