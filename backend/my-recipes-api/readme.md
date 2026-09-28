@@ -55,6 +55,10 @@ El backend incluye Spring Security con JWT. Los endpoints de recetas y usuarios 
 
 Los endpoints de autenticación (`/api/auth/**`) son públicos.
 
+El email se guarda siempre en minúsculas y las búsquedas son insensibles a mayúsculas, así que da igual cómo se escriba al registrarse o al iniciar sesión.
+
+La contraseña debe tener entre 8 y 72 caracteres al registrarse o al cambiarla (`PUT /api/users/me/password`). Al iniciar sesión no se exige mínimo, solo ese máximo, para no dejar fuera a cuentas creadas antes de esta política.
+
 ## Cómo arrancar el backend
 
 ```bash

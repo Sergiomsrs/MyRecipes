@@ -67,6 +67,7 @@ SecurityContextHolder con userId, email, role
 - **Filtro JWT** (`JwtAuthenticationFilter`): se ejecuta antes de cada petición, lee el header `Authorization`, extrae y valida el token, y establece el contexto de seguridad.
 - **JwtService**: genera tokens con claims `sub` (userId), `email`, `role`. Utiliza JJWT 0.12.6.
 - **SecurityConfig**: CSRF deshabilitado, sesiones STATELESS, rutas `/api/auth/**` públicas, resto autenticado.
+- **Email**: se guarda siempre en minúsculas y sin espacios (`UserService.registerUser`), y todas las búsquedas (`login`, carga del usuario desde el token, comprobación de duplicados) son insensibles a mayúsculas (`findByEmailIgnoreCase` / `existsByEmailIgnoreCase`). Así un mismo correo no puede registrarse dos veces con distinta capitalización ni dejar de iniciar sesión por haberlo escrito de otra forma.
 
 ### Implementación frontend
 
@@ -103,6 +104,12 @@ Nunca será posible acceder a recursos pertenecientes a otro usuario modificando
 Las contraseñas nunca se almacenarán en texto plano.
 
 Se utilizará BCrypt para almacenar únicamente su hash.
+
+Política de longitud:
+
+- Al registrarse y al cambiar la contraseña: entre 8 y 72 caracteres.
+- Al iniciar sesión no se exige mínimo, solo un máximo de 72 caracteres, para no dejar fuera a cuentas creadas con la política anterior.
+- BCrypt solo considera los primeros 72 **bytes** de la contraseña. `UserService` convierte el error de BCrypt en un `400` ("La contraseña no puede superar los 72 bytes") en lugar de dejar que reviente con un `500`.
 
 Durante el proceso de autenticación:
 

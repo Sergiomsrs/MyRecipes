@@ -8,10 +8,11 @@ public record RegisterRequest(
 
         @NotBlank(message = "email es obligatorio")
         @Email(message = "email debe ser un email válido")
+        @Size(max = 255, message = "email no puede superar 255 caracteres")
         String email,
 
         @NotBlank(message = "password es obligatorio")
-        @Size(min = 6, message = "password debe tener al menos 6 caracteres")
+        @Size(min = 8, max = 72, message = "password debe tener entre 8 y 72 caracteres")
         String password
 
 ) {

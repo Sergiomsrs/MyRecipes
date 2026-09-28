@@ -8,10 +8,11 @@ public class LoginRequest {
 
     @NotBlank(message = "email es obligatorio")
     @Email(message = "email debe ser un email válido")
+    @Size(max = 255, message = "email no puede superar 255 caracteres")
     private String email;
 
     @NotBlank(message = "password es obligatorio")
-    @Size(min = 6, message = "password debe tener al menos 6 caracteres")
+    @Size(max = 72, message = "password no puede superar 72 caracteres")
     private String password;
 
     public String getEmail() {
