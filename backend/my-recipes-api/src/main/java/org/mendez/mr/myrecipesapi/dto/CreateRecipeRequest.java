@@ -34,11 +34,14 @@ public record CreateRecipeRequest(
         Integer rating,
 
         @NotEmpty(message = "la receta debe tener al menos un ingrediente")
+        @Size(max = 50, message = "la receta no puede tener más de 50 ingredientes")
         List<@Valid CreateRecipeIngredientRequest> ingredients,
 
         @NotEmpty(message = "la receta debe tener al menos un paso")
+        @Size(max = 50, message = "la receta no puede tener más de 50 pasos")
         List<@Valid CreateRecipeStepRequest> steps,
 
+        @Size(max = 12, message = "la receta no puede tener más de 12 fotos")
         List<@Valid CreatePhotoRequest> photos
 
 ) {

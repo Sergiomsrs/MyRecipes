@@ -28,6 +28,7 @@ La configuración se lee de variables de entorno (ver `.env.example`). Las varia
 | `LOG_LEVEL_ROOT` / `LOG_LEVEL_APP` | Nivel de logging | `INFO` |
 | `RATE_LIMIT_AUTH_ENABLED` / `RATE_LIMIT_AUTH_LIMIT` / `RATE_LIMIT_AUTH_WINDOW_MS` | Rate limit de `/api/auth/**` (10 peticiones/min por cliente) | `true` / `10` / `60000` |
 | `RATE_LIMIT_AUTH_TRUSTED_PROXIES` | IPs o CIDR de proxies de confianza desde los que se acepta `X-Forwarded-For` | `127.0.0.0/8,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7` |
+| `HEALTH_DB_CACHE_TTL_MS` | Intervalo de caché del chequeo de BD de `/health` y `/actuator/health` | `5000` |
 
 Para desarrollo local, exporta las variables antes de arrancar:
 
@@ -65,14 +66,14 @@ Por defecto arrancará en `http://localhost:8080`.
 
 ## Verificar que funciona
 
-- Llama a `GET /health` (público): devuelve `{"status":"UP"}` si la BD responde, `503` si no.
+- Llama a `GET /health` (público): devuelve `{"status":"UP"}` si la BD responde, `503` si no. El resultado se cachea durante `HEALTH_DB_CACHE_TTL_MS` (5 s por defecto), así que la respuesta puede tener ese margen de retraso.
 - Registra un usuario y haz login: `POST /api/auth/register` → `POST /api/auth/login`.
 - Con el token, lista tus recetas: `GET /api/v1/recipes`.
 
 ## Despliegue (Dokploy)
 
-- **Imagen**: `Dockerfile` multi-etapa; expone el puerto `8080` e incluye un `HEALTHCHECK` contra `/actuator/health`.
-- **Healthcheck en Dokploy**: ruta `/health` o `/actuator/health` (ambos públicos; comprueban la conexión a la BD).
+- **Imagen**: `Dockerfile` multi-etapa; expone el puerto `8080` e incluye un `HEALTHCHECK` contra `/actuator/health/liveness`.
+- **Healthcheck en Dokploy**: usa `/actuator/health/liveness` (público y sin coste: no consulta la BD, es el mismo que usa el `HEALTHCHECK` del `Dockerfile`). Si quieres que el healthcheck dependa de la BD, usa `/health`: comprueba la conexión, pero con el resultado cacheado durante `HEALTH_DB_CACHE_TTL_MS` para que no pueda agotar el pool. Evita `/actuator/health`, que agrega todos los indicadores y marca `DOWN` cuando la BD no responde.
 - **Variables**: configurar en Dokploy las de `.env.example`. Las que ya estén dadas de alta no cambian de nombre.
 - **HTTPS**: Traefik de Dokploy se encarga del TLS; `server.forward-headers-strategy=framework` está activo para que la app conozca el esquema real.
 - **Supabase**: `sslmode=require` está fijado en la URL JDBC. Usa el pooler de Supabase (`DB_PORT=6543` en modo transacción) o el modo sesión (`5432`), nunca el directo desde un VPS.
@@ -184,9 +185,9 @@ Authorization: Bearer eyJhbGci...
 
 - `title`: obligatorio, máx 150 · `description`: máx 1000 · `notes`: máx 1000 · `summaryChanges`: máx 500
 - `rating`: entre 1 y 10
-- `ingredients` (mín 1): `name` máx 150, `quantity` decimal obligatorio, `unit` máx 50, `orderIndex` int obligatorio
-- `steps` (mín 1): `order` int obligatorio, `description` máx 2000
-- `photos` (opcional): `url` máx 1000 obligatorio y debe empezar por `http://` o `https://`, `caption` máx 255
+- `ingredients` (entre 1 y 50): `name` máx 150, `quantity` decimal obligatorio, `unit` máx 50, `orderIndex` int obligatorio
+- `steps` (entre 1 y 50): `order` int obligatorio, `description` máx 2000
+- `photos` (opcional, máx 12): `url` máx 1000 obligatorio y debe empezar por `http://` o `https://`, `caption` máx 255
 - El `userId` se obtiene del token JWT, no se envía en el body
 
 ### Errores
