@@ -38,23 +38,40 @@ class UserServiceTest {
     }
 
     @Test
+    void aceptaUnaPasswordDeExactamente72Bytes() {
+        String password = "ñ".repeat(36);
+        assertThat(password.getBytes(StandardCharsets.UTF_8)).hasSize(72);
+
+        User saved = userService.registerUser(new User("test@example.com", password, "USER"));
+
+        assertThat(saved.getPassword()).startsWith("$2");
+    }
+
+    @Test
     void rechazaPasswordsQueSuperanLos72BytesDeBcrypt() {
-        User user = new User("test@example.com", "ñ".repeat(36), "USER");
+        String password = "ñ".repeat(37);
+        assertThat(password.getBytes(StandardCharsets.UTF_8)).hasSize(74);
 
-        assertThat(user.getPassword().getBytes(StandardCharsets.UTF_8)).hasSize(72);
-
-        assertThatThrownBy(() -> userService.registerUser(user))
+        assertThatThrownBy(() -> userService.registerUser(new User("test@example.com", password, "USER")))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("72 bytes");
     }
 
     @Test
     void rechazaUnaNuevaPasswordQueSuperaLos72BytesAlCambiarla() {
-        User user = new User("test@example.com", "password123", "USER");
-        String[] encoded = userService.registerUser(user).getPassword().split("\\" + userService.password());
-        assertThat(encoded).isNotEmpty();
+        User user = userService.registerUser(new User("test@example.com", "password123", "USER"));
 
-        assertThatThrownBy(() -> userService.changePassword(user, encoded[encoded.length - 1], "ñ".repeat(36)))
-                .isInstanceOf(BadRequestException.class);
+        assertThatThrownBy(() -> userService.changePassword(user, "password123", "ñ".repeat(37)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("72 bytes");
+    }
+
+    @Test
+    void rechazaElCambioSiLaPasswordActualNoCoincide() {
+        User user = userService.registerUser(new User("test@example.com", "password123", "USER"));
+
+        assertThatThrownBy(() -> userService.changePassword(user, "otraPassword", "nuevaPassword"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("actual es incorrecta");
     }
 }
