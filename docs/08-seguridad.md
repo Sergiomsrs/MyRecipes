@@ -68,6 +68,7 @@ SecurityContextHolder con userId, email, role
 - **JwtService**: genera tokens con claims `sub` (userId), `email`, `role`. Utiliza JJWT 0.12.6.
 - **SecurityConfig**: CSRF deshabilitado, sesiones STATELESS, rutas `/api/auth/**` públicas, resto autenticado.
 - **Email**: se guarda siempre en minúsculas y sin espacios (`UserService.registerUser`), y todas las búsquedas (`login`, carga del usuario desde el token, comprobación de duplicados) son insensibles a mayúsculas (`findByEmailIgnoreCase` / `existsByEmailIgnoreCase`). Así un mismo correo no puede registrarse dos veces con distinta capitalización ni dejar de iniciar sesión por haberlo escrito de otra forma.
+- **Restricción en la base de datos**: índice único funcional sobre `upper(email)` (`docs/email-unique-index.sql`). Es la red de seguridad frente a dos altas simultáneas: la aplicación comprueba antes de insertar, pero entre esa comprobación y el `INSERT` cabe una carrera, y sin el índice colarían dos cuentas. Ese `INSERT` que viola la restricción se traduce a un `400` con el mismo mensaje de "email ya registrado" en vez de un `500`.
 
 ### Implementación frontend
 

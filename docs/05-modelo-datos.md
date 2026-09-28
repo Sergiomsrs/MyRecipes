@@ -65,6 +65,10 @@ Cada usuario únicamente tendrá acceso a sus propias recetas.
 - password (hash BCrypt, obligatorio)
 - role (por defecto "USER")
 
+### Unicidad del email
+
+La unicidad no distingue mayúsculas: además de la comprobación en la aplicación, la base de datos tiene un índice único funcional sobre `upper(email)` (ver `email-unique-index.sql`). Sin ese índice, dos altas simultáneas de `A@x.com` y `a@x.com` podrían crearse como dos cuentas distintas, y después la búsqueda del login devolvería dos filas y fallaría.
+
 ### Nota
 
 El diseño inicial contemplaba un campo `name` y `createdAt`, pero se ha simplificado para la primera versión. El email funciona como identificador principal del usuario.

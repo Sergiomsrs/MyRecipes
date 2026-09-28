@@ -10,6 +10,7 @@ import org.mendez.mr.myrecipesapi.security.dto.RegisterRequest;
 import org.mendez.mr.myrecipesapi.security.service.CustomUserDetails;
 import org.mendez.mr.myrecipesapi.security.service.JwtService;
 import org.mendez.mr.myrecipesapi.security.service.UserService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -64,7 +65,11 @@ public class AuthController {
         }
 
         User user = new User(request.email(), request.password(), "USER");
-        user = userService.registerUser(user);
+        try {
+            user = userService.registerUser(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new BadRequestException("El email ya está registrado");
+        }
 
         String token = jwtService.generateToken(
                 user.getId().toString(),

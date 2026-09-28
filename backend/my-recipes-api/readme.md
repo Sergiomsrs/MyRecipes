@@ -47,6 +47,7 @@ El esquema se gestiona **manualmente** sobre Supabase: `spring.jpa.hibernate.ddl
 
 - Si cambias una entidad, aplica el cambio con SQL en el editor de Supabase.
 - Para comprobar que el esquema coincide con las entidades, ejecuta `docs/verify-schema.sql` en el SQL Editor (solo lectura).
+- `docs/email-unique-index.sql` añade el índice único funcional sobre `upper(email)` (unicidad del email sin distinguir mayúsculas). Ejecuta el paso 1 antes: si devuelve filas, hay cuentas duplicadas y el índice no se podrá crear.
 - Cuando el modelo se estabilice, se migrará a Flyway (ver roadmap/ADRs en `docs/`).
 
 ## Autenticación
@@ -55,7 +56,7 @@ El backend incluye Spring Security con JWT. Los endpoints de recetas y usuarios 
 
 Los endpoints de autenticación (`/api/auth/**`) son públicos.
 
-El email se guarda siempre en minúsculas y las búsquedas son insensibles a mayúsculas, así que da igual cómo se escriba al registrarse o al iniciar sesión.
+El email se guarda siempre en minúsculas y las búsquedas son insensibles a mayúsculas, así que da igual cómo se escriba al registrarse o al iniciar sesión. La base de datos refuerza esa unicidad con un índice único sobre `upper(email)`.
 
 La contraseña debe tener entre 8 y 72 caracteres al registrarse o al cambiarla (`PUT /api/users/me/password`). Al iniciar sesión no se exige mínimo, solo ese máximo, para no dejar fuera a cuentas creadas antes de esta política.
 

@@ -1,6 +1,6 @@
 package org.mendez.mr.myrecipesapi.security.ratelimit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
@@ -23,7 +23,7 @@ class RateLimitFilterTest {
 
     @BeforeEach
     void setUp() {
-        filter = new RateLimitFilter(new ObjectMapper(), true, LIMIT, 60_000L, TRUSTED_PROXIES);
+        filter = new RateLimitFilter(JsonMapper.builder().findAndAddModules().build(), true, LIMIT, 60_000L, TRUSTED_PROXIES);;
     }
 
     @Test
