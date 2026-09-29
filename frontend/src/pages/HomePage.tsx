@@ -51,11 +51,8 @@ export default function HomePage() {
             <section className="landing-section gradient-glow">
                 <div className="page-container lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
                     <div>
-                        <span className="chip mb-5">
-                            <span className="text-base leading-none">🥘</span>
-                            Tu cuaderno de cocina
-                        </span>
-                        <h1 className="font-serif font-semibold text-[2rem] md:text-5xl leading-[1.1] tracking-tight mb-6">
+                        <p className="section-label mb-5">Tu cuaderno de cocina</p>
+                        <h1 className="font-serif text-[2rem] md:text-5xl leading-[1.1] tracking-tight mb-6">
                             La receta es solo el borrador.{" "}
                             <span className="gradient-text">La ejecución es tuya.</span>
                         </h1>
@@ -99,17 +96,17 @@ export default function HomePage() {
             <section className="landing-section">
                 <div className="page-container">
                     <p className="section-label mb-3">Cómo funciona</p>
-                    <h2 className="font-serif font-semibold text-3xl md:text-4xl tracking-tight mb-10">
+                    <h2 className="font-serif text-3xl md:text-4xl tracking-tight mb-10">
                         Tres pasos. Sin complicaciones.
                     </h2>
 
-                    <div className="grid gap-5 md:grid-cols-3">
+                    <div className="grid gap-8 md:grid-cols-3 md:gap-10">
                         {steps.map((step) => (
-                            <div key={step.number} className="card p-6">
-                                <span className="inline-flex items-center justify-center size-9 bg-primary-fixed text-primary rounded-full font-serif font-semibold text-base mb-4">
+                            <div key={step.number}>
+                                <span className="block text-sm text-primary font-medium mb-2 tabular-nums">
                                     {step.number}
                                 </span>
-                                <h3 className="font-serif font-semibold text-on-surface text-lg mb-2">
+                                <h3 className="font-serif text-on-surface text-lg mb-1.5">
                                     {step.title}
                                 </h3>
                                 <p className="text-sm text-on-surface-variant leading-relaxed">
@@ -122,12 +119,12 @@ export default function HomePage() {
             </section>
 
             {/* Ejemplo */}
-            <section className="landing-section bg-surface-container-low/50">
+            <section className="landing-section">
                 <div className="page-container">
                     <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
                         <div className="mb-8 lg:mb-0">
                             <p className="section-label mb-3">Un ejemplo real</p>
-                            <h2 className="font-serif font-semibold text-3xl md:text-4xl tracking-tight mb-4">
+                            <h2 className="font-serif text-3xl md:text-4xl tracking-tight mb-4">
                                 Tortilla de patatas
                             </h2>
                             <p className="text-on-surface-variant leading-relaxed">
@@ -137,32 +134,35 @@ export default function HomePage() {
                             </p>
                         </div>
 
-                        <div className="space-y-3">
-                            {tortillaAttempts.map((entry) => (
+                        <div>
+                            {tortillaAttempts.map((entry, index) => (
                                 <div
                                     key={entry.attempt}
-                                    className={`card p-5 ${
-                                        entry.highlight
-                                            ? "bg-primary-fixed/30 ring-1 ring-primary/30"
+                                    className={`py-4 ${
+                                        index > 0
+                                            ? "border-t border-outline-variant/40"
                                             : ""
+                                    } ${
+                                        entry.highlight
+                                            ? "border-l-2 border-primary pl-4 -ml-4"
+                                            : "pl-4 -ml-4"
                                     }`}
                                 >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="font-mono text-xs text-primary font-semibold">
-                                            Intento #{entry.attempt}
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-xs text-primary">
+                                            Intento {entry.attempt}
                                         </span>
-                                        <span className="text-xl">{entry.mood}</span>
+                                        <span className="text-sm" aria-hidden="true">
+                                            {entry.mood}
+                                        </span>
                                     </div>
-                                    <p className="font-medium text-on-surface mb-2">
-                                        {entry.label}
-                                    </p>
-                                    <ul className="space-y-1">
+                                    <p className="text-on-surface mb-2">{entry.label}</p>
+                                    <ul className="space-y-0.5">
                                         {entry.changes.map((change) => (
                                             <li
                                                 key={change}
-                                                className="text-sm text-on-surface-variant flex items-center gap-2"
+                                                className="text-sm text-on-surface-variant"
                                             >
-                                                <span className="size-1.5 rounded-full bg-primary" />
                                                 {change}
                                             </li>
                                         ))}
@@ -177,7 +177,7 @@ export default function HomePage() {
             {/* CTA final */}
             <section className="landing-section gradient-glow pb-20">
                 <div className="page-container max-w-2xl mx-auto text-center">
-                    <h2 className="font-serif font-semibold text-3xl md:text-4xl tracking-tight mb-4">
+                    <h2 className="font-serif text-3xl md:text-4xl tracking-tight mb-4">
                         Tu mejor receta aún está{" "}
                         <span className="gradient-text">evolucionando</span>
                     </h2>
@@ -188,7 +188,7 @@ export default function HomePage() {
                     <Link to="/recipes" className="btn-primary max-w-xs mx-auto">
                         Empezar ahora
                     </Link>
-                    <p className="font-mono text-xs text-on-surface-variant mt-6">
+                    <p className="text-xs text-on-surface-variant mt-6">
                         Recetas en el servidor · intentos en tu navegador
                     </p>
                 </div>

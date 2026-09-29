@@ -6,6 +6,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import RecipesPage from "../pages/RecipesPage";
+import CookbookPage from "../pages/CookbookPage";
 import UserProfilePage from "../pages/UserProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -28,6 +29,10 @@ export const router = createBrowserRouter(
                         {
                             path: "/recipes",
                             element: <RecipesPage />,
+                        },
+                        {
+                            path: "/recetario",
+                            element: <CookbookPage />,
                         },
                         {
                             path: "/profile",

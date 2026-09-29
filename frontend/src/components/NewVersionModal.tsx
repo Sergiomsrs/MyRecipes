@@ -125,12 +125,12 @@ export default function NewVersionModal({
     return (
         <>
             <div
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                className="fixed inset-0 bg-on-surface/40 z-40"
                 onClick={onClose}
             />
 
             <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-4 pointer-events-none">
-                <div className="card w-full md:max-w-2xl max-h-[90vh] rounded-t-2xl md:rounded-2xl border-b-0 md:border-b pointer-events-auto overflow-y-auto">
+                <div className="plane w-full md:max-w-2xl max-h-[90vh] rounded-t-xl md:rounded-lg pointer-events-auto overflow-y-auto">
                     <div className="flex justify-center pt-3 pb-1 md:hidden">
                         <div className="w-10 h-1 bg-outline-variant rounded-full" />
                     </div>
@@ -140,7 +140,7 @@ export default function NewVersionModal({
                         className="px-5 md:px-6 pb-6 pt-2 md:pt-6"
                     >
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="font-serif font-semibold text-lg text-on-surface">
+                            <h2 className="font-serif text-lg text-on-surface">
                                 Nueva versión
                             </h2>
                             <button
@@ -252,7 +252,7 @@ export default function NewVersionModal({
                             <button
                                 type="button"
                                 onClick={addIngredient}
-                                className="mt-4 text-sm text-primary font-semibold active:opacity-80 transition-opacity"
+                                className="mt-4 text-sm text-primary hover:underline transition-colors"
                             >
                                 + Añadir ingrediente
                             </button>
@@ -268,8 +268,8 @@ export default function NewVersionModal({
                                             key={step.id}
                                             className="flex gap-3 items-start"
                                         >
-                                            <span className="flex items-center justify-center size-6 bg-primary-fixed text-primary rounded-md text-xs font-mono font-medium shrink-0 mt-2.5">
-                                                {index + 1}
+                                            <span className="text-xs text-on-surface-variant tabular-nums w-4 shrink-0 mt-4">
+                                                {index + 1}.
                                             </span>
                                             <textarea
                                                 value={step.description}
@@ -306,7 +306,7 @@ export default function NewVersionModal({
                             <button
                                 type="button"
                                 onClick={addStep}
-                                className="mt-4 text-sm text-primary font-semibold active:opacity-80 transition-opacity"
+                                className="mt-4 text-sm text-primary hover:underline transition-colors"
                             >
                                 + Añadir paso
                             </button>

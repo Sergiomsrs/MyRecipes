@@ -68,24 +68,22 @@ export default function RecipeDetail({
                             d="M15 19l-7-7 7-7"
                         />
                     </svg>
-                    <span className="text-sm font-medium">Recetas</span>
+                    <span className="text-sm">Recetas</span>
                 </button>
                 <button
                     type="button"
                     onClick={() => onEdit(recipe)}
-                    className="text-sm font-semibold text-primary hover:opacity-80 transition-opacity"
+                    className="text-sm text-primary hover:underline transition-colors"
                 >
                     Editar
                 </button>
             </div>
 
             <div className="page-container py-5 md:py-8">
-                <span
-                    className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full mb-4 ${meta.bgClass}`}
-                >
+                <p className="section-label mb-3">
                     {meta.emoji} {meta.label}
-                </span>
-                <h1 className="font-serif font-semibold text-3xl md:text-4xl lg:text-5xl tracking-tight leading-tight mb-5">
+                </p>
+                <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl tracking-tight leading-tight mb-4">
                     {recipe.title}
                 </h1>
                 {recipe.description && (
@@ -93,19 +91,19 @@ export default function RecipeDetail({
                         {recipe.description}
                     </p>
                 )}
-                <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-on-surface-variant mt-5">
+                <p className="text-xs text-on-surface-variant mt-4">
                     {version && (
-                        <span className="inline-flex items-center gap-1">
-                            <span className="px-1.5 py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-semibold">
+                        <>
+                            <span className="text-primary font-medium">
                                 v{version.versionNumber}
                             </span>
-                        </span>
+                            <span className="mx-1.5" aria-hidden="true">·</span>
+                        </>
                     )}
-                    <span aria-hidden="true">·</span>
-                    <span>Creada {createdLabel}</span>
-                    <span aria-hidden="true">·</span>
-                    <span>Actualizada {updatedLabel}</span>
-                </div>
+                    Creada {createdLabel}
+                    <span className="mx-1.5" aria-hidden="true">·</span>
+                    Actualizada {updatedLabel}
+                </p>
 
                 <button
                     type="button"
@@ -119,17 +117,17 @@ export default function RecipeDetail({
             {/* Banner: viewing historical version */}
             {isViewingOldVersion && (
                 <div className="page-container">
-                    <div className="flex items-center justify-between gap-3 bg-tertiary-fixed/40 border border-tertiary/20 rounded-xl px-4 py-3 mb-4">
-                        <p className="text-sm text-on-surface">
-                            Viendo versión{" "}
-                            <span className="font-mono font-semibold">
+                    <div className="flex items-center justify-between gap-3 border-l-2 border-primary/40 pl-3 py-1 mb-6">
+                        <p className="text-sm text-on-surface-variant">
+                            Viendo la versión{" "}
+                            <span className="text-primary font-medium">
                                 v{version?.versionNumber}
                             </span>
                         </p>
                         <button
                             type="button"
                             onClick={onBackToCurrentVersion}
-                            className="text-sm font-semibold text-primary hover:underline shrink-0"
+                            className="text-sm text-primary hover:underline shrink-0"
                         >
                             Volver a la actual
                         </button>
@@ -174,12 +172,12 @@ export default function RecipeDetail({
                             </p>
                         ) : version ? (
                             <>
-                                <div className="lg:grid lg:grid-cols-2 lg:gap-8 py-5 border-t border-outline-variant">
+                                <div className="lg:grid lg:grid-cols-2 lg:gap-12 py-7 border-t border-outline-variant/40">
                                     <div>
                                         <p className="section-label mb-4">
                                             Ingredientes
                                         </p>
-                                        <div className="card p-5 space-y-3">
+                                        <ul className="space-y-2.5">
                                             {[...version.ingredients]
                                                 .sort(
                                                     (a, b) =>
@@ -187,68 +185,67 @@ export default function RecipeDetail({
                                                         b.orderIndex
                                                 )
                                                 .map((ingredient) => (
-                                                    <div
+                                                    <li
                                                         key={ingredient.id}
                                                         className="flex justify-between items-baseline gap-4 text-sm"
                                                     >
                                                         <span className="text-on-surface">
                                                             {ingredient.name}
                                                         </span>
-                                                        <span className="font-mono text-xs text-on-surface-variant shrink-0">
+                                                        <span className="text-xs text-on-surface-variant shrink-0 tabular-nums">
                                                             {
                                                                 ingredient.quantity
                                                             }{" "}
                                                             {ingredient.unit}
                                                         </span>
-                                                    </div>
+                                                    </li>
                                                 ))}
-                                        </div>
+                                        </ul>
                                     </div>
 
-                                    <div className="pt-5 lg:pt-0">
+                                    <div className="mt-7 pt-7 border-t border-outline-variant/40 lg:mt-0 lg:pt-0 lg:border-t-0">
                                         <p className="section-label mb-4">
                                             Preparación
                                         </p>
-                                        <div className="card p-5 space-y-4">
+                                        <ol className="space-y-3.5">
                                             {[...version.steps]
                                                 .sort(
                                                     (a, b) => a.order - b.order
                                                 )
                                                 .map((step, index) => (
-                                                    <div
+                                                    <li
                                                         key={step.id}
                                                         className="flex gap-3"
                                                     >
-                                                        <span className="flex items-center justify-center size-6 bg-primary-fixed text-primary rounded-full text-xs font-serif font-semibold shrink-0 mt-0.5">
-                                                            {index + 1}
+                                                        <span className="text-xs text-on-surface-variant tabular-nums w-4 shrink-0 pt-0.5">
+                                                            {index + 1}.
                                                         </span>
-                                                        <p className="text-sm text-on-surface-variant leading-relaxed pt-0.5">
+                                                        <p className="text-sm text-on-surface-variant leading-relaxed">
                                                             {step.description}
                                                         </p>
-                                                    </div>
+                                                    </li>
                                                 ))}
-                                        </div>
+                                        </ol>
                                     </div>
                                 </div>
 
                                 {(version.rating || version.notes) && (
-                                    <div className="py-5 border-t border-outline-variant">
+                                    <div className="py-7 border-t border-outline-variant/40">
                                         <p className="section-label mb-3">
                                             Notas de la versión
                                         </p>
-                                        <div className="card p-5 space-y-3">
+                                        <div className="space-y-2">
                                             {version.rating && (
                                                 <p className="text-sm text-on-surface">
-                                                    Valoración:{" "}
-                                                    <span className="text-tertiary font-semibold">
+                                                    Valoración{" "}
+                                                    <span className="text-primary font-medium tabular-nums">
                                                         {version.rating}/10
                                                     </span>
                                                 </p>
                                             )}
                                             {version.notes && (
-                                                <p className="text-sm text-on-surface-variant leading-relaxed italic">
-                                                    &ldquo;{version.notes}
-                                                    &rdquo;
+                                                <p className="text-sm text-on-surface-variant leading-relaxed">
+                                                    {version.notes}
                                                 </p>
                                             )}
                                         </div>
@@ -256,15 +253,13 @@ export default function RecipeDetail({
                                 )}
 
                                 {version.summaryChanges && (
-                                    <div className="py-5 border-t border-outline-variant">
+                                    <div className="py-7 border-t border-outline-variant/40">
                                         <p className="section-label mb-3">
                                             Cambios en esta versión
                                         </p>
-                                        <div className="card p-5">
-                                            <p className="text-sm text-on-surface-variant leading-relaxed">
-                                                {version.summaryChanges}
-                                            </p>
-                                        </div>
+                                        <p className="text-sm text-on-surface-variant leading-relaxed">
+                                            {version.summaryChanges}
+                                        </p>
                                     </div>
                                 )}
                             </>

@@ -144,13 +144,13 @@ export default function RecipeForm({
                                         onClick={() =>
                                             setFormData({ ...formData, category })
                                         }
-                                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors ${
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
                                             selected
-                                                ? `${meta.bgClass} ring-1 ring-current/20`
-                                                : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container"
+                                                ? "bg-primary/10 text-primary font-medium"
+                                                : "text-on-surface-variant hover:bg-surface-container-low"
                                         }`}
                                     >
-                                        <span>{meta.emoji}</span>
+                                        <span aria-hidden="true">{meta.emoji}</span>
                                         {meta.label}
                                     </button>
                                 );
@@ -252,7 +252,7 @@ export default function RecipeForm({
                             <button
                                 type="button"
                                 onClick={addIngredient}
-                                className="mt-4 text-sm text-primary font-semibold active:opacity-80 transition-opacity"
+                                className="mt-4 text-sm text-primary hover:underline transition-colors"
                             >
                                 + Añadir ingrediente
                             </button>
@@ -268,8 +268,8 @@ export default function RecipeForm({
                                             key={step.id}
                                             className="flex gap-3 items-start"
                                         >
-                                            <span className="flex items-center justify-center size-6 bg-primary-fixed text-primary rounded-md text-xs font-mono font-medium shrink-0 mt-2.5">
-                                                {index + 1}
+                                            <span className="text-xs text-on-surface-variant tabular-nums w-4 shrink-0 mt-4">
+                                                {index + 1}.
                                             </span>
                                             <textarea
                                                 value={step.description}
@@ -306,7 +306,7 @@ export default function RecipeForm({
                             <button
                                 type="button"
                                 onClick={addStep}
-                                className="mt-4 text-sm text-primary font-semibold active:opacity-80 transition-opacity"
+                                className="mt-4 text-sm text-primary hover:underline transition-colors"
                             >
                                 + Añadir paso
                             </button>

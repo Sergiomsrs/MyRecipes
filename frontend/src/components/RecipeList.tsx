@@ -19,14 +19,11 @@ export default function RecipeList({
 
     if (recipes.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="size-14 rounded-2xl bg-surface-container flex items-center justify-center mb-4">
-                    <span className="text-2xl">🍳</span>
-                </div>
-                <p className="font-serif font-semibold text-lg text-on-surface mb-2">
+            <div className="py-16 text-center">
+                <p className="font-serif text-lg text-on-surface mb-1.5">
                     Tu cuaderno está vacío
                 </p>
-                <p className="text-on-surface-variant text-sm leading-relaxed max-w-xs">
+                <p className="text-on-surface-variant text-sm max-w-xs mx-auto">
                     Crea tu primera receta y empieza a documentar cada versión.
                 </p>
             </div>
@@ -34,8 +31,8 @@ export default function RecipeList({
     }
 
     return (
-        <div className="flex flex-col space-y-3">
-            {recipes.map((recipe) => {
+        <div className="-mx-2">
+            {recipes.map((recipe, index) => {
                 const meta = categoryMeta[recipe.category];
                 const updatedLabel = new Date(recipe.updatedAt).toLocaleDateString(
                     "es-ES",
@@ -45,34 +42,36 @@ export default function RecipeList({
                 return (
                     <article
                         key={recipe.id}
-                        className="relative rounded-xl bg-surface-container-lowest p-4 shadow-sm hover:shadow-md transition-shadow recipe-card"
+                        className={`relative transition-colors hover:bg-surface-container-low/40 ${
+                            index > 0
+                                ? "border-t border-outline-variant/40"
+                                : ""
+                        }`}
                     >
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center justify-between gap-2 py-4 px-2">
                             <button
                                 type="button"
                                 onClick={() => onView(recipe)}
-                                className="flex items-start gap-3 min-w-0 text-left flex-1"
+                                className="flex items-center gap-3.5 min-w-0 text-left flex-1 py-1"
                             >
-                                <div
-                                    className={`w-12 h-12 rounded-lg shrink-0 flex items-center justify-center text-xl ${meta.bgClass}`}
+                                <span
+                                    className="w-10 h-10 shrink-0 flex items-center justify-center text-lg"
+                                    aria-hidden="true"
                                 >
                                     {meta.emoji}
-                                </div>
-                                <div className="flex flex-col min-w-0 flex-1">
-                                    <h4 className="font-serif font-semibold text-base text-on-surface truncate">
+                                </span>
+                                <span className="flex flex-col min-w-0 flex-1">
+                                    <span className="font-serif text-base text-on-surface truncate">
                                         {recipe.title}
-                                    </h4>
-                                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                        <span
-                                            className={`inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.2 rounded-full ${meta.bgClass}`}
-                                        >
-                                            {meta.label}
+                                    </span>
+                                    <span className="text-xs text-on-surface-variant truncate">
+                                        {meta.label}
+                                        <span className="mx-1.5" aria-hidden="true">
+                                            ·
                                         </span>
-                                        <span className="text-xs text-on-surface-variant font-mono">
-                                            {updatedLabel}
-                                        </span>
-                                    </div>
-                                </div>
+                                        {updatedLabel}
+                                    </span>
+                                </span>
                             </button>
 
                             <button
@@ -80,7 +79,7 @@ export default function RecipeList({
                                 onClick={() =>
                                     setOpenMenuId(openMenuId === recipe.id ? null : recipe.id)
                                 }
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container active:scale-95 shrink-0"
+                                className="w-8 h-8 -mr-1 flex items-center justify-center text-on-surface-variant/70 hover:text-on-surface transition-colors shrink-0"
                                 aria-label="Opciones"
                             >
                                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -95,14 +94,14 @@ export default function RecipeList({
                                     className="fixed inset-0 z-10"
                                     onClick={() => setOpenMenuId(null)}
                                 />
-                                <div className="absolute right-4 top-full mt-1 z-20 card py-1 min-w-40 shadow-lg">
+                                <div className="absolute right-3 top-full mt-1 z-20 plane py-1 min-w-40">
                                     <button
                                         type="button"
                                         onClick={() => {
                                             setOpenMenuId(null);
                                             onEdit(recipe);
                                         }}
-                                        className="w-full text-left px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-high transition-colors"
+                                        className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-container-low transition-colors"
                                     >
                                         Editar
                                     </button>
@@ -118,7 +117,7 @@ export default function RecipeList({
                                                 onDelete(recipe.id);
                                             }
                                         }}
-                                        className="w-full text-left px-4 py-2.5 text-sm text-error hover:bg-surface-container-high transition-colors"
+                                        className="w-full text-left px-4 py-2 text-sm text-error hover:bg-surface-container-low transition-colors"
                                     >
                                         Eliminar
                                     </button>

@@ -175,13 +175,10 @@ export default function RecipesPage() {
         return (
             <div className="min-h-full bg-surface">
                 <div className="page-container pt-16 flex flex-col items-center justify-center text-center">
-                    <div className="size-12 rounded-xl bg-error-container flex items-center justify-center mb-4">
-                        <span className="text-2xl">⚠️</span>
-                    </div>
-                    <p className="font-serif font-semibold text-lg text-on-surface mb-2">
+                    <p className="font-serif text-lg text-on-surface mb-2">
                         No se pudieron cargar las recetas
                     </p>
-                    <p className="text-on-surface-variant text-sm leading-relaxed max-w-xs mb-6">
+                    <p className="text-sm text-error border-l-2 border-error/50 pl-3 mb-6">
                         {error}
                     </p>
                     <button
@@ -200,7 +197,7 @@ export default function RecipesPage() {
         <div className="min-h-full bg-surface">
             {formError && (
                 <div className="page-container pt-4">
-                    <p className="text-sm text-error bg-error-container/30 rounded-xl px-4 py-3">
+                    <p className="text-sm text-error border-l-2 border-error/50 pl-3">
                         {formError}
                     </p>
                 </div>
@@ -211,33 +208,27 @@ export default function RecipesPage() {
                     <div className="page-container pt-3 pb-24 space-y-5">
                         {/* Saludo y Resumen */}
                         <section className="flex flex-col">
-                            <div className="flex items-baseline justify-between gap-2">
-                                <h1 className="font-serif font-semibold text-2xl text-on-surface">
-                                    Hola, {userName}
-                                </h1>
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-mono text-xs font-semibold shrink-0">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-                                    Activo
-                                </span>
-                            </div>
-                            <p className="text-sm text-on-surface-variant mt-1">
+                            <h1 className="font-serif text-2xl text-on-surface">
+                                Hola, {userName}
+                            </h1>
+                            <p className="text-sm text-on-surface-variant mt-0.5">
                                 {recipes.length} receta{recipes.length !== 1 ? "s" : ""} en
                                 tu cuaderno
                             </p>
                         </section>
 
-                        {/* Filtros Pills */}
+                        {/* Filtros */}
                         <section>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                                 {(Object.keys(filterLabels) as FilterType[]).map((key) => (
                                     <button
                                         key={key}
                                         type="button"
                                         onClick={() => setActiveFilter(key)}
-                                        className={`filter-btn shrink-0 px-3 py-1.5 rounded-full font-mono text-xs font-semibold transition-all duration-200 ${
+                                        className={`shrink-0 text-sm pb-0.5 border-b transition-colors ${
                                             activeFilter === key
-                                                ? "bg-primary text-on-primary shadow-sm"
-                                                : "bg-surface-container-high text-on-surface hover:bg-surface-container"
+                                                ? "text-primary border-primary font-medium"
+                                                : "text-on-surface-variant border-transparent hover:text-on-surface"
                                         }`}
                                     >
                                         {filterLabels[key]}{" "}
@@ -268,19 +259,17 @@ export default function RecipesPage() {
                         </section>
 
                         {/* Listado de Recetas */}
-                        <section className="flex flex-col space-y-3">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <h3 className="font-serif font-semibold text-lg">
-                                        Recetas
-                                    </h3>
-                                    <span className="w-5 h-5 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-mono text-xs font-semibold">
+                        <section className="flex flex-col space-y-4">
+                            <div className="flex items-baseline justify-between">
+                                <h3 className="font-serif text-lg text-on-surface">
+                                    Recetas
+                                    <span className="text-on-surface-variant text-sm ml-1.5">
                                         {filteredRecipes.length}
                                     </span>
-                                </div>
+                                </h3>
                                 <button
                                     type="button"
-                                    className="font-mono text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline"
+                                    className="text-xs text-on-surface-variant flex items-center gap-0.5 hover:text-on-surface transition-colors"
                                 >
                                     <span>Ordenar: Recientes</span>
                                     <svg
@@ -307,24 +296,20 @@ export default function RecipesPage() {
                             />
                         </section>
 
-                        {/* Banner Creación Rápida */}
+                        {/* Nueva receta */}
                         <section>
-                            <div className="rounded-2xl bg-gradient-to-r from-primary to-primary-container p-4 text-on-primary shadow-lg flex items-center justify-between gap-3">
-                                <div className="flex flex-col min-w-0">
-                                    <span className="font-serif font-semibold text-lg leading-tight">
-                                        ¿Nuevo experimento?
-                                    </span>
-                                    <span className="text-sm text-on-primary/85 mt-0.5 hidden sm:block">
-                                        Añade ingredientes y registra cada versión desde el día 1.
-                                    </span>
-                                </div>
+                            <div className="border-t border-outline-variant/40 pt-5 flex items-center justify-between gap-4">
+                                <p className="text-sm text-on-surface-variant max-w-xs">
+                                    ¿Nuevo experimento? Registra cada versión desde el
+                                    día 1.
+                                </p>
                                 <button
                                     type="button"
                                     onClick={handleFabClick}
-                                    className="shrink-0 h-11 px-4 rounded-xl bg-surface-container-lowest text-primary font-serif font-semibold shadow-md flex items-center gap-1 active:scale-95 transition-transform"
+                                    className="shrink-0 h-10 px-4 rounded-lg bg-primary text-on-primary text-sm font-medium flex items-center gap-1.5 hover:brightness-105 transition-[filter]"
                                 >
                                     <svg
-                                        className="w-5 h-5"
+                                        className="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -336,7 +321,7 @@ export default function RecipesPage() {
                                             d="M12 4v16m8-8H4"
                                         />
                                     </svg>
-                                    <span>Crear</span>
+                                    <span>Nueva receta</span>
                                 </button>
                             </div>
                         </section>
@@ -347,7 +332,7 @@ export default function RecipesPage() {
             {currentView === "create" && (
                 <>
                     <div className="page-container pt-4 flex items-center justify-between">
-                        <h1 className="font-serif font-semibold text-xl text-on-surface">
+                        <h1 className="font-serif text-xl text-on-surface">
                             Nueva receta
                         </h1>
                         <button
@@ -406,7 +391,7 @@ export default function RecipesPage() {
             {currentView === "edit" && selectedRecipe && (
                 <>
                     <div className="page-container pt-4 flex items-center justify-between">
-                        <h1 className="font-serif font-semibold text-xl text-on-surface">
+                        <h1 className="font-serif text-xl text-on-surface">
                             Editar receta
                         </h1>
                         <button

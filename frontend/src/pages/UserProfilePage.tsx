@@ -83,46 +83,44 @@ export default function UserProfilePage() {
 
     return (
         <div className="min-h-full flex flex-col items-center px-5 py-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center mb-4 ring-4 ring-surface-container-high">
-                <span className="text-2xl font-bold text-on-primary-container">
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <span className="text-xl font-semibold text-primary">
                     {user?.email?.charAt(0).toUpperCase() || "U"}
                 </span>
             </div>
-            <h1 className="font-serif font-semibold text-2xl tracking-tight mb-1">
-                <span className="gradient-text">Mi cuenta</span>
+            <h1 className="font-serif text-2xl tracking-tight mb-1">
+                Mi cuenta
             </h1>
             <p className="text-sm text-on-surface-variant mb-8">
                 {user?.email}
             </p>
 
-            <div className="w-full max-w-sm space-y-6 text-left">
-                {/* Datos del usuario */}
-                <div className="card p-6">
-                    <h2 className="font-serif font-semibold text-lg text-on-surface mb-4">
-                        Datos
-                    </h2>
+                <div className="w-full max-w-sm space-y-8 text-left">
+                    {/* Datos del usuario */}
+                    <div>
+                    <h2 className="section-label mb-4">Datos</h2>
                     <dl className="space-y-3">
                         <div>
-                            <dt className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
+                            <dt className="text-xs text-on-surface-variant mb-0.5">
                                 Email
                             </dt>
-                            <dd className="text-sm text-on-surface font-medium">
+                            <dd className="text-sm text-on-surface break-all">
                                 {profile?.email ?? user?.email}
                             </dd>
                         </div>
                         <div>
-                            <dt className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
+                            <dt className="text-xs text-on-surface-variant mb-0.5">
                                 Rol
                             </dt>
-                            <dd className="text-sm text-on-surface font-medium">
+                            <dd className="text-sm text-on-surface">
                                 {profile?.role ?? user?.role}
                             </dd>
                         </div>
                         <div>
-                            <dt className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
+                            <dt className="text-xs text-on-surface-variant mb-0.5">
                                 ID de usuario
                             </dt>
-                            <dd className="text-xs text-on-surface-variant font-mono break-all">
+                            <dd className="text-xs text-on-surface-variant break-all">
                                 {profile?.userId ?? user?.userId}
                             </dd>
                         </div>
@@ -130,10 +128,8 @@ export default function UserProfilePage() {
                 </div>
 
                 {/* Cambiar contraseña */}
-                <div className="card p-6">
-                    <h2 className="font-serif font-semibold text-lg text-on-surface mb-4">
-                        Cambiar contraseña
-                    </h2>
+                <div>
+                    <h2 className="section-label mb-4">Cambiar contraseña</h2>
                     <form
                         onSubmit={handlePasswordChange}
                         className="space-y-4"
@@ -141,7 +137,7 @@ export default function UserProfilePage() {
                         <div>
                             <label
                                 htmlFor="currentPassword"
-                                className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5"
+                                className="section-label block mb-1.5"
                             >
                                 Contraseña actual
                             </label>
@@ -158,7 +154,7 @@ export default function UserProfilePage() {
                         <div>
                             <label
                                 htmlFor="newPassword"
-                                className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5"
+                                className="section-label block mb-1.5"
                             >
                                 Nueva contraseña
                             </label>
@@ -176,7 +172,7 @@ export default function UserProfilePage() {
                         <div>
                             <label
                                 htmlFor="confirmPassword"
-                                className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5"
+                                className="section-label block mb-1.5"
                             >
                                 Confirmar nueva contraseña
                             </label>
@@ -192,12 +188,12 @@ export default function UserProfilePage() {
                         </div>
 
                         {passwordError && (
-                            <p className="text-sm text-error bg-error-container/30 px-3 py-2 rounded-lg">
+                            <p className="text-sm text-error border-l-2 border-error/50 pl-3">
                                 {passwordError}
                             </p>
                         )}
                         {passwordSuccess && (
-                            <p className="text-sm text-secondary bg-secondary-container/30 px-3 py-2 rounded-lg">
+                            <p className="text-sm text-on-surface-variant border-l-2 border-secondary/50 pl-3">
                                 {passwordSuccess}
                             </p>
                         )}
@@ -213,13 +209,15 @@ export default function UserProfilePage() {
                 </div>
 
                 {/* Cerrar sesión */}
-                <button
-                    type="button"
-                    onClick={logout}
-                    className="w-full py-3 btn-outline text-error border-error/30 hover:bg-error-container/10"
-                >
-                    Cerrar sesión
-                </button>
+                <div className="pt-8 border-t border-outline-variant/40">
+                    <button
+                        type="button"
+                        onClick={logout}
+                        className="w-full py-3 btn-outline text-error border-error/30 hover:bg-error/5"
+                    >
+                        Cerrar sesión
+                    </button>
+                </div>
             </div>
         </div>
     );

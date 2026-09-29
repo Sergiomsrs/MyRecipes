@@ -53,32 +53,30 @@ export default function VersionTimeline({
             <button
                 type="button"
                 onClick={() => setIsExpanded(true)}
-                className="w-full flex items-center justify-between gap-3 card px-4 py-3 text-left"
+                className="w-full flex items-center justify-between gap-3 border-y border-outline-variant/40 px-1 py-3 text-left"
                 aria-expanded={false}
                 aria-label="Mostrar historial de versiones"
             >
                 <div className="min-w-0">
-                    <div className="flex items-baseline gap-2">
-                        <span className="font-mono text-xs font-semibold text-primary">
-                            v{selectedVersion.versionNumber}
-                        </span>
+                    <p className="text-xs text-primary">
+                        v{selectedVersion.versionNumber}
                         {selectedVersion.id === currentVersionId && (
-                            <span className="text-[10px] font-mono font-semibold text-primary bg-primary-fixed/60 px-1.5 py-0.5 rounded-full">
-                                actual
+                            <span className="text-on-surface-variant">
+                                {" "}· actual
                             </span>
                         )}
-                    </div>
-                    <p className="text-xs text-on-surface-variant leading-snug truncate mt-0.5">
+                    </p>
+                    <p className="text-xs text-on-surface-variant leading-snug truncate">
                         {selectedVersion.summaryChanges || "Versión inicial"}
                         {selectedVersion.rating && (
-                            <span className="ml-2 text-tertiary font-semibold">
+                            <span className="ml-2 text-primary tabular-nums">
                                 {selectedVersion.rating}/10
                             </span>
                         )}
                     </p>
                 </div>
                 <svg
-                    className="w-4 h-4 text-on-surface-variant shrink-0 transition-transform"
+                    className="w-4 h-4 text-on-surface-variant shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -97,13 +95,13 @@ export default function VersionTimeline({
     /* Full timeline (desktop sidebar OR expanded mobile accordion) */
     return (
         <nav aria-label="Historial de versiones">
-            <div className="flex items-center justify-between mb-3">
-                <p className="section-label">Historial</p>
+            <div className="flex items-center justify-between mb-1">
+                <p className="section-label">Historial de versiones</p>
                 {collapsible && (
                     <button
                         type="button"
                         onClick={() => setIsExpanded(false)}
-                        className="text-xs text-primary font-semibold hover:underline"
+                        className="text-xs text-on-surface-variant hover:text-on-surface transition-colors"
                         aria-expanded={true}
                     >
                         Ocultar
@@ -111,15 +109,12 @@ export default function VersionTimeline({
                 )}
             </div>
             <div className="relative">
-                {/* Vertical line */}
-                <div className="absolute left-[7px] top-2 bottom-2 w-px bg-outline-variant" />
+                <div className="absolute left-[7px] top-4 bottom-4 w-px bg-outline-variant/50" />
 
-                <ul className="space-y-1">
-                    {sorted.map((version) => {
-                        const isCurrent =
-                            version.id === currentVersionId;
-                        const isSelected =
-                            version.id === selectedVersionId;
+                <ul>
+                    {sorted.map((version, index) => {
+                        const isCurrent = version.id === currentVersionId;
+                        const isSelected = version.id === selectedVersionId;
                         const date = formatDate(version.createdAt);
 
                         return (
@@ -130,55 +125,43 @@ export default function VersionTimeline({
                                         onSelectVersion(version);
                                         if (collapsible) setIsExpanded(false);
                                     }}
-                                    className={`relative w-full text-left pl-6 py-2.5 pr-3 rounded-lg transition-colors ${
-                                        isSelected
-                                            ? "bg-primary-fixed/40"
-                                            : "hover:bg-surface-container-low"
-                                    }`}
+                                    className={`relative w-full text-left pl-5 py-3 -mx-2 px-2 rounded-md transition-colors ${
+                                        index > 0
+                                            ? "border-t border-outline-variant/40"
+                                            : ""
+                                    } ${isSelected ? "bg-primary/[0.05]" : "hover:bg-surface-container-low/50"}`}
                                 >
-                                    {/* Timeline dot */}
                                     <span
-                                        className={`absolute left-0 top-[14px] w-[15px] h-[15px] rounded-full border-2 transition-colors ${
+                                        className={`absolute left-[4px] top-[19px] size-[7px] rounded-full transition-colors ${
                                             isCurrent
-                                                ? "bg-primary border-primary"
-                                                : isSelected
-                                                  ? "bg-primary-fixed border-primary"
-                                                  : "bg-surface border-outline-variant"
+                                                ? "bg-primary"
+                                                : "bg-outline-variant"
                                         }`}
                                     />
 
-                                    <div className="flex items-baseline gap-2 mb-0.5">
-                                        <span
-                                            className={`font-mono text-xs font-semibold ${
-                                                isCurrent
-                                                    ? "text-primary"
-                                                    : "text-on-surface"
-                                            }`}
-                                        >
-                                            v{version.versionNumber}
-                                        </span>
+                                    <p className="text-xs text-primary">
+                                        v{version.versionNumber}
                                         {isCurrent && (
-                                            <span className="text-[10px] font-mono font-semibold text-primary bg-primary-fixed/60 px-1.5 py-0.5 rounded-full">
-                                                actual
+                                            <span className="text-on-surface-variant">
+                                                {" "}· actual
                                             </span>
                                         )}
-                                    </div>
-
-                                    <p className="text-xs text-on-surface-variant leading-snug line-clamp-2">
+                                    </p>
+                                    <p className="text-sm text-on-surface leading-snug line-clamp-2 mt-0.5">
                                         {version.summaryChanges ||
                                             "Versión inicial"}
                                     </p>
-
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-[11px] text-on-surface-variant/70">
-                                            {date}
-                                        </span>
+                                    <p className="text-xs text-on-surface-variant/80 mt-0.5 tabular-nums">
+                                        {date}
                                         {version.rating && (
-                                            <span className="text-[11px] text-tertiary font-semibold">
-                                                {version.rating}/10
-                                            </span>
+                                            <>
+                                                {" "}·{" "}
+                                                <span className="text-primary">
+                                                    {version.rating}/10
+                                                </span>
+                                            </>
                                         )}
-                                    </div>
+                                    </p>
                                 </button>
                             </li>
                         );
