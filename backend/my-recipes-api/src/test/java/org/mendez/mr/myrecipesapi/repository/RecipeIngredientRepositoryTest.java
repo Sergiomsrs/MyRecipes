@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -160,5 +163,65 @@ class RecipeIngredientRepositoryTest {
         assertThat(ingredients.get(0).getName()).isEqualTo("Harina");
         assertThat(ingredients.get(1).getName()).isEqualTo("Sal");
         assertThat(ingredients.get(2).getName()).isEqualTo("Agua");
+    }
+
+    @Test
+    void shouldFindIngredientsOfSeveralVersionsOrderedByOrderIndex() {
+
+        Recipe firstRecipe = recipeRepository.save(
+                new Recipe(
+                        UUID.randomUUID(),
+                        "Pan",
+                        "Receta básica",
+                        RecipeCategory.MAIN_COURSE
+                )
+        );
+
+        Recipe secondRecipe = recipeRepository.save(
+                new Recipe(
+                        UUID.randomUUID(),
+                        "Bizcocho",
+                        "Receta de sobremesa",
+                        RecipeCategory.DESSERT
+                )
+        );
+
+        RecipeVersion firstVersion = recipeVersionRepository.save(
+                new RecipeVersion(firstRecipe, 1, "Versión inicial", null, null)
+        );
+
+        RecipeVersion secondVersion = recipeVersionRepository.save(
+                new RecipeVersion(secondRecipe, 1, "Versión inicial", null, null)
+        );
+
+        recipeIngredientRepository.save(
+                new RecipeIngredient(firstVersion, "Sal", new BigDecimal("10"), "g", 2)
+        );
+        recipeIngredientRepository.save(
+                new RecipeIngredient(firstVersion, "Harina", new BigDecimal("500"), "g", 1)
+        );
+        recipeIngredientRepository.save(
+                new RecipeIngredient(secondVersion, "Harina", new BigDecimal("250"), "g", 1)
+        );
+
+        List<RecipeIngredient> ingredients =
+                recipeIngredientRepository.findByRecipeVersionIdInOrderByOrderIndex(
+                        List.of(firstVersion.getId(), secondVersion.getId())
+                );
+
+        assertThat(ingredients).hasSize(3);
+
+        Map<UUID, List<String>> namesByVersionId = ingredients.stream().collect(
+                Collectors.groupingBy(
+                        ingredient -> ingredient.getRecipeVersion().getId(),
+                        LinkedHashMap::new,
+                        Collectors.mapping(RecipeIngredient::getName, Collectors.toList())
+                )
+        );
+
+        assertThat(namesByVersionId.get(firstVersion.getId()))
+                .containsExactly("Harina", "Sal");
+        assertThat(namesByVersionId.get(secondVersion.getId()))
+                .containsExactly("Harina");
     }
 }

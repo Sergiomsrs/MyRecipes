@@ -1,65 +1,8 @@
-import { useEffect, useState } from "react";
-import type { Recipe, RecipeVersion } from "../types/recipe";
-import { useRecipes } from "../hooks/useRecipes";
-import { getErrorMessage } from "../api/errors";
+import { useCookbook } from "../hooks/useCookbook";
 import RecipeCard from "../components/RecipeCard";
 
-interface CookbookEntry {
-    recipe: Recipe;
-    version?: RecipeVersion;
-    error?: string;
-}
-
 export default function CookbookPage() {
-    const { recipes, isLoading, error, getCurrentVersion } = useRecipes();
-    const [entries, setEntries] = useState<CookbookEntry[] | null>(null);
-
-    useEffect(() => {
-        if (isLoading || recipes.length === 0) return;
-        let cancelled = false;
-
-        (async () => {
-            const sorted = [...recipes].sort(
-                (a, b) =>
-                    new Date(b.updatedAt).getTime() -
-                    new Date(a.updatedAt).getTime()
-            );
-
-            const results = await Promise.allSettled(
-                sorted.map((recipe) => getCurrentVersion(recipe.id))
-            );
-
-            if (cancelled) return;
-
-            setEntries(
-                sorted.map((recipe, index) => {
-                    const result = results[index];
-                    if (result.status === "fulfilled") {
-                        return { recipe, version: result.value };
-                    }
-                    return {
-                        recipe,
-                        error: getErrorMessage(
-                            result.reason,
-                            "No se pudo cargar la versión final"
-                        ),
-                    };
-                })
-            );
-        })();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [recipes, isLoading, getCurrentVersion]);
-
-    if (isLoading) {
-        return (
-            <div className="min-h-full bg-surface flex items-center justify-center py-24">
-                <p className="text-on-surface-variant">Cargando el recetario...</p>
-            </div>
-        );
-    }
+    const { entries, isLoading, error, reload } = useCookbook();
 
     if (error) {
         return (
@@ -73,7 +16,7 @@ export default function CookbookPage() {
                     </p>
                     <button
                         type="button"
-                        onClick={() => window.location.reload()}
+                        onClick={reload}
                         className="px-5 py-2.5 btn-primary"
                     >
                         Reintentar
@@ -83,12 +26,10 @@ export default function CookbookPage() {
         );
     }
 
-    if (entries === null) {
+    if (isLoading || entries === null) {
         return (
             <div className="min-h-full bg-surface flex items-center justify-center py-24">
-                <p className="text-on-surface-variant">
-                    Cargando versiones finales...
-                </p>
+                <p className="text-on-surface-variant">Cargando el recetario...</p>
             </div>
         );
     }
@@ -131,8 +72,7 @@ export default function CookbookPage() {
                         <RecipeCard
                             key={entry.recipe.id}
                             recipe={entry.recipe}
-                            version={entry.version}
-                            error={entry.error}
+                            version={entry.currentVersion}
                         />
                     ))}
                 </div>

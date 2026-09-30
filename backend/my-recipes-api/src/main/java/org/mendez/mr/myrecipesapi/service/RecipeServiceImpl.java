@@ -7,6 +7,7 @@ import org.mendez.mr.myrecipesapi.dto.CreateRecipeStepRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateVersionRequest;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
+import org.mendez.mr.myrecipesapi.dto.RecipeWithCurrentVersionResponse;
 import org.mendez.mr.myrecipesapi.dto.UpdateRecipeRequest;
 import org.mendez.mr.myrecipesapi.entity.Photo;
 import org.mendez.mr.myrecipesapi.entity.Recipe;
@@ -15,13 +16,21 @@ import org.mendez.mr.myrecipesapi.entity.RecipeStep;
 import org.mendez.mr.myrecipesapi.entity.RecipeVersion;
 import org.mendez.mr.myrecipesapi.exception.ResourceNotFoundException;
 import org.mendez.mr.myrecipesapi.mapper.RecipeMapper;
+import org.mendez.mr.myrecipesapi.repository.PhotoRepository;
+import org.mendez.mr.myrecipesapi.repository.RecipeIngredientRepository;
 import org.mendez.mr.myrecipesapi.repository.RecipeRepository;
+import org.mendez.mr.myrecipesapi.repository.RecipeStepRepository;
 import org.mendez.mr.myrecipesapi.repository.RecipeVersionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Service
 @Transactional
@@ -29,13 +38,22 @@ public class RecipeServiceImpl implements RecipeService {
 
     private final RecipeRepository recipeRepository;
     private final RecipeVersionRepository recipeVersionRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
+    private final RecipeStepRepository recipeStepRepository;
+    private final PhotoRepository photoRepository;
 
     public RecipeServiceImpl(
             RecipeRepository recipeRepository,
-            RecipeVersionRepository recipeVersionRepository
+            RecipeVersionRepository recipeVersionRepository,
+            RecipeIngredientRepository recipeIngredientRepository,
+            RecipeStepRepository recipeStepRepository,
+            PhotoRepository photoRepository
     ) {
         this.recipeRepository = recipeRepository;
         this.recipeVersionRepository = recipeVersionRepository;
+        this.recipeIngredientRepository = recipeIngredientRepository;
+        this.recipeStepRepository = recipeStepRepository;
+        this.photoRepository = photoRepository;
     }
 
     @Override
@@ -43,6 +61,90 @@ public class RecipeServiceImpl implements RecipeService {
         return RecipeMapper.toResponse(
                 recipeRepository.findByUserIdOrderByUpdatedAtDesc(userId)
         );
+    }
+
+    @Override
+    public List<RecipeWithCurrentVersionResponse> getRecipesWithCurrentVersion(UUID userId) {
+
+        List<Recipe> recipes =
+                recipeRepository.findByUserIdOrderByUpdatedAtDesc(userId);
+
+        List<UUID> versionIds = recipes.stream()
+                .map(Recipe::getCurrentVersionId)
+                .filter(Objects::nonNull)
+                .toList();
+
+        Map<UUID, RecipeVersionResponse> versionResponses =
+                loadVersionResponses(versionIds);
+
+        return recipes.stream()
+                .map(recipe -> RecipeMapper.toResponseWithCurrentVersion(
+                        recipe,
+                        versionResponses.get(recipe.getCurrentVersionId())
+                ))
+                .toList();
+    }
+
+    private Map<UUID, RecipeVersionResponse> loadVersionResponses(List<UUID> versionIds) {
+
+        if (versionIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<UUID, RecipeVersion> versionsById = new HashMap<>();
+
+        for (RecipeVersion version : recipeVersionRepository.findByIdIn(versionIds)) {
+            versionsById.put(version.getId(), version);
+        }
+
+        if (versionsById.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<UUID, List<RecipeIngredient>> ingredientsByVersionId = groupByVersionId(
+                recipeIngredientRepository.findByRecipeVersionIdInOrderByOrderIndex(versionIds),
+                RecipeIngredient::getRecipeVersion
+        );
+
+        Map<UUID, List<RecipeStep>> stepsByVersionId = groupByVersionId(
+                recipeStepRepository.findByRecipeVersionIdInOrderByOrder(versionIds),
+                RecipeStep::getRecipeVersion
+        );
+
+        Map<UUID, List<Photo>> photosByVersionId = groupByVersionId(
+                photoRepository.findByRecipeVersionIdIn(versionIds),
+                Photo::getRecipeVersion
+        );
+
+        Map<UUID, RecipeVersionResponse> versionResponses = new HashMap<>();
+
+        versionsById.forEach((versionId, version) -> versionResponses.put(
+                versionId,
+                RecipeMapper.toVersionResponse(
+                        version,
+                        ingredientsByVersionId.getOrDefault(versionId, List.of()),
+                        stepsByVersionId.getOrDefault(versionId, List.of()),
+                        photosByVersionId.getOrDefault(versionId, List.of())
+                )
+        ));
+
+        return versionResponses;
+    }
+
+    private <T> Map<UUID, List<T>> groupByVersionId(
+            List<T> items,
+            Function<T, RecipeVersion> versionResolver
+    ) {
+        Map<UUID, List<T>> grouped = new HashMap<>();
+
+        for (T item : items) {
+            grouped.computeIfAbsent(
+                    versionResolver.apply(item).getId(),
+                    versionId -> new ArrayList<>()
+            ).add(item);
+        }
+
+        return grouped;
     }
 
     @Override

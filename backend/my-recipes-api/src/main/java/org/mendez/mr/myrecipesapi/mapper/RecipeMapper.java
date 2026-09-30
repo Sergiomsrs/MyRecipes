@@ -5,6 +5,7 @@ import org.mendez.mr.myrecipesapi.dto.RecipeIngredientResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeStepResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
+import org.mendez.mr.myrecipesapi.dto.RecipeWithCurrentVersionResponse;
 import org.mendez.mr.myrecipesapi.entity.Photo;
 import org.mendez.mr.myrecipesapi.entity.Recipe;
 import org.mendez.mr.myrecipesapi.entity.RecipeIngredient;
@@ -35,7 +36,31 @@ public final class RecipeMapper {
         return recipes.stream().map(RecipeMapper::toResponse).toList();
     }
 
+    public static RecipeWithCurrentVersionResponse toResponseWithCurrentVersion(
+            Recipe recipe,
+            RecipeVersionResponse currentVersion
+    ) {
+        return new RecipeWithCurrentVersionResponse(
+                toResponse(recipe),
+                currentVersion
+        );
+    }
+
     public static RecipeVersionResponse toVersionResponse(RecipeVersion version) {
+        return toVersionResponse(
+                version,
+                version.getIngredients(),
+                version.getSteps(),
+                version.getPhotos()
+        );
+    }
+
+    public static RecipeVersionResponse toVersionResponse(
+            RecipeVersion version,
+            List<RecipeIngredient> ingredients,
+            List<RecipeStep> steps,
+            List<Photo> photos
+    ) {
         return new RecipeVersionResponse(
                 version.getId(),
                 version.getRecipe().getId(),
@@ -44,9 +69,9 @@ public final class RecipeMapper {
                 version.getNotes(),
                 version.getRating(),
                 version.getCreatedAt(),
-                toIngredientResponse(version.getIngredients()),
-                toStepResponse(version.getSteps()),
-                toPhotoResponse(version.getPhotos())
+                toIngredientResponse(ingredients),
+                toStepResponse(steps),
+                toPhotoResponse(photos)
         );
     }
 

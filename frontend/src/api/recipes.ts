@@ -4,6 +4,7 @@ import type {
     CreateVersionPayload,
     Recipe,
     RecipeVersion,
+    RecipeWithCurrentVersion,
     UpdateRecipePayload,
 } from "../types/recipe";
 
@@ -11,6 +12,16 @@ const RECIPES_BASE = "/api/v1/recipes";
 
 export async function getRecipes(): Promise<Recipe[]> {
     const { data } = await api.get<Recipe[]>(RECIPES_BASE);
+    return data;
+}
+
+export async function getRecipesWithCurrentVersion(
+    signal?: AbortSignal
+): Promise<RecipeWithCurrentVersion[]> {
+    const { data } = await api.get<RecipeWithCurrentVersion[]>(
+        `${RECIPES_BASE}/current-versions`,
+        { signal }
+    );
     return data;
 }
 

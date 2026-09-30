@@ -5,6 +5,7 @@ import org.mendez.mr.myrecipesapi.dto.CreateRecipeRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateVersionRequest;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
+import org.mendez.mr.myrecipesapi.dto.RecipeWithCurrentVersionResponse;
 import org.mendez.mr.myrecipesapi.dto.UpdateRecipeRequest;
 import org.mendez.mr.myrecipesapi.security.service.CustomUserDetails;
 import org.mendez.mr.myrecipesapi.service.RecipeService;
@@ -30,6 +31,12 @@ public class RecipeController {
     public ResponseEntity<List<RecipeResponse>> getRecipes() {
         UUID userId = getCurrentUserId();
         return ResponseEntity.ok(recipeService.getRecipes(userId));
+    }
+
+    @GetMapping("/current-versions")
+    public ResponseEntity<List<RecipeWithCurrentVersionResponse>> getRecipesWithCurrentVersion() {
+        UUID userId = getCurrentUserId();
+        return ResponseEntity.ok(recipeService.getRecipesWithCurrentVersion(userId));
     }
 
     @GetMapping("/{id}")

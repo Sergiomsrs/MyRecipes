@@ -4,6 +4,7 @@ import org.mendez.mr.myrecipesapi.dto.CreateRecipeRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateVersionRequest;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
+import org.mendez.mr.myrecipesapi.dto.RecipeWithCurrentVersionResponse;
 import org.mendez.mr.myrecipesapi.dto.UpdateRecipeRequest;
 
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.UUID;
 public interface RecipeService {
 
     List<RecipeResponse> getRecipes(UUID userId);
+
+    List<RecipeWithCurrentVersionResponse> getRecipesWithCurrentVersion(UUID userId);
 
     RecipeResponse getRecipe(UUID recipeId, UUID userId);
 

@@ -116,3 +116,8 @@ export interface UpdateRecipePayload {
     description: string;
     category: RecipeCategory;
 }
+
+export interface RecipeWithCurrentVersion {
+    recipe: Recipe;
+    currentVersion: RecipeVersion | null;
+}

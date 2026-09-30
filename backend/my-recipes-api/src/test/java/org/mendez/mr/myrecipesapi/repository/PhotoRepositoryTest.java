@@ -8,6 +8,7 @@ import org.mendez.mr.myrecipesapi.enums.RecipeCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -96,5 +97,58 @@ class PhotoRepositoryTest {
         assertThat(result).isPresent();
         assertThat(result.get().getUrl()).isEqualTo("https://example.com/paella.jpg");
         assertThat(result.get().getCaption()).isEqualTo("Paella terminada");
+    }
+
+    @Test
+    void shouldFindPhotosOfSeveralVersions() {
+
+        Recipe firstRecipe = recipeRepository.save(
+                new Recipe(
+                        UUID.randomUUID(),
+                        "Tortilla de patatas",
+                        "Receta tradicional",
+                        RecipeCategory.MAIN_COURSE
+                )
+        );
+
+        Recipe secondRecipe = recipeRepository.save(
+                new Recipe(
+                        UUID.randomUUID(),
+                        "Paella",
+                        "Receta familiar",
+                        RecipeCategory.MAIN_COURSE
+                )
+        );
+
+        RecipeVersion firstVersion = recipeVersionRepository.save(
+                new RecipeVersion(firstRecipe, 1, "Versión inicial", null, null)
+        );
+
+        RecipeVersion secondVersion = recipeVersionRepository.save(
+                new RecipeVersion(secondRecipe, 1, "Versión inicial", null, null)
+        );
+
+        photoRepository.save(new Photo(firstVersion, "https://example.com/tortilla.jpg", null));
+        photoRepository.save(new Photo(secondVersion, "https://example.com/paella.jpg", "Terminada"));
+
+        List<Photo> photos = photoRepository.findByRecipeVersionIdIn(
+                List.of(firstVersion.getId(), secondVersion.getId())
+        );
+
+        assertThat(photos).hasSize(2);
+        assertThat(photos)
+                .extracting(Photo::getUrl)
+                .containsExactlyInAnyOrder(
+                        "https://example.com/tortilla.jpg",
+                        "https://example.com/paella.jpg"
+                );
+    }
+
+    @Test
+    void shouldNotFindPhotosWhenNoVersionIdsAreProvided() {
+
+        List<Photo> photos = photoRepository.findByRecipeVersionIdIn(List.of());
+
+        assertThat(photos).isEmpty();
     }
 }

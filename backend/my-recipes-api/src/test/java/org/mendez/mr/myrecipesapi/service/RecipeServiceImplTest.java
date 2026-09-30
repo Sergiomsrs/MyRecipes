@@ -1,10 +1,15 @@
 package org.mendez.mr.myrecipesapi.service;
 
 import org.junit.jupiter.api.Test;
+import org.mendez.mr.myrecipesapi.dto.CreatePhotoRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeIngredientRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeStepRequest;
+import org.mendez.mr.myrecipesapi.dto.PhotoResponse;
+import org.mendez.mr.myrecipesapi.dto.RecipeIngredientResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
+import org.mendez.mr.myrecipesapi.dto.RecipeStepResponse;
+import org.mendez.mr.myrecipesapi.dto.RecipeWithCurrentVersionResponse;
 import org.mendez.mr.myrecipesapi.entity.Recipe;
 import org.mendez.mr.myrecipesapi.entity.RecipeIngredient;
 import org.mendez.mr.myrecipesapi.entity.RecipeStep;
@@ -99,5 +104,98 @@ class RecipeServiceTest {
         List<RecipeResponse> recipes = recipeService.getRecipes(userId);
 
         assertThat(recipes).hasSize(2);
+    }
+
+    @Test
+    void shouldGetRecipesWithTheirCurrentVersion() {
+
+        UUID userId = UUID.randomUUID();
+
+        RecipeResponse first = recipeService.createRecipe(buildRequest(), userId);
+        RecipeResponse second = recipeService.createRecipe(
+                new CreateRecipeRequest(
+                        "Bizcocho de limón",
+                        "Receta de sobremesa",
+                        RecipeCategory.DESSERT,
+                        "Versión inicial",
+                        "Muy esponjoso",
+                        9,
+                        List.of(
+                                new CreateRecipeIngredientRequest("Harina", new BigDecimal("250"), "g", 1),
+                                new CreateRecipeIngredientRequest("Limón", new BigDecimal("2"), "unidad", 2)
+                        ),
+                        List.of(
+                                new CreateRecipeStepRequest(1, "Mezclar los ingredientes."),
+                                new CreateRecipeStepRequest(2, "Hornear 40 minutos.")
+                        ),
+                        List.of(
+                                new CreatePhotoRequest("https://example.com/bizcocho.jpg", "Bizcocho recién horneado")
+                        )
+                ),
+                userId
+        );
+
+        List<RecipeWithCurrentVersionResponse> entries =
+                recipeService.getRecipesWithCurrentVersion(userId);
+
+        assertThat(entries).hasSize(2);
+
+        assertThat(entries)
+                .extracting(entry -> entry.recipe().id())
+                .containsExactly(second.id(), first.id());
+
+        RecipeWithCurrentVersionResponse latestEntry = entries.get(0);
+
+        assertThat(latestEntry.recipe().title()).isEqualTo("Bizcocho de limón");
+        assertThat(latestEntry.currentVersion()).isNotNull();
+        assertThat(latestEntry.currentVersion().recipeId()).isEqualTo(second.id());
+        assertThat(latestEntry.currentVersion().versionNumber()).isEqualTo(1);
+        assertThat(latestEntry.currentVersion().rating()).isEqualTo(9);
+        assertThat(latestEntry.currentVersion().notes()).isEqualTo("Muy esponjoso");
+        assertThat(latestEntry.currentVersion().ingredients())
+                .extracting(RecipeIngredientResponse::name)
+                .containsExactly("Harina", "Limón");
+        assertThat(latestEntry.currentVersion().steps())
+                .extracting(RecipeStepResponse::description)
+                .containsExactly("Mezclar los ingredientes.", "Hornear 40 minutos.");
+        assertThat(latestEntry.currentVersion().photos())
+                .extracting(PhotoResponse::url)
+                .containsExactly("https://example.com/bizcocho.jpg");
+
+        RecipeWithCurrentVersionResponse previousEntry = entries.get(1);
+
+        assertThat(previousEntry.currentVersion()).isNotNull();
+        assertThat(previousEntry.currentVersion().recipeId()).isEqualTo(first.id());
+        assertThat(previousEntry.currentVersion().ingredients())
+                .extracting(RecipeIngredientResponse::name)
+                .containsExactly("Patatas", "Huevos");
+        assertThat(previousEntry.currentVersion().steps())
+                .extracting(RecipeStepResponse::description)
+                .containsExactly("Pelar y cortar las patatas.", "Freír las patatas.");
+    }
+
+    @Test
+    void shouldReturnOnlyRecipesOfTheAuthenticatedUserWithCurrentVersion() {
+
+        UUID userId = UUID.randomUUID();
+        UUID otherUserId = UUID.randomUUID();
+
+        recipeService.createRecipe(buildRequest(), userId);
+        recipeService.createRecipe(buildRequest(), otherUserId);
+
+        List<RecipeWithCurrentVersionResponse> entries =
+                recipeService.getRecipesWithCurrentVersion(userId);
+
+        assertThat(entries).hasSize(1);
+        assertThat(entries.get(0).recipe().userId()).isEqualTo(userId);
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenUserHasNoRecipes() {
+
+        List<RecipeWithCurrentVersionResponse> entries =
+                recipeService.getRecipesWithCurrentVersion(UUID.randomUUID());
+
+        assertThat(entries).isEmpty();
     }
 }

@@ -110,6 +110,47 @@ public class RecipeVersionRepositoryTest {
         assertThat(versions).hasSize(3);
     }
 
+    @Test
+    void shouldFindVersionsByIdsWithTheirRecipe() {
+
+        Recipe recipe = recipeRepository.save(
+                new Recipe(
+                        UUID.randomUUID(),
+                        "Pizza",
+                        "Receta italiana",
+                        RecipeCategory.MAIN_COURSE
+                )
+        );
+
+        RecipeVersion first = recipeVersionRepository.save(
+                new RecipeVersion(recipe, 1, "Inicial", "", 7)
+        );
+
+        RecipeVersion second = recipeVersionRepository.save(
+                new RecipeVersion(recipe, 2, "Más queso", "", 8)
+        );
+
+        List<RecipeVersion> versions =
+                recipeVersionRepository.findByIdIn(List.of(first.getId(), second.getId()));
+
+        assertThat(versions)
+                .extracting(RecipeVersion::getId)
+                .containsExactlyInAnyOrder(first.getId(), second.getId());
+        assertThat(versions)
+                .extracting(version -> version.getRecipe().getId())
+                .containsOnly(recipe.getId());
+    }
+
+    @Test
+    void shouldNotFindVersionsWhenNoIdsAreProvided() {
+
+        List<RecipeVersion> versions = recipeVersionRepository.findByIdIn(List.of());
+
+        assertThat(versions).isEmpty();
+    }
+}
+
+
 
 
 

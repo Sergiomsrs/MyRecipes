@@ -234,6 +234,55 @@ GET /api/v1/recipes
 
 Devuelve el listado de recetas del usuario autenticado.
 
+Devuelve únicamente los metadatos de cada receta, sin su versión actual.
+
+---
+
+## Obtener las recetas con su versión actual
+
+```
+GET /api/v1/recipes/current-versions
+```
+
+Devuelve el listado de recetas del usuario autenticado junto con su versión actual completa.
+
+Ordena las recetas por `updatedAt` descendente.
+
+Cada elemento tiene esta forma:
+
+```json
+{
+  "recipe": {
+    "id": "uuid",
+    "userId": "uuid",
+    "title": "Tortilla de patatas",
+    "description": "Receta tradicional",
+    "category": "MAIN_COURSE",
+    "currentVersionId": "uuid",
+    "createdAt": "2025-01-01T10:00:00Z",
+    "updatedAt": "2025-01-02T10:00:00Z"
+  },
+  "currentVersion": {
+    "id": "uuid",
+    "recipeId": "uuid",
+    "versionNumber": 2,
+    "summaryChanges": "Menos sal",
+    "notes": "Queda mejor reposando",
+    "rating": 9,
+    "createdAt": "2025-01-02T10:00:00Z",
+    "ingredients": [],
+    "steps": [],
+    "photos": []
+  }
+}
+```
+
+`currentVersion` es `null` si la receta todavía no tiene versión actual.
+
+Este endpoint existe para que las vistas que necesitan la versión final de cada receta no tengan que recorrer el listado y luego pedir la versión de una en una.
+
+El backend resuelve ingredientes, pasos y fotografías con un número fijo de consultas, sin repetir una consulta por receta.
+
 ---
 
 ## Obtener una receta
