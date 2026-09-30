@@ -1,6 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Recipe, RecipeFormData, RecipeVersion } from "../types/recipe";
-import { useRecipes } from "../hooks/useRecipes";
+import {
+    useRecipeCurrentVersion,
+    useRecipeVersions,
+    useRecipesList,
+} from "../hooks/useRecipes";
+import {
+    useCreateRecipe,
+    useCreateVersion,
+    useDeleteRecipe,
+    useUpdateRecipe,
+} from "../hooks/useRecipeMutations";
 import { useAuth } from "../hooks/useAuth";
 import { getErrorMessage } from "../api/errors";
 import RecipeList from "../components/RecipeList";
@@ -20,29 +30,38 @@ const filterLabels: Record<FilterType, string> = {
 
 export default function RecipesPage() {
     const {
-        recipes,
-        isLoading,
+        data: recipes,
+        isPending,
         error,
-        createRecipe,
-        updateRecipe,
-        deleteRecipe,
-        getRecipe,
-        getCurrentVersion,
-        getVersions,
-        createVersion,
-    } = useRecipes();
+        refetch,
+    } = useRecipesList();
+    const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
+    const [selectedVersionId, setSelectedVersionId] = useState<string>("");
+    const currentVersionQuery = useRecipeCurrentVersion(selectedRecipeId ?? "");
+    const versionsQuery = useRecipeVersions(selectedRecipeId ?? "");
+    const createRecipeMutation = useCreateRecipe();
+    const updateRecipeMutation = useUpdateRecipe();
+    const deleteRecipeMutation = useDeleteRecipe();
+    const createVersionMutation = useCreateVersion();
     const { user } = useAuth();
     const [currentView, setCurrentView] = useState<View>("list");
-    const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-    const [currentVersion, setCurrentVersion] = useState<RecipeVersion | null>(null);
-    const [isVersionLoading, setIsVersionLoading] = useState(false);
-    const [versions, setVersions] = useState<RecipeVersion[]>([]);
-    const [selectedVersionId, setSelectedVersionId] = useState<string>("");
-    const [isTimelineLoading, setIsTimelineLoading] = useState(false);
     const [showNewVersionModal, setShowNewVersionModal] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [activeFilter, setActiveFilter] = useState<FilterType>("all");
     const [sortOrder, setSortOrder] = useState<"recent" | "oldest" | "title">("recent");
+
+    const recipeList = recipes ?? [];
+    const selectedRecipe =
+        recipeList.find((recipe) => recipe.id === selectedRecipeId) ?? null;
+    const versions = versionsQuery.data ?? [];
+    const currentVersion = currentVersionQuery.data ?? null;
+    const displayedVersion =
+        versions.find((version) => version.id === selectedVersionId) ?? null;
+    const isViewingDetail = currentView === "detail" && selectedRecipe !== null;
+    const isVersionLoading = isViewingDetail && currentVersionQuery.isPending;
+    const isTimelineLoading = isViewingDetail && versionsQuery.isPending;
+    const currentVersionId =
+        currentVersion?.id ?? selectedRecipe?.currentVersionId ?? "";
 
     const handleFabClick = useCallback(() => {
         setFormError(null);
@@ -55,7 +74,7 @@ export default function RecipesPage() {
         return () => window.removeEventListener("fab-click", handler);
     }, [handleFabClick]);
 
-    const filteredRecipes = recipes.filter((recipe) => {
+    const filteredRecipes = recipeList.filter((recipe) => {
         if (activeFilter === "all") return true;
         if (activeFilter === "favoritas") return recipe.category === "DESSERT";
         if (activeFilter === "definitiva")
@@ -82,7 +101,7 @@ export default function RecipesPage() {
     const handleCreateRecipe = async (data: RecipeFormData) => {
         setFormError(null);
         try {
-            await createRecipe(data);
+            await createRecipeMutation.mutateAsync(data);
             setCurrentView("list");
         } catch (err) {
             setFormError(getErrorMessage(err, "No se pudo crear la receta"));
@@ -93,68 +112,52 @@ export default function RecipesPage() {
         setFormError(null);
         if (!selectedRecipe) return;
         try {
-            await updateRecipe(selectedRecipe.id, data);
-            setSelectedRecipe(getRecipe(selectedRecipe.id) || null);
+            await updateRecipeMutation.mutateAsync({ id: selectedRecipe.id, data });
             setCurrentView("detail");
         } catch (err) {
             setFormError(getErrorMessage(err, "No se pudo guardar la receta"));
         }
     };
 
-    const handleViewRecipe = async (recipe: Recipe) => {
-        setSelectedRecipe(recipe);
-        setCurrentVersion(null);
-        setVersions([]);
-        setSelectedVersionId("");
+    const handleViewRecipe = (recipe: Recipe) => {
+        setFormError(null);
+        setSelectedRecipeId(recipe.id);
+        setSelectedVersionId(recipe.currentVersionId);
         setCurrentView("detail");
-        setIsVersionLoading(true);
-        setIsTimelineLoading(true);
-        try {
-            const [version, allVersions] = await Promise.all([
-                getCurrentVersion(recipe.id),
-                getVersions(recipe.id),
-            ]);
-            setCurrentVersion(version);
-            setSelectedVersionId(version.id);
-            setVersions(allVersions);
-        } catch (err) {
-            setFormError(
-                getErrorMessage(err, "No se pudo cargar la receta completa")
-            );
-        } finally {
-            setIsVersionLoading(false);
-            setIsTimelineLoading(false);
-        }
     };
 
     const handleSelectVersion = (version: RecipeVersion) => {
         setSelectedVersionId(version.id);
-        setCurrentVersion(version);
     };
 
-    const handleBackToCurrentVersion = async () => {
-        if (!selectedRecipe) return;
-        setIsVersionLoading(true);
-        try {
-            const version = await getCurrentVersion(selectedRecipe.id);
-            setCurrentVersion(version);
-            setSelectedVersionId(version.id);
-        } catch (err) {
-            setFormError(getErrorMessage(err, "No se pudo cargar la versión actual"));
-        } finally {
-            setIsVersionLoading(false);
+    const handleBackToCurrentVersion = () => {
+        const targetId = currentVersion?.id ?? selectedRecipe?.currentVersionId;
+        if (targetId) {
+            setSelectedVersionId(targetId);
         }
     };
 
     const handleEditRecipe = (recipe: Recipe) => {
-        setSelectedRecipe(recipe);
+        setFormError(null);
+        setSelectedRecipeId(recipe.id);
         setCurrentView("edit");
+    };
+
+    const handleBackToList = () => {
+        setFormError(null);
+        setCurrentView("list");
+    };
+
+    const handleBackToDetail = () => {
+        setFormError(null);
+        setCurrentView("detail");
     };
 
     const handleDeleteRecipe = async (id: string) => {
         setFormError(null);
         try {
-            await deleteRecipe(id);
+            await deleteRecipeMutation.mutateAsync(id);
+            setSelectedRecipeId(null);
             setCurrentView("list");
         } catch (err) {
             setFormError(getErrorMessage(err, "No se pudo eliminar la receta"));
@@ -165,17 +168,19 @@ export default function RecipesPage() {
         setFormError(null);
         if (!selectedRecipe) return;
         try {
-            const newVersion = await createVersion(selectedRecipe.id, summaryChanges, data);
-            setCurrentVersion(newVersion);
+            const newVersion = await createVersionMutation.mutateAsync({
+                recipeId: selectedRecipe.id,
+                summaryChanges,
+                data,
+            });
             setSelectedVersionId(newVersion.id);
-            setVersions((current) => [...current, newVersion]);
             setShowNewVersionModal(false);
         } catch (err) {
             setFormError(getErrorMessage(err, "No se pudo crear la nueva versión"));
         }
     };
 
-    if (isLoading) {
+    if (isPending) {
         return (
             <div className="min-h-full bg-surface flex items-center justify-center py-24">
                 <p className="text-on-surface-variant">Cargando recetas...</p>
@@ -191,11 +196,11 @@ export default function RecipesPage() {
                         No se pudieron cargar las recetas
                     </p>
                     <p className="text-sm text-error border-l-2 border-error/50 pl-3 mb-6">
-                        {error}
+                        {getErrorMessage(error, "No se pudieron cargar las recetas")}
                     </p>
                     <button
                         type="button"
-                        onClick={() => window.location.reload()}
+                        onClick={() => void refetch()}
                         className="px-5 py-2.5 btn-primary"
                     >
                         Reintentar
@@ -233,7 +238,7 @@ export default function RecipesPage() {
                             </div>
 
                             <p className="mt-4 text-sm text-stone-600">
-                                {recipes.length} recetas vivas · {recipes.length} cocinados
+                                {recipeList.length} recetas vivas · {recipeList.length} cocinados
                                 documentados
                             </p>
                         </header>
@@ -249,13 +254,13 @@ export default function RecipesPage() {
                                             Laboratorio de sabores
                                         </p>
                                         <h2 className="mt-1 text-base font-semibold text-stone-800 md:text-lg">
-                                            {recipes.length} recetas afinándose esta semana
+                                            {recipeList.length} recetas afinándose esta semana
                                         </h2>
                                     </div>
                                 </div>
 
                                 <div className="rounded-full border border-amber-200 bg-white/60 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
-                                    +{Math.max(recipes.length, 0)} en prueba
+                                    +{Math.max(recipeList.length, 0)} en prueba
                                 </div>
                             </div>
                         </section>
@@ -266,8 +271,8 @@ export default function RecipesPage() {
                                     {(Object.keys(filterLabels) as FilterType[]).map((key) => {
                                         const count =
                                             key === "all"
-                                                ? recipes.length
-                                                : recipes.filter((r) => {
+                                                ? recipeList.length
+                                                : recipeList.filter((r) => {
                                                     if (key === "favoritas")
                                                         return r.category === "DESSERT";
                                                     if (key === "definitiva")
@@ -394,10 +399,7 @@ export default function RecipesPage() {
                         </h1>
                         <button
                             type="button"
-                            onClick={() => {
-                                setFormError(null);
-                                setCurrentView("list");
-                            }}
+                            onClick={handleBackToList}
                             className="p-2 text-on-surface-variant hover:text-on-surface transition-colors"
                             aria-label="Cerrar"
                         >
@@ -410,10 +412,7 @@ export default function RecipesPage() {
                     <RecipeForm
                         mode="create"
                         onSubmit={handleCreateRecipe}
-                        onCancel={() => {
-                            setFormError(null);
-                            setCurrentView("list");
-                        }}
+                        onCancel={handleBackToList}
                     />
                 </>
             )}
@@ -422,22 +421,22 @@ export default function RecipesPage() {
                 <>
                     <RecipeDetail
                         recipe={selectedRecipe}
-                        version={currentVersion}
+                        version={displayedVersion}
                         isVersionLoading={isVersionLoading}
                         versions={versions}
-                        currentVersionId={currentVersion?.id || ""}
+                        currentVersionId={currentVersionId}
                         selectedVersionId={selectedVersionId}
                         isTimelineLoading={isTimelineLoading}
                         onSelectVersion={handleSelectVersion}
                         onBackToCurrentVersion={handleBackToCurrentVersion}
                         onEdit={handleEditRecipe}
-                        onBack={() => setCurrentView("list")}
+                        onBack={handleBackToList}
                         onNewVersion={() => setShowNewVersionModal(true)}
                     />
-                    {currentVersion && (
+                    {displayedVersion && (
                         <NewVersionModal
                             isOpen={showNewVersionModal}
-                            currentVersion={currentVersion}
+                            currentVersion={displayedVersion}
                             onClose={() => setShowNewVersionModal(false)}
                             onSubmit={handleCreateVersion}
                         />
@@ -453,10 +452,7 @@ export default function RecipesPage() {
                         </h1>
                         <button
                             type="button"
-                            onClick={() => {
-                                setFormError(null);
-                                setCurrentView("detail");
-                            }}
+                            onClick={handleBackToDetail}
                             className="p-2 text-on-surface-variant hover:text-on-surface transition-colors"
                             aria-label="Cerrar"
                         >
@@ -480,10 +476,7 @@ export default function RecipesPage() {
                         recipe={selectedRecipe}
                         mode="edit"
                         onSubmit={handleUpdateRecipe}
-                        onCancel={() => {
-                            setFormError(null);
-                            setCurrentView("detail");
-                        }}
+                        onCancel={handleBackToDetail}
                     />
                 </>
             )}

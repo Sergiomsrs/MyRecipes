@@ -25,11 +25,6 @@ export async function getRecipesWithCurrentVersion(
     return data;
 }
 
-export async function getRecipe(id: string): Promise<Recipe> {
-    const { data } = await api.get<Recipe>(`${RECIPES_BASE}/${id}`);
-    return data;
-}
-
 export async function getCurrentVersion(id: string): Promise<RecipeVersion> {
     const { data } = await api.get<RecipeVersion>(
         `${RECIPES_BASE}/${id}/versions/current`

@@ -1,11 +1,12 @@
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../context/ThemeContext";
+import { usePrefetchNav } from "../hooks/usePrefetchNav";
 
 const navLinks = [
     { to: "/recipes", label: "Recetas", end: false },
     { to: "/recetario", label: "Recetario", end: false },
-];
+] as const;
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
     return `text-sm px-1 py-0.5 border-b transition-colors ${
@@ -18,6 +19,7 @@ function navLinkClass({ isActive }: { isActive: boolean }) {
 export default function Header() {
     const { theme, toggleTheme } = useTheme();
     const { user, isAuthenticated, logout } = useAuth();
+    const { prefetch, cancelPrefetch } = usePrefetchNav();
 
     return (
         <header className="fixed top-0 inset-x-0 z-50 glass-header pt-[env(safe-area-inset-top,0px)]">
@@ -32,7 +34,16 @@ export default function Header() {
                 {isAuthenticated && (
                     <nav className="hidden md:flex items-center gap-1">
                         {navLinks.map((link) => (
-                            <NavLink key={link.to} to={link.to} end={link.end} className={navLinkClass}>
+                            <NavLink
+                                key={link.to}
+                                to={link.to}
+                                end={link.end}
+                                className={navLinkClass}
+                                onMouseEnter={() => prefetch(link.to)}
+                                onMouseLeave={() => cancelPrefetch(link.to)}
+                                onFocus={() => prefetch(link.to)}
+                                onBlur={() => cancelPrefetch(link.to)}
+                            >
                                 {link.label}
                             </NavLink>
                         ))}

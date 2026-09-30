@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import * as usersApi from "../api/users";
+import { useProfile } from "../hooks/useRecipes";
+import { changePassword } from "../api/users";
 import { getErrorMessage } from "../api/errors";
 
 export default function UserProfilePage() {
     const { user, logout } = useAuth();
-    const [profile, setProfile] = useState<usersApi.UserProfile | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const {
+        data: profile,
+        isPending,
+        error,
+    } = useProfile();
 
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -16,15 +19,9 @@ export default function UserProfilePage() {
     const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        usersApi
-            .getProfile()
-            .then(setProfile)
-            .catch((err) => {
-                setError(getErrorMessage(err, "Error al cargar el perfil"));
-            })
-            .finally(() => setIsLoading(false));
-    }, []);
+    const profileError = error
+        ? getErrorMessage(error, "Error al cargar el perfil")
+        : null;
 
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,7 +42,7 @@ export default function UserProfilePage() {
 
         setIsSubmitting(true);
         try {
-            const result = await usersApi.changePassword(
+            const result = await changePassword(
                 currentPassword,
                 newPassword
             );
@@ -62,7 +59,7 @@ export default function UserProfilePage() {
         }
     };
 
-    if (isLoading) {
+    if (isPending) {
         return (
             <div className="min-h-full flex items-center justify-center">
                 <div className="text-on-surface-variant text-sm">
@@ -87,9 +84,9 @@ export default function UserProfilePage() {
             </p>
 
             <div className="w-full max-w-sm space-y-8 text-left">
-                {error && (
+                {profileError && (
                     <p className="text-sm text-error border-l-2 border-error/50 pl-3">
-                        {error}
+                        {profileError}
                     </p>
                 )}
 

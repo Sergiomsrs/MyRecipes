@@ -1,8 +1,9 @@
-import { useCookbook } from "../hooks/useCookbook";
+import { useCookbook } from "../hooks/useRecipes";
+import { getErrorMessage } from "../api/errors";
 import RecipeCard from "../components/RecipeCard";
 
 export default function CookbookPage() {
-    const { entries, isLoading, error, reload } = useCookbook();
+    const { data: entries, isPending, error, refetch } = useCookbook();
 
     if (error) {
         return (
@@ -12,11 +13,11 @@ export default function CookbookPage() {
                         No se pudo cargar el recetario
                     </p>
                     <p className="text-sm text-error border-l-2 border-error/50 pl-3 mb-6">
-                        {error}
+                        {getErrorMessage(error, "No se pudo cargar el recetario")}
                     </p>
                     <button
                         type="button"
-                        onClick={reload}
+                        onClick={() => void refetch()}
                         className="px-5 py-2.5 btn-primary"
                     >
                         Reintentar
@@ -26,7 +27,7 @@ export default function CookbookPage() {
         );
     }
 
-    if (isLoading || entries === null) {
+    if (isPending || !entries) {
         return (
             <div className="min-h-full bg-surface flex items-center justify-center py-24">
                 <p className="text-on-surface-variant">Cargando el recetario...</p>

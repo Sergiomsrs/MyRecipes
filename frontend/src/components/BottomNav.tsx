@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { usePrefetchNav } from "../hooks/usePrefetchNav";
 
 interface BottomNavProps {
     onFabClick?: () => void;
@@ -8,6 +9,7 @@ interface BottomNavProps {
 
 export default function BottomNav({ onFabClick }: BottomNavProps) {
     const { isAuthenticated } = useAuth();
+    const { prefetch, cancelPrefetch } = usePrefetchNav();
 
     const handleFabClick = useCallback(() => {
         if (onFabClick) {
@@ -30,6 +32,10 @@ export default function BottomNav({ onFabClick }: BottomNavProps) {
             <div className="max-w-[420px] mx-auto flex items-center justify-between h-16 px-4">
                 <Link
                     to="/recipes"
+                    onMouseEnter={() => prefetch("/recipes")}
+                    onMouseLeave={() => cancelPrefetch("/recipes")}
+                    onFocus={() => prefetch("/recipes")}
+                    onBlur={() => cancelPrefetch("/recipes")}
                     className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] text-primary font-bold transition-colors"
                 >
                     <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,6 +61,10 @@ export default function BottomNav({ onFabClick }: BottomNavProps) {
 
                 <Link
                     to="/recetario"
+                    onMouseEnter={() => prefetch("/recetario")}
+                    onMouseLeave={() => cancelPrefetch("/recetario")}
+                    onFocus={() => prefetch("/recetario")}
+                    onBlur={() => cancelPrefetch("/recetario")}
                     className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] text-on-surface-variant hover:text-on-surface transition-colors"
                 >
                     <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

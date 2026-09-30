@@ -1,7 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useEffect, useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { loginUser, type AuthResponse } from "../api/auth";
 import { setUnauthorizedHandler } from "../api/axios";
+import { recipeQueries } from "../api/queries";
 
 interface User {
     token: string;
@@ -34,6 +36,7 @@ function getStoredUser(): User | null {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(getStoredUser);
+    const queryClient = useQueryClient();
 
     const login = useCallback(async (email: string, password: string) => {
         const data: AuthResponse = await loginUser(email, password);
@@ -46,13 +49,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionStorage.setItem("token", data.token);
         sessionStorage.setItem("user", JSON.stringify(newUser));
         setUser(newUser);
-    }, []);
+        void queryClient.prefetchQuery(recipeQueries.list());
+        void queryClient.prefetchQuery(recipeQueries.currentVersions());
+    }, [queryClient]);
 
     const logout = useCallback(() => {
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("user");
+        queryClient.clear();
         setUser(null);
-    }, []);
+    }, [queryClient]);
 
     useEffect(() => {
         setUnauthorizedHandler(logout);
