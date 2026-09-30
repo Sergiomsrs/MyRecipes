@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { getErrorMessage } from "../api/errors";
 
 export default function LoginPage() {
     const { login, isAuthenticated } = useAuth();
@@ -22,7 +23,7 @@ export default function LoginPage() {
             await login(email, password);
         } catch (err) {
             setError(
-                err instanceof Error ? err.message : "Credenciales incorrectas"
+                getErrorMessage(err, "Credenciales incorrectas")
             );
         } finally {
             setIsLoading(false);

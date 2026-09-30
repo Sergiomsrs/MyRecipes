@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { Recipe, RecipeFormData, RecipeVersion } from "../types/recipe";
 import { useRecipes } from "../hooks/useRecipes";
 import { useAuth } from "../hooks/useAuth";
+import { getErrorMessage } from "../api/errors";
 import RecipeList from "../components/RecipeList";
 import RecipeForm from "../components/RecipeForm";
 import RecipeDetail from "../components/RecipeDetail";
@@ -41,6 +42,7 @@ export default function RecipesPage() {
     const [showNewVersionModal, setShowNewVersionModal] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+    const [sortOrder, setSortOrder] = useState<"recent" | "oldest" | "title">("recent");
 
     const handleFabClick = useCallback(() => {
         setFormError(null);
@@ -63,6 +65,18 @@ export default function RecipesPage() {
         return true;
     });
 
+    const visibleRecipes = [...filteredRecipes].sort((a, b) => {
+        if (sortOrder === "oldest") {
+            return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+        }
+
+        if (sortOrder === "title") {
+            return a.title.localeCompare(b.title, "es");
+        }
+
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+
     const userName = user?.email?.split("@")[0] || "Chef";
 
     const handleCreateRecipe = async (data: RecipeFormData) => {
@@ -71,7 +85,7 @@ export default function RecipesPage() {
             await createRecipe(data);
             setCurrentView("list");
         } catch (err) {
-            setFormError(err instanceof Error ? err.message : "No se pudo crear la receta");
+            setFormError(getErrorMessage(err, "No se pudo crear la receta"));
         }
     };
 
@@ -83,7 +97,7 @@ export default function RecipesPage() {
             setSelectedRecipe(getRecipe(selectedRecipe.id) || null);
             setCurrentView("detail");
         } catch (err) {
-            setFormError(err instanceof Error ? err.message : "No se pudo guardar la receta");
+            setFormError(getErrorMessage(err, "No se pudo guardar la receta"));
         }
     };
 
@@ -105,7 +119,7 @@ export default function RecipesPage() {
             setVersions(allVersions);
         } catch (err) {
             setFormError(
-                err instanceof Error ? err.message : "No se pudo cargar la receta completa"
+                getErrorMessage(err, "No se pudo cargar la receta completa")
             );
         } finally {
             setIsVersionLoading(false);
@@ -126,9 +140,7 @@ export default function RecipesPage() {
             setCurrentVersion(version);
             setSelectedVersionId(version.id);
         } catch (err) {
-            setFormError(
-                err instanceof Error ? err.message : "No se pudo cargar la versión actual"
-            );
+            setFormError(getErrorMessage(err, "No se pudo cargar la versión actual"));
         } finally {
             setIsVersionLoading(false);
         }
@@ -145,7 +157,7 @@ export default function RecipesPage() {
             await deleteRecipe(id);
             setCurrentView("list");
         } catch (err) {
-            setFormError(err instanceof Error ? err.message : "No se pudo eliminar la receta");
+            setFormError(getErrorMessage(err, "No se pudo eliminar la receta"));
         }
     };
 
@@ -159,7 +171,7 @@ export default function RecipesPage() {
             setVersions((current) => [...current, newVersion]);
             setShowNewVersionModal(false);
         } catch (err) {
-            setFormError(err instanceof Error ? err.message : "No se pudo crear la nueva versión");
+            setFormError(getErrorMessage(err, "No se pudo crear la nueva versión"));
         }
     };
 
@@ -205,125 +217,170 @@ export default function RecipesPage() {
 
             {currentView === "list" && (
                 <>
-                    <div className="page-container pt-3 pb-24 space-y-5">
-                        {/* Saludo y Resumen */}
-                        <section className="flex flex-col">
-                            <h1 className="font-serif text-2xl text-on-surface">
-                                Hola, {userName}
-                            </h1>
-                            <p className="text-sm text-on-surface-variant mt-0.5">
-                                {recipes.length} receta{recipes.length !== 1 ? "s" : ""} en
-                                tu cuaderno
+                    <div className="page-container max-w-5xl mx-auto px-4 pb-24 pt-6 md:px-6">
+                        <header className="border-b border-stone-200/80 pb-6">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="space-y-3">
+                                    <div>
+                                        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-stone-500">
+                                            Cuaderno personal
+                                        </p>
+                                        <h1 className="mt-2 font-serif text-3xl leading-none text-stone-900 md:text-4xl">
+                                            Hola, {userName}
+                                        </h1>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="mt-4 text-sm text-stone-600">
+                                {recipes.length} recetas vivas · {recipes.length} cocinados
+                                documentados
                             </p>
-                        </section>
+                        </header>
 
-                        {/* Filtros */}
-                        <section>
-                            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                                {(Object.keys(filterLabels) as FilterType[]).map((key) => (
-                                    <button
-                                        key={key}
-                                        type="button"
-                                        onClick={() => setActiveFilter(key)}
-                                        className={`shrink-0 text-sm pb-0.5 border-b transition-colors ${
-                                            activeFilter === key
-                                                ? "text-primary border-primary font-medium"
-                                                : "text-on-surface-variant border-transparent hover:text-on-surface"
-                                        }`}
-                                    >
-                                        {filterLabels[key]}{" "}
-                                        {key === "all"
-                                            ? recipes.length
-                                            : recipes.filter((r) => {
-                                                  if (key === "favoritas")
-                                                      return r.category === "DESSERT";
-                                                  if (key === "definitiva")
-                                                      return (
-                                                          r.title
-                                                              .toLowerCase()
-                                                              .includes("definitiva") ||
-                                                          r.category === "MAIN_COURSE"
-                                                      );
-                                                  if (key === "evolucion")
-                                                      return (
-                                                          r.title
-                                                              .toLowerCase()
-                                                              .includes("evolución") ||
-                                                          r.category === "STARTER"
-                                                      );
-                                                  return true;
-                                              }).length}
-                                    </button>
-                                ))}
+                        <section className="mt-6 rounded-3xl border border-amber-200/70 bg-[#faf6ef] p-4 shadow-sm md:p-5">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f1e3d8] text-lg text-[#8a4d2d] shadow-inner">
+                                        ✦
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-stone-500">
+                                            Laboratorio de sabores
+                                        </p>
+                                        <h2 className="mt-1 text-base font-semibold text-stone-800 md:text-lg">
+                                            {recipes.length} recetas afinándose esta semana
+                                        </h2>
+                                    </div>
+                                </div>
+
+                                <div className="rounded-full border border-amber-200 bg-white/60 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
+                                    +{Math.max(recipes.length, 0)} en prueba
+                                </div>
                             </div>
                         </section>
 
-                        {/* Listado de Recetas */}
-                        <section className="flex flex-col space-y-4">
-                            <div className="flex items-baseline justify-between">
-                                <h3 className="font-serif text-lg text-on-surface">
-                                    Recetas
-                                    <span className="text-on-surface-variant text-sm ml-1.5">
-                                        {filteredRecipes.length}
-                                    </span>
-                                </h3>
-                                <button
-                                    type="button"
-                                    className="text-xs text-on-surface-variant flex items-center gap-0.5 hover:text-on-surface transition-colors"
-                                >
-                                    <span>Ordenar: Recientes</span>
-                                    <svg
-                                        className="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
+                        <section className="mt-6">
+                            <div className="flex flex-col gap-4">
+                                <div className="inline-flex w-full flex-wrap items-center gap-2 rounded-2xl bg-stone-100 p-1.5 shadow-[inset_0_1px_0_rgba(0,0,0,0.02)] md:w-auto">
+                                    {(Object.keys(filterLabels) as FilterType[]).map((key) => {
+                                        const count =
+                                            key === "all"
+                                                ? recipes.length
+                                                : recipes.filter((r) => {
+                                                    if (key === "favoritas")
+                                                        return r.category === "DESSERT";
+                                                    if (key === "definitiva")
+                                                        return (
+                                                            r.title
+                                                                .toLowerCase()
+                                                                .includes("definitiva") ||
+                                                            r.category === "MAIN_COURSE"
+                                                        );
+                                                    if (key === "evolucion")
+                                                        return (
+                                                            r.title
+                                                                .toLowerCase()
+                                                                .includes("evolución") ||
+                                                            r.category === "STARTER"
+                                                        );
+                                                    return true;
+                                                }).length;
 
+                                        const active = activeFilter === key;
+
+                                        return (
+                                            <button
+                                                key={key}
+                                                type="button"
+                                                onClick={() => setActiveFilter(key)}
+                                                className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-all ${active
+                                                    ? "bg-[#c85a32] text-white shadow-sm"
+                                                    : "bg-transparent text-stone-600 hover:bg-stone-200/80 hover:text-stone-800"
+                                                    }`}
+                                            >
+                                                <span>{filterLabels[key]}</span>
+                                                <span
+                                                    className={`inline-flex min-w-[1.4rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${active
+                                                        ? "bg-white/20 text-white"
+                                                        : "bg-stone-200 text-stone-600"
+                                                        }`}
+                                                >
+                                                    {count}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <h3 className="font-serif text-2xl text-stone-900">
+                                            Recetas en bitácora
+                                        </h3>
+                                        <span className="inline-flex min-w-[1.7rem] items-center justify-center rounded-full bg-stone-200 px-2 py-0.5 text-xs font-semibold text-stone-700">
+                                            {filteredRecipes.length}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative">
+                                            <select
+                                                aria-label="Ordenar recetas"
+                                                value={sortOrder}
+                                                onChange={(event) =>
+                                                    setSortOrder(
+                                                        event.target.value as
+                                                        | "recent"
+                                                        | "oldest"
+                                                        | "title"
+                                                    )
+                                                }
+                                                className="appearance-none rounded-xl border border-stone-200 bg-white px-3 py-2 pr-8 text-sm text-stone-700 shadow-sm outline-none transition focus:border-stone-300"
+                                            >
+                                                <option value="recent">Ordenar: Recientes</option>
+                                                <option value="oldest">Más antiguos</option>
+                                                <option value="title">Título A-Z</option>
+                                            </select>
+                                            <svg
+                                                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                                aria-hidden="true"
+                                            >
+                                                <path d="M5.25 7.5 10 12.25 14.75 7.5H5.25Z" />
+                                            </svg>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={handleFabClick}
+                                            className="inline-flex items-center gap-2 rounded-xl bg-[#c85a32] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#b44f2d] focus:outline-none focus:ring-2 focus:ring-[#d58d74]"
+                                        >
+                                            <svg
+                                                className="h-4 w-4"
+                                                viewBox="0 0 20 20"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="1.8"
+                                                aria-hidden="true"
+                                            >
+                                                <path d="M10 4.5v11M4.5 10h11" strokeLinecap="round" />
+                                            </svg>
+                                            Nueva receta
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="mt-5">
                             <RecipeList
-                                recipes={filteredRecipes}
+                                recipes={visibleRecipes}
                                 onView={handleViewRecipe}
                                 onEdit={handleEditRecipe}
                                 onDelete={handleDeleteRecipe}
                             />
-                        </section>
-
-                        {/* Nueva receta */}
-                        <section>
-                            <div className="border-t border-outline-variant/40 pt-5 flex items-center justify-between gap-4">
-                                <p className="text-sm text-on-surface-variant max-w-xs">
-                                    ¿Nuevo experimento? Registra cada versión desde el
-                                    día 1.
-                                </p>
-                                <button
-                                    type="button"
-                                    onClick={handleFabClick}
-                                    className="shrink-0 h-10 px-4 rounded-lg bg-primary text-on-primary text-sm font-medium flex items-center gap-1.5 hover:brightness-105 transition-[filter]"
-                                >
-                                    <svg
-                                        className="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M12 4v16m8-8H4"
-                                        />
-                                    </svg>
-                                    <span>Nueva receta</span>
-                                </button>
-                            </div>
                         </section>
                     </div>
                 </>

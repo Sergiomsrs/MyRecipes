@@ -239,6 +239,87 @@ body {
     padding-inline: 1rem;
 }
 
+.recipe-header {
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 80%, transparent);
+}
+
+.recipe-header h1 {
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+    font-weight: 400;
+}
+
+.recipe-header-meta {
+    color: color-mix(in srgb, var(--color-on-surface-variant) 90%, transparent);
+}
+
+.recipe-filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    padding-top: 0.8rem;
+}
+
+.recipe-filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.15rem 0 0.2rem;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    color: color-mix(in srgb, var(--color-on-surface-variant) 88%, transparent);
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: color 150ms ease, border-color 150ms ease;
+}
+
+.recipe-filter-tab:hover {
+    color: var(--color-on-surface);
+}
+
+.recipe-filter-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: color-mix(in srgb, var(--color-primary) 80%, transparent);
+}
+
+.recipe-filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.3rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-surface-container) 78%, transparent);
+    color: inherit;
+    font-size: 0.66rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.recipe-section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.1rem;
+}
+
+.recipe-order-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.1rem 0;
+    border: 0;
+    background: transparent;
+    color: color-mix(in srgb, var(--color-on-surface-variant) 92%, transparent);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
 @media (min-width: 768px) {
     .page-container {
         max-width: 44rem;
@@ -297,6 +378,7 @@ body {
 }
 
 @media print {
+
     .glass-header,
     .glass-nav {
         display: none;

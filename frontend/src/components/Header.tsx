@@ -17,7 +17,7 @@ function navLinkClass({ isActive }: { isActive: boolean }) {
 
 export default function Header() {
     const { theme, toggleTheme } = useTheme();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, logout } = useAuth();
 
     return (
         <header className="fixed top-0 inset-x-0 z-50 glass-header pt-[env(safe-area-inset-top,0px)]">
@@ -58,6 +58,17 @@ export default function Header() {
                     </button>
                     {isAuthenticated && (
                         <>
+                            <button
+                                type="button"
+                                onClick={logout}
+                                className="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-error transition-colors"
+                                aria-label="Cerrar sesión"
+                                title="Cerrar sesión"
+                            >
+                                <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </button>
                             <div className="w-px h-5 bg-outline-variant mx-1 hidden md:block" />
                             <NavLink
                                 to="/profile"

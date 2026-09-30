@@ -1,5 +1,25 @@
 import axios from "axios";
 
+declare module "axios" {
+    export interface AxiosRequestConfig {
+        skipAuthRedirect?: boolean;
+    }
+}
+
+type UnauthorizedHandler = () => void;
+
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+let isLoggingOut = false;
+
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
+    unauthorizedHandler = handler;
+}
+
+function clearStoredSession() {
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+}
+
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
     headers: {
@@ -16,15 +36,23 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        isLoggingOut = false;
+        return response;
+    },
     (error) => {
-        if (error.response?.status === 401) {
-            sessionStorage.removeItem("token");
-            sessionStorage.removeItem("user");
-            window.location.href = `${import.meta.env.BASE_URL}login`;
+        if (
+            error.response?.status === 401 &&
+            !error.config?.skipAuthRedirect
+        ) {
+            if (!isLoggingOut) {
+                isLoggingOut = true;
+                clearStoredSession();
+                unauthorizedHandler?.();
+            }
         }
         return Promise.reject(error);
     }
 );
 
-export default api;
+export default api;

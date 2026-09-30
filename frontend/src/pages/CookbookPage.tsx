@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Recipe, RecipeVersion } from "../types/recipe";
 import { useRecipes } from "../hooks/useRecipes";
+import { getErrorMessage } from "../api/errors";
 import RecipeCard from "../components/RecipeCard";
 
 interface CookbookEntry {
@@ -38,10 +39,10 @@ export default function CookbookPage() {
                     }
                     return {
                         recipe,
-                        error:
-                            result.reason instanceof Error
-                                ? result.reason.message
-                                : "No se pudo cargar la versión final",
+                        error: getErrorMessage(
+                            result.reason,
+                            "No se pudo cargar la versión final"
+                        ),
                     };
                 })
             );

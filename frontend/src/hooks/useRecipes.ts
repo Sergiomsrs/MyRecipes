@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import * as api from "../api/recipes";
+import { getErrorMessage } from "../api/errors";
 import type {
     Recipe,
     RecipeFormData,
@@ -18,7 +19,7 @@ export function useRecipes() {
             const data = await api.getRecipes();
             setRecipes(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Error al cargar las recetas");
+            setError(getErrorMessage(err, "Error al cargar las recetas"));
         } finally {
             setIsLoading(false);
         }

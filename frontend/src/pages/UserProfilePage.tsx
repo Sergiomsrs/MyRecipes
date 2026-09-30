@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import * as usersApi from "../api/users";
+import { getErrorMessage } from "../api/errors";
 
 export default function UserProfilePage() {
     const { user, logout } = useAuth();
@@ -20,9 +21,7 @@ export default function UserProfilePage() {
             .getProfile()
             .then(setProfile)
             .catch((err) => {
-                setError(
-                    err instanceof Error ? err.message : "Error al cargar el perfil"
-                );
+                setError(getErrorMessage(err, "Error al cargar el perfil"));
             })
             .finally(() => setIsLoading(false));
     }, []);
@@ -56,7 +55,7 @@ export default function UserProfilePage() {
             setConfirmPassword("");
         } catch (err) {
             setPasswordError(
-                err instanceof Error ? err.message : "Error al cambiar la contraseña"
+                getErrorMessage(err, "Error al cambiar la contraseña")
             );
         } finally {
             setIsSubmitting(false);
@@ -69,14 +68,6 @@ export default function UserProfilePage() {
                 <div className="text-on-surface-variant text-sm">
                     Cargando perfil...
                 </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-full flex items-center justify-center">
-                <div className="text-error text-sm">{error}</div>
             </div>
         );
     }
@@ -95,9 +86,15 @@ export default function UserProfilePage() {
                 {user?.email}
             </p>
 
-                <div className="w-full max-w-sm space-y-8 text-left">
-                    {/* Datos del usuario */}
-                    <div>
+            <div className="w-full max-w-sm space-y-8 text-left">
+                {error && (
+                    <p className="text-sm text-error border-l-2 border-error/50 pl-3">
+                        {error}
+                    </p>
+                )}
+
+                {/* Datos del usuario */}
+                <div>
                     <h2 className="section-label mb-4">Datos</h2>
                     <dl className="space-y-3">
                         <div>

@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useState, type ReactNode } from "react";
+import { createContext, useCallback, useEffect, useState, type ReactNode } from "react";
 import { loginUser, type AuthResponse } from "../api/auth";
+import { setUnauthorizedHandler } from "../api/axios";
 
 interface User {
     token: string;
@@ -52,6 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionStorage.removeItem("user");
         setUser(null);
     }, []);
+
+    useEffect(() => {
+        setUnauthorizedHandler(logout);
+        return () => setUnauthorizedHandler(null);
+    }, [logout]);
 
     return (
         <AuthContext.Provider
