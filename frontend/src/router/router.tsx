@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createHashRouter } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -10,7 +10,7 @@ import CookbookPage from "../pages/CookbookPage";
 import UserProfilePage from "../pages/UserProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
 
-export const router = createBrowserRouter(
+export const router = createHashRouter(
     [
         {
             element: <MainLayout />,
@@ -46,8 +46,5 @@ export const router = createBrowserRouter(
                 },
             ],
         },
-    ],
-    {
-        basename: "/MyRecipes",
-    }
+    ]
 );

@@ -42,7 +42,7 @@ export default function RecipeList({
                 return (
                     <article
                         key={recipe.id}
-                        className={`relative transition-colors hover:bg-surface-container-low/40 ${
+                        className={`relative transition-colors ${
                             index > 0
                                 ? "border-t border-outline-variant/40"
                                 : ""
@@ -52,7 +52,7 @@ export default function RecipeList({
                             <button
                                 type="button"
                                 onClick={() => onView(recipe)}
-                                className="flex items-center gap-3.5 min-w-0 text-left flex-1 py-1"
+                                className="flex items-center gap-3.5 min-w-0 text-left flex-1 py-2 -my-2 rounded-lg transition-colors hover:bg-surface-container-low/70 focus-visible:bg-surface-container-low/70"
                             >
                                 <span
                                     className="w-10 h-10 shrink-0 flex items-center justify-center text-lg"

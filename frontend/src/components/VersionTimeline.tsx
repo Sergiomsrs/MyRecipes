@@ -53,7 +53,7 @@ export default function VersionTimeline({
             <button
                 type="button"
                 onClick={() => setIsExpanded(true)}
-                className="w-full flex items-center justify-between gap-3 border-y border-outline-variant/40 px-1 py-3 text-left"
+                className="w-full flex items-center justify-between gap-3 border-y border-outline-variant/40 px-2 -mx-1 rounded-lg transition-colors hover:bg-surface-container-low/50 focus-visible:bg-surface-container-low/50 py-3 text-left"
                 aria-expanded={false}
                 aria-label="Mostrar historial de versiones"
             >

@@ -65,6 +65,27 @@ En caso de adquirir un dominio propio, GitHub Pages permitirá asociarlo fácilm
 
 ---
 
+## Enrutamiento del frontend
+
+GitHub Pages sirve únicamente ficheros estáticos y no permite configurar reglas de reescritura en el servidor. Si el frontend usara rutas limpias (por ejemplo `/MyRecipes/recetas`), la petición se resolvería contra el sistema de ficheros y GitHub Pages devolvería un error 404 antes de que la aplicación llegara a cargarse. Esto afectaría tanto a la recarga de la página como a los enlaces directos a una sección concreta.
+
+Para evitarlo, el frontend utiliza **hash routing** mediante `createHashRouter`, de forma que toda la ruta se mantiene en el fragmento de la URL:
+
+```
+/MyRecipes/#/recetas
+/MyRecipes/#/login
+/MyRecipes/#/recetario
+/MyRecipes/#/profile
+```
+
+El router se crea sin `basename`. Con hash routing la ruta que react-router interpreta es la que aparece dentro del fragmento (`/recipes`, `/login`...), que nunca incluye el prefijo `/MyRecipes`; ese prefijo solo corresponde a la ruta física en la que GitHub Pages aloja los ficheros y ya lo resuelve la propiedad `base` de Vite. Todas las URLs quedan resueltas por `index.html`, el único fichero que GitHub Pages necesita servir.
+
+Esta decisión también permite que las rutas inexistentes se resuelvan dentro de la aplicación, mostrando la pantalla de error propia en lugar de la página 404 del servidor.
+
+La alternativa sería generar un fichero `404.html` adicional que redirigiese a `index.html` conservando la ruta original, lo que permitiría recuperar las URLs limpias. Se ha descartado porque requiere un paso adicional de compilación y un fichero que mantener sincronizado, lo que introduce fragilidad en un despliegue manual. Si en el futuro se automatiza el despliegue mediante GitHub Actions o se migra a un servidor con reescritura de URLs (ver §10.13), esta alternativa vuelve a ser viable y puede reevaluarse.
+
+---
+
 ## Backend
 
 La API REST desarrollada con Spring Boot se desplegará en un servidor VPS con Ubuntu.
