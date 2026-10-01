@@ -5,6 +5,8 @@ import { categoryMeta } from "../constants/categories";
 interface RecipeListProps {
     recipes: Recipe[];
     onView: (recipe: Recipe) => void;
+    onPrefetch: (recipeId: string) => void;
+    onCancelPrefetch: (recipeId: string) => void;
     onEdit: (recipe: Recipe) => void;
     onDelete: (id: string) => void;
 }
@@ -12,6 +14,8 @@ interface RecipeListProps {
 export default function RecipeList({
     recipes,
     onView,
+    onPrefetch,
+    onCancelPrefetch,
     onEdit,
     onDelete,
 }: RecipeListProps) {
@@ -42,16 +46,22 @@ export default function RecipeList({
                 return (
                     <article
                         key={recipe.id}
-                        className={`relative transition-colors ${
-                            index > 0
+                        className={`relative transition-colors ${index > 0
                                 ? "border-t border-outline-variant/40"
                                 : ""
-                        }`}
+                            }`}
                     >
                         <div className="flex items-center justify-between gap-2 py-4 px-2">
                             <button
                                 type="button"
-                                onClick={() => onView(recipe)}
+                                onPointerEnter={() => onPrefetch(recipe.id)}
+                                onPointerLeave={() => onCancelPrefetch(recipe.id)}
+                                onFocus={() => onPrefetch(recipe.id)}
+                                onBlur={() => onCancelPrefetch(recipe.id)}
+                                onClick={() => {
+                                    onCancelPrefetch(recipe.id);
+                                    onView(recipe);
+                                }}
                                 className="flex items-center gap-3.5 min-w-0 text-left flex-1 py-2 -my-2 rounded-lg transition-colors hover:bg-surface-container-low/70 focus-visible:bg-surface-container-low/70"
                             >
                                 <span

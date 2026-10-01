@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Recipe, RecipeFormData, RecipeVersion } from "../types/recipe";
 import {
+    usePrefetchRecipe,
     useRecipeCurrentVersion,
     useRecipeVersions,
     useRecipesList,
@@ -35,6 +36,7 @@ export default function RecipesPage() {
         error,
         refetch,
     } = useRecipesList();
+    const { prefetchRecipe, cancelRecipePrefetch } = usePrefetchRecipe();
     const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
     const [selectedVersionId, setSelectedVersionId] = useState<string>("");
     const currentVersionQuery = useRecipeCurrentVersion(selectedRecipeId ?? "");
@@ -388,6 +390,8 @@ export default function RecipesPage() {
                                 <RecipeList
                                     recipes={visibleRecipes}
                                     onView={handleViewRecipe}
+                                    onPrefetch={prefetchRecipe}
+                                    onCancelPrefetch={cancelRecipePrefetch}
                                     onEdit={handleEditRecipe}
                                     onDelete={handleDeleteRecipe}
                                 />
