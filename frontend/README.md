@@ -1,5 +1,37 @@
 # React + TypeScript + Vite
 
+## Ejecutar y desplegar
+
+Instala las dependencias antes de ejecutar la aplicación:
+
+```bash
+npm install
+```
+
+### Desarrollo con backend local
+
+```bash
+npm run dev
+```
+
+Usa la API local configurada en `.env.development` (`http://localhost:8080`).
+
+### Desarrollo con backend de producción
+
+```bash
+npm run dev:prod
+```
+
+Levanta Vite en local, pero usa la API de producción configurada en `.env.production` (`https://recetas-api.sendso.tech`). Este comando no publica el frontend.
+
+### Publicar el frontend
+
+```bash
+npm run deploy
+```
+
+Ejecuta primero la compilación (`predeploy`) y publica el contenido de `dist` en GitHub Pages.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
