@@ -65,7 +65,7 @@ class DemoAccountTest {
     private UUID normalUserId;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         demoUserId = register("demo-" + UUID.randomUUID() + "@example.com", Role.DEMO);
         normalUserId = register("user-" + UUID.randomUUID() + "@example.com", Role.USER);
         demoToken = login(demoUserId);

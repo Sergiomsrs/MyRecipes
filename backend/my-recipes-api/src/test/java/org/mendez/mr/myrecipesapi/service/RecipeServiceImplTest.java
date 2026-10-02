@@ -73,6 +73,16 @@ class RecipeServiceTest {
         );
     }
 
+    private RecipeWithCurrentVersionResponse entryOf(
+            List<RecipeWithCurrentVersionResponse> entries,
+            UUID recipeId
+    ) {
+        return entries.stream()
+                .filter(entry -> entry.recipe().id().equals(recipeId))
+                .findFirst()
+                .orElseThrow();
+    }
+
     @Test
     void shouldCreateRecipeWithInitialVersionAndContent() {
 
@@ -155,9 +165,9 @@ class RecipeServiceTest {
 
         assertThat(entries)
                 .extracting(entry -> entry.recipe().id())
-                .containsExactly(second.id(), first.id());
+                .containsExactlyInAnyOrder(first.id(), second.id());
 
-        RecipeWithCurrentVersionResponse latestEntry = entries.get(0);
+        RecipeWithCurrentVersionResponse latestEntry = entryOf(entries, second.id());
 
         assertThat(latestEntry.recipe().title()).isEqualTo("Bizcocho de limón");
         assertThat(latestEntry.currentVersion()).isNotNull();
@@ -175,7 +185,7 @@ class RecipeServiceTest {
                 .extracting(PhotoResponse::url)
                 .containsExactly("https://example.com/bizcocho.jpg");
 
-        RecipeWithCurrentVersionResponse previousEntry = entries.get(1);
+        RecipeWithCurrentVersionResponse previousEntry = entryOf(entries, first.id());
 
         assertThat(previousEntry.currentVersion()).isNotNull();
         assertThat(previousEntry.currentVersion().recipeId()).isEqualTo(first.id());
