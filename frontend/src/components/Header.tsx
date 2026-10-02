@@ -9,11 +9,10 @@ const navLinks = [
 ] as const;
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
-    return `text-sm px-1 py-0.5 border-b transition-colors ${
-        isActive
-            ? "text-primary border-primary"
-            : "text-on-surface-variant border-transparent hover:text-on-surface"
-    }`;
+    return `text-sm px-1 py-0.5 border-b transition-colors ${isActive
+        ? "text-primary border-primary"
+        : "text-on-surface-variant border-transparent hover:text-on-surface"
+        }`;
 }
 
 export default function Header() {
@@ -25,7 +24,7 @@ export default function Header() {
         <header className="fixed top-0 inset-x-0 z-50 glass-header pt-[env(safe-area-inset-top,0px)]">
             <div className="h-16 px-4 md:px-8 lg:px-10 max-w-[74rem] mx-auto flex items-center justify-between gap-2">
                 <Link to="/" className="flex items-center gap-2 min-w-0 shrink-0">
-                    <span className="font-serif text-lg text-on-surface truncate">
+                    <span className="font-serif text-xl text-on-surface truncate">
                         MyRecipes
                     </span>
                 </Link>
@@ -84,10 +83,9 @@ export default function Header() {
                             <NavLink
                                 to="/profile"
                                 className={({ isActive }) =>
-                                    `hidden md:flex items-center gap-1.5 text-sm px-1 py-0.5 border-b transition-colors ${
-                                        isActive
-                                            ? "text-primary border-primary"
-                                            : "text-on-surface-variant border-transparent hover:text-on-surface"
+                                    `hidden md:flex items-center gap-1.5 text-sm px-1 py-0.5 border-b transition-colors ${isActive
+                                        ? "text-primary border-primary"
+                                        : "text-on-surface-variant border-transparent hover:text-on-surface"
                                     }`
                                 }
                             >

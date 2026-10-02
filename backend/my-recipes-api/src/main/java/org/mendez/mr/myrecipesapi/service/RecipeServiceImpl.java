@@ -14,6 +14,7 @@ import org.mendez.mr.myrecipesapi.entity.Recipe;
 import org.mendez.mr.myrecipesapi.entity.RecipeIngredient;
 import org.mendez.mr.myrecipesapi.entity.RecipeStep;
 import org.mendez.mr.myrecipesapi.entity.RecipeVersion;
+import org.mendez.mr.myrecipesapi.entity.User;
 import org.mendez.mr.myrecipesapi.exception.ResourceNotFoundException;
 import org.mendez.mr.myrecipesapi.mapper.RecipeMapper;
 import org.mendez.mr.myrecipesapi.repository.PhotoRepository;
@@ -21,6 +22,7 @@ import org.mendez.mr.myrecipesapi.repository.RecipeIngredientRepository;
 import org.mendez.mr.myrecipesapi.repository.RecipeRepository;
 import org.mendez.mr.myrecipesapi.repository.RecipeStepRepository;
 import org.mendez.mr.myrecipesapi.repository.RecipeVersionRepository;
+import org.mendez.mr.myrecipesapi.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,19 +43,25 @@ public class RecipeServiceImpl implements RecipeService {
     private final RecipeIngredientRepository recipeIngredientRepository;
     private final RecipeStepRepository recipeStepRepository;
     private final PhotoRepository photoRepository;
+    private final UserRepository userRepository;
+    private final DemoGuard demoGuard;
 
     public RecipeServiceImpl(
             RecipeRepository recipeRepository,
             RecipeVersionRepository recipeVersionRepository,
             RecipeIngredientRepository recipeIngredientRepository,
             RecipeStepRepository recipeStepRepository,
-            PhotoRepository photoRepository
+            PhotoRepository photoRepository,
+            UserRepository userRepository,
+            DemoGuard demoGuard
     ) {
         this.recipeRepository = recipeRepository;
         this.recipeVersionRepository = recipeVersionRepository;
         this.recipeIngredientRepository = recipeIngredientRepository;
         this.recipeStepRepository = recipeStepRepository;
         this.photoRepository = photoRepository;
+        this.userRepository = userRepository;
+        this.demoGuard = demoGuard;
     }
 
     @Override
@@ -155,6 +163,8 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public RecipeResponse createRecipe(CreateRecipeRequest request, UUID userId) {
 
+        demoGuard.assertRecipeQuota(findUser(userId));
+
         Recipe recipe = new Recipe(
                 userId,
                 request.title(),
@@ -203,6 +213,8 @@ public class RecipeServiceImpl implements RecipeService {
     public RecipeVersionResponse createVersion(UUID recipeId, CreateVersionRequest request, UUID userId) {
 
         Recipe recipe = findOwned(recipeId, userId);
+
+        demoGuard.assertVersionQuota(findUser(userId), recipeId);
 
         List<RecipeVersion> existingVersions =
                 recipeVersionRepository.findByRecipeIdOrderByVersionNumber(recipeId);
@@ -282,6 +294,13 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeRepository.findByIdAndUserId(recipeId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Recipe not found with id " + recipeId
+                ));
+    }
+
+    private User findUser(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User not found with id " + userId
                 ));
     }
 

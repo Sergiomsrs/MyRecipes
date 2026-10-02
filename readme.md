@@ -153,6 +153,37 @@ Actualmente el proyecto se encuentra en fase de desarrollo.
 
 ---
 
+# Demo
+
+Existe una **cuenta demo pública** con recetas de ejemplo ya cargadas, para poder probar la aplicación sin necesidad de registrarse.
+
+La pantalla de login incluye un botón **"Probar con la cuenta demo"** que entra directamente con esa cuenta, sin rellenar el formulario ni registrarse.
+
+Las credenciales de la cuenta demo están escritas en el frontend a propósito: son públicas por diseño y cualquiera que abra la aplicación puede entrar con ellas.
+
+### Qué puede hacer
+
+- Todo el CRUD de recetas y versiones: crear, editar, eliminar y crear nuevas versiones.
+
+### Qué no puede hacer
+
+- Cambiar la contraseña ni modificar los datos de la cuenta.
+
+### Límites
+
+| Límite | Valor |
+|---|---|
+| Recetas | 15 |
+| Versiones por receta | 10 |
+
+Los límites son configurables en el backend (`app.demo.max-recipes` y `app.demo.max-versions-per-recipe`). Al superarlos, la API responde con un `403` explicando el motivo.
+
+Al entrar, la aplicación muestra un aviso permanente indicando que es la cuenta demo. Los datos son compartidos y pueden restaurarse en cualquier momento.
+
+Las restricciones las aplica el backend leyendo el rol del usuario en la base de datos (columna `users.role`). Ocultar los botones en la interfaz es solo comodidad: la comprobación real siempre está en el servidor.
+
+---
+
 # Documentación
 
 Toda la documentación del proyecto puede consultarse en la carpeta [`docs`](./docs).

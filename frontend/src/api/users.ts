@@ -1,9 +1,10 @@
 import api from "./axios";
+import type { UserRole } from "../types/user";
 
 export interface UserProfile {
     userId: string;
     email: string;
-    role: string;
+    role: UserRole;
 }
 
 export async function getProfile(): Promise<UserProfile> {

@@ -12,6 +12,8 @@ export default function UserProfilePage() {
         error,
     } = useProfile();
 
+    const isDemo = user?.role === "DEMO";
+
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -122,85 +124,96 @@ export default function UserProfilePage() {
                 </div>
 
                 {/* Cambiar contraseña */}
-                <div>
-                    <h2 className="section-label mb-4">Cambiar contraseña</h2>
-                    <form
-                        onSubmit={handlePasswordChange}
-                        className="space-y-4"
-                    >
-                        <div>
-                            <label
-                                htmlFor="currentPassword"
-                                className="section-label block mb-1.5"
-                            >
-                                Contraseña actual
-                            </label>
-                            <input
-                                id="currentPassword"
-                                type="password"
-                                required
-                                value={currentPassword}
-                                onChange={(e) => setCurrentPassword(e.target.value)}
-                                className="input-field input-field--block"
-                            />
-                        </div>
-
-                        <div>
-                            <label
-                                htmlFor="newPassword"
-                                className="section-label block mb-1.5"
-                            >
-                                Nueva contraseña
-                            </label>
-                            <input
-                                id="newPassword"
-                                type="password"
-                                required
-                                minLength={6}
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="input-field input-field--block"
-                            />
-                        </div>
-
-                        <div>
-                            <label
-                                htmlFor="confirmPassword"
-                                className="section-label block mb-1.5"
-                            >
-                                Confirmar nueva contraseña
-                            </label>
-                            <input
-                                id="confirmPassword"
-                                type="password"
-                                required
-                                minLength={6}
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="input-field input-field--block"
-                            />
-                        </div>
-
-                        {passwordError && (
-                            <p className="text-sm text-error border-l-2 border-error/50 pl-3">
-                                {passwordError}
-                            </p>
-                        )}
-                        {passwordSuccess && (
-                            <p className="text-sm text-on-surface-variant border-l-2 border-secondary/50 pl-3">
-                                {passwordSuccess}
-                            </p>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="btn-primary w-full"
+                {isDemo ? (
+                    <div>
+                        <h2 className="section-label mb-4">
+                            Cambiar contraseña
+                        </h2>
+                        <p className="text-sm text-on-surface-variant border-l-2 border-outline-variant/50 pl-3">
+                            No disponible en la cuenta demo.
+                        </p>
+                    </div>
+                ) : (
+                    <div>
+                        <h2 className="section-label mb-4">Cambiar contraseña</h2>
+                        <form
+                            onSubmit={handlePasswordChange}
+                            className="space-y-4"
                         >
-                            {isSubmitting ? "Guardando..." : "Actualizar contraseña"}
-                        </button>
-                    </form>
-                </div>
+                            <div>
+                                <label
+                                    htmlFor="currentPassword"
+                                    className="section-label block mb-1.5"
+                                >
+                                    Contraseña actual
+                                </label>
+                                <input
+                                    id="currentPassword"
+                                    type="password"
+                                    required
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    className="input-field input-field--block"
+                                />
+                            </div>
+
+                            <div>
+                                <label
+                                    htmlFor="newPassword"
+                                    className="section-label block mb-1.5"
+                                >
+                                    Nueva contraseña
+                                </label>
+                                <input
+                                    id="newPassword"
+                                    type="password"
+                                    required
+                                    minLength={6}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="input-field input-field--block"
+                                />
+                            </div>
+
+                            <div>
+                                <label
+                                    htmlFor="confirmPassword"
+                                    className="section-label block mb-1.5"
+                                >
+                                    Confirmar nueva contraseña
+                                </label>
+                                <input
+                                    id="confirmPassword"
+                                    type="password"
+                                    required
+                                    minLength={6}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="input-field input-field--block"
+                                />
+                            </div>
+
+                            {passwordError && (
+                                <p className="text-sm text-error border-l-2 border-error/50 pl-3">
+                                    {passwordError}
+                                </p>
+                            )}
+                            {passwordSuccess && (
+                                <p className="text-sm text-on-surface-variant border-l-2 border-secondary/50 pl-3">
+                                    {passwordSuccess}
+                                </p>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="btn-primary w-full"
+                            >
+                                {isSubmitting ? "Guardando..." : "Actualizar contraseña"}
+                            </button>
+                        </form>
+                    </div>
+                )}
 
                 {/* Cerrar sesión */}
                 <div className="pt-8 border-t border-outline-variant/40">

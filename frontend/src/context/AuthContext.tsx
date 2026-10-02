@@ -4,10 +4,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { loginUser, type AuthResponse } from "../api/auth";
 import { setUnauthorizedHandler } from "../api/axios";
 import { recipeQueries } from "../api/queries";
+import type { UserRole } from "../types/user";
 
 interface User {
     token: string;
-    role: string;
+    role: UserRole;
     userId: string;
     email: string;
 }

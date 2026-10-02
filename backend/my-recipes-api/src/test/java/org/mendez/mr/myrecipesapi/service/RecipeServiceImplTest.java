@@ -14,9 +14,11 @@ import org.mendez.mr.myrecipesapi.entity.Recipe;
 import org.mendez.mr.myrecipesapi.entity.RecipeIngredient;
 import org.mendez.mr.myrecipesapi.entity.RecipeStep;
 import org.mendez.mr.myrecipesapi.entity.RecipeVersion;
+import org.mendez.mr.myrecipesapi.entity.User;
 import org.mendez.mr.myrecipesapi.enums.RecipeCategory;
 import org.mendez.mr.myrecipesapi.repository.RecipeRepository;
 import org.mendez.mr.myrecipesapi.repository.RecipeVersionRepository;
+import org.mendez.mr.myrecipesapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,17 @@ class RecipeServiceTest {
 
     @Autowired
     private RecipeVersionRepository recipeVersionRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private UUID createUser() {
+        User user = userRepository.save(new User(
+                "user-" + UUID.randomUUID() + "@example.com",
+                "password123"
+        ));
+        return user.getId();
+    }
 
     private CreateRecipeRequest buildRequest() {
         return new CreateRecipeRequest(
@@ -63,7 +76,7 @@ class RecipeServiceTest {
     @Test
     void shouldCreateRecipeWithInitialVersionAndContent() {
 
-        UUID userId = UUID.randomUUID();
+        UUID userId = createUser();
 
         RecipeResponse response = recipeService.createRecipe(buildRequest(), userId);
 
@@ -96,7 +109,7 @@ class RecipeServiceTest {
     @Test
     void shouldGetRecipesOfUser() {
 
-        UUID userId = UUID.randomUUID();
+        UUID userId = createUser();
 
         recipeService.createRecipe(buildRequest(), userId);
         recipeService.createRecipe(buildRequest(), userId);
@@ -109,7 +122,7 @@ class RecipeServiceTest {
     @Test
     void shouldGetRecipesWithTheirCurrentVersion() {
 
-        UUID userId = UUID.randomUUID();
+        UUID userId = createUser();
 
         RecipeResponse first = recipeService.createRecipe(buildRequest(), userId);
         RecipeResponse second = recipeService.createRecipe(
@@ -177,8 +190,8 @@ class RecipeServiceTest {
     @Test
     void shouldReturnOnlyRecipesOfTheAuthenticatedUserWithCurrentVersion() {
 
-        UUID userId = UUID.randomUUID();
-        UUID otherUserId = UUID.randomUUID();
+        UUID userId = createUser();
+        UUID otherUserId = createUser();
 
         recipeService.createRecipe(buildRequest(), userId);
         recipeService.createRecipe(buildRequest(), otherUserId);

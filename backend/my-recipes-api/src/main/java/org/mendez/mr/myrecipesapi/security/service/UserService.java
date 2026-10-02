@@ -3,6 +3,7 @@ package org.mendez.mr.myrecipesapi.security.service;
 import org.mendez.mr.myrecipesapi.entity.User;
 import org.mendez.mr.myrecipesapi.exception.BadRequestException;
 import org.mendez.mr.myrecipesapi.repository.UserRepository;
+import org.mendez.mr.myrecipesapi.service.DemoGuard;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,12 @@ public class UserService {
     private static final int BCRYPT_MAX_BYTES = 72;
 
     private final UserRepository userRepository;
+    private final DemoGuard demoGuard;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, DemoGuard demoGuard) {
         this.userRepository = userRepository;
+        this.demoGuard = demoGuard;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -28,6 +31,7 @@ public class UserService {
     }
 
     public void changePassword(User user, String rawCurrentPassword, String rawNewPassword) {
+        demoGuard.assertNotDemo(user);
         if (!passwordEncoder.matches(rawCurrentPassword, user.getPassword())) {
             throw new IllegalArgumentException("La contraseña actual es incorrecta");
         }

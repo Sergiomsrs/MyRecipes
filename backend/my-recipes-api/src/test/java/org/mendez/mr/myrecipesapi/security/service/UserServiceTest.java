@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mendez.mr.myrecipesapi.entity.User;
 import org.mendez.mr.myrecipesapi.exception.BadRequestException;
 import org.mendez.mr.myrecipesapi.repository.UserRepository;
+import org.mendez.mr.myrecipesapi.service.DemoGuard;
 
 import java.nio.charset.StandardCharsets;
 
@@ -23,13 +24,13 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
-        userService = new UserService(userRepository);
+        userService = new UserService(userRepository, mock(DemoGuard.class));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
     void guardaElEmailEnMinusculasYSinEspacios() {
-        User saved = userService.registerUser(new User("  Test.User@Example.COM  ", "password123", "USER"));
+        User saved = userService.registerUser(new User("  Test.User@Example.COM  ", "password123"));
 
         assertThat(saved.getEmail()).isEqualTo("test.user@example.com");
         assertThat(saved.getPassword()).isNotEqualTo("password123");
@@ -42,7 +43,7 @@ class UserServiceTest {
         String password = "ñ".repeat(36);
         assertThat(password.getBytes(StandardCharsets.UTF_8)).hasSize(72);
 
-        User saved = userService.registerUser(new User("test@example.com", password, "USER"));
+        User saved = userService.registerUser(new User("test@example.com", password));
 
         assertThat(saved.getPassword()).startsWith("$2");
     }
@@ -52,14 +53,14 @@ class UserServiceTest {
         String password = "ñ".repeat(37);
         assertThat(password.getBytes(StandardCharsets.UTF_8)).hasSize(74);
 
-        assertThatThrownBy(() -> userService.registerUser(new User("test@example.com", password, "USER")))
+        assertThatThrownBy(() -> userService.registerUser(new User("test@example.com", password)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("72 bytes");
     }
 
     @Test
     void rechazaUnaNuevaPasswordQueSuperaLos72BytesAlCambiarla() {
-        User user = userService.registerUser(new User("test@example.com", "password123", "USER"));
+        User user = userService.registerUser(new User("test@example.com", "password123"));
 
         assertThatThrownBy(() -> userService.changePassword(user, "password123", "ñ".repeat(37)))
                 .isInstanceOf(BadRequestException.class)
@@ -68,7 +69,7 @@ class UserServiceTest {
 
     @Test
     void rechazaElCambioSiLaPasswordActualNoCoincide() {
-        User user = userService.registerUser(new User("test@example.com", "password123", "USER"));
+        User user = userService.registerUser(new User("test@example.com", "password123"));
 
         assertThatThrownBy(() -> userService.changePassword(user, "otraPassword", "nuevaPassword"))
                 .isInstanceOf(IllegalArgumentException.class)

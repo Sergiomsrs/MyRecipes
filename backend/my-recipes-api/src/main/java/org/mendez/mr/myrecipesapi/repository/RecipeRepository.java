@@ -13,4 +13,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
 
     Optional<Recipe> findByIdAndUserId(UUID id, UUID userId);
 
+    long countByUserId(UUID userId);
+
 }

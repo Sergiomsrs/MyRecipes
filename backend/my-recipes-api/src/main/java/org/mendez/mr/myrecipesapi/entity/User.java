@@ -1,6 +1,7 @@
 package org.mendez.mr.myrecipesapi.entity;
 
 import jakarta.persistence.*;
+import org.mendez.mr.myrecipesapi.enums.Role;
 
 @Entity
 @Table(name = "users")
@@ -16,13 +17,20 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role = "USER";
+    private Role role = Role.USER;
 
     protected User() {
     }
 
-    public User(String email, String password, String role) {
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
+        this.role = Role.USER;
+    }
+
+    public User(String email, String password, Role role) {
         this.email = email;
         this.password = password;
         this.role = role;
@@ -52,11 +60,7 @@ public class User {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 }

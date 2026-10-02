@@ -51,10 +51,10 @@ public class AuthController {
         String token = jwtService.generateToken(
                 user.getId().toString(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole().name()
         );
 
-        return ResponseEntity.ok(new AuthResponse(token, user.getRole(), user.getId()));
+        return ResponseEntity.ok(new AuthResponse(token, user.getRole().name(), user.getId()));
     }
 
     @PostMapping("/register")
@@ -64,7 +64,7 @@ public class AuthController {
             throw new BadRequestException("El email ya está registrado");
         }
 
-        User user = new User(request.email(), request.password(), "USER");
+        User user = new User(request.email(), request.password());
         try {
             user = userService.registerUser(user);
         } catch (DataIntegrityViolationException ex) {
@@ -74,9 +74,9 @@ public class AuthController {
         String token = jwtService.generateToken(
                 user.getId().toString(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole().name()
         );
 
-        return ResponseEntity.ok(new AuthResponse(token, user.getRole(), user.getId()));
+        return ResponseEntity.ok(new AuthResponse(token, user.getRole().name(), user.getId()));
     }
 }

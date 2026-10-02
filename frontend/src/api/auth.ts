@@ -1,8 +1,9 @@
 import api from "./axios";
+import type { UserRole } from "../types/user";
 
 export interface AuthResponse {
     token: string;
-    role: string;
+    role: UserRole;
     userId: string;
 }
 

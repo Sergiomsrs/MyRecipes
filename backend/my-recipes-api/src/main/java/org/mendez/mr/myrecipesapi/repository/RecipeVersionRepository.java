@@ -12,6 +12,8 @@ public interface RecipeVersionRepository extends JpaRepository<RecipeVersion, UU
     List<RecipeVersion> findByRecipeId(UUID id);
     List<RecipeVersion> findByRecipeIdOrderByVersionNumber(UUID recipeId);
 
+    long countByRecipeId(UUID id);
+
     @EntityGraph(attributePaths = "recipe")
     List<RecipeVersion> findByIdIn(Collection<UUID> ids);
 
