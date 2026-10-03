@@ -27,7 +27,7 @@ export default function FavoriteButton({
                 fill={favorite ? "currentColor" : "none"}
                 stroke="currentColor"
                 strokeWidth={favorite ? 0 : 1.6}
-                viewBox="0 0 20 20"
+                viewBox="0 0 24 24"
             >
                 <path
                     fillRule="evenodd"
