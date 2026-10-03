@@ -1,42 +1,31 @@
-import { useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { usePrefetchNav } from "../hooks/usePrefetchNav";
 
-interface BottomNavProps {
-    onFabClick?: () => void;
+function navLinkClass({ isActive }: { isActive: boolean }) {
+    return `min-w-0 flex flex-col items-center justify-center gap-1 min-h-[44px] text-[10px] font-semibold uppercase transition-colors ${isActive
+        ? "text-primary"
+        : "text-on-surface-variant hover:text-on-surface"
+        }`;
 }
 
-export default function BottomNav({ onFabClick }: BottomNavProps) {
+export default function BottomNav() {
     const { isAuthenticated } = useAuth();
     const { prefetch, cancelPrefetch } = usePrefetchNav();
-
-    const handleFabClick = useCallback(() => {
-        if (onFabClick) {
-            onFabClick();
-        } else {
-            window.dispatchEvent(new CustomEvent("fab-click"));
-        }
-    }, [onFabClick]);
-
-    useEffect(() => {
-        const handler = () => handleFabClick();
-        window.addEventListener("fab-click", handler);
-        return () => window.removeEventListener("fab-click", handler);
-    }, [handleFabClick]);
 
     if (!isAuthenticated) return null;
 
     return (
         <nav className="fixed bottom-0 inset-x-0 z-50 glass-nav pb-[env(safe-area-inset-bottom,0px)] md:hidden">
-            <div className="max-w-[420px] mx-auto flex items-center justify-between h-16 px-4">
-                <Link
+            <div className="max-w-[420px] mx-auto grid grid-cols-3 items-center h-16 px-4">
+                <NavLink
                     to="/recipes"
+                    end={false}
                     onMouseEnter={() => prefetch("/recipes")}
                     onMouseLeave={() => cancelPrefetch("/recipes")}
                     onFocus={() => prefetch("/recipes")}
                     onBlur={() => cancelPrefetch("/recipes")}
-                    className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] text-primary font-bold transition-colors"
+                    className={navLinkClass}
                 >
                     <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -44,28 +33,15 @@ export default function BottomNav({ onFabClick }: BottomNavProps) {
                     <span className="text-xs font-semibold tracking-wide uppercase">
                         Mis Recetas
                     </span>
-                </Link>
+                </NavLink>
 
-                <div className="flex items-center justify-center px-1 shrink-0">
-                    <button
-                        type="button"
-                        onClick={handleFabClick}
-                        className="w-12 h-12 -mt-4 flex items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_1px_3px_rgba(26,28,30,0.2)] hover:brightness-105 transition-[filter] active:scale-95"
-                        aria-label="Nueva receta"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                        </svg>
-                    </button>
-                </div>
-
-                <Link
+                <NavLink
                     to="/recetario"
                     onMouseEnter={() => prefetch("/recetario")}
                     onMouseLeave={() => cancelPrefetch("/recetario")}
                     onFocus={() => prefetch("/recetario")}
                     onBlur={() => cancelPrefetch("/recetario")}
-                    className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] text-on-surface-variant hover:text-on-surface transition-colors"
+                    className={navLinkClass}
                 >
                     <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -73,11 +49,11 @@ export default function BottomNav({ onFabClick }: BottomNavProps) {
                     <span className="text-xs font-semibold tracking-wide uppercase">
                         Recetario
                     </span>
-                </Link>
+                </NavLink>
 
-                <Link
+                <NavLink
                     to="/profile"
-                    className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] text-on-surface-variant hover:text-on-surface transition-colors"
+                    className={navLinkClass}
                 >
                     <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -86,7 +62,7 @@ export default function BottomNav({ onFabClick }: BottomNavProps) {
                     <span className="text-xs font-semibold tracking-wide uppercase">
                         Ajustes
                     </span>
-                </Link>
+                </NavLink>
             </div>
         </nav>
     );

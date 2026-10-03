@@ -16,11 +16,10 @@ export default function FavoriteButton({
             aria-pressed={favorite}
             aria-label={favorite ? "Quitar de favoritas" : label}
             title={favorite ? "Quitar de favoritas" : label}
-            className={`shrink-0 p-2 -mr-1 transition-colors ${
-                favorite
+            className={`shrink-0 p-2 -mr-1 transition-colors ${favorite
                     ? "text-amber-500 hover:text-amber-600"
                     : "text-on-surface-variant/50 hover:text-amber-500"
-            }`}
+                }`}
         >
             <svg
                 className="w-5 h-5"

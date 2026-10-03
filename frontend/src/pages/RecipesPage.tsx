@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import type { Recipe, RecipeFormData, RecipeVersion } from "../types/recipe";
 import {
     usePrefetchRecipe,
@@ -78,16 +78,10 @@ export default function RecipesPage() {
     const currentVersionId =
         currentVersion?.id ?? selectedRecipe?.currentVersionId ?? "";
 
-    const handleFabClick = useCallback(() => {
+    const handleOpenCreateForm = useCallback(() => {
         setFormError(null);
         setCurrentView("create");
     }, []);
-
-    useEffect(() => {
-        const handler = () => handleFabClick();
-        window.addEventListener("fab-click", handler);
-        return () => window.removeEventListener("fab-click", handler);
-    }, [handleFabClick]);
 
     const filteredRecipes = recipeList.filter((recipe) =>
         matchesFilter(recipe, activeFilter)
@@ -372,7 +366,7 @@ export default function RecipesPage() {
 
                                             <button
                                                 type="button"
-                                                onClick={handleFabClick}
+                                                onClick={handleOpenCreateForm}
                                                 className="inline-flex items-center gap-2 rounded-xl bg-[#c85a32] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#b44f2d] focus:outline-none focus:ring-2 focus:ring-[#d58d74]"
                                             >
                                                 <svg

@@ -4,11 +4,7 @@ import BottomNav from "../components/BottomNav";
 import DemoBanner from "../components/DemoBanner";
 import { useAuth } from "../hooks/useAuth";
 
-interface MainLayoutProps {
-    onFabClick?: () => void;
-}
-
-export default function MainLayout({ onFabClick }: MainLayoutProps) {
+export default function MainLayout() {
     const { pathname } = useLocation();
     const { user, isAuthenticated } = useAuth();
     const isDemo = isAuthenticated && user?.role === "DEMO";
@@ -22,7 +18,7 @@ export default function MainLayout({ onFabClick }: MainLayoutProps) {
                     <Outlet />
                 </div>
             </main>
-            <BottomNav onFabClick={onFabClick} />
+            <BottomNav />
         </div>
     );
 }

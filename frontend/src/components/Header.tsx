@@ -9,7 +9,7 @@ const navLinks = [
 ] as const;
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
-    return `text-sm px-1 py-0.5 border-b transition-colors ${isActive
+    return `text-base font-medium px-3 py-2 border-b-2 transition-colors ${isActive
         ? "text-primary border-primary"
         : "text-on-surface-variant border-transparent hover:text-on-surface"
         }`;
@@ -31,7 +31,7 @@ export default function Header() {
 
                 {/* Desktop nav links */}
                 {isAuthenticated && (
-                    <nav className="hidden md:flex items-center gap-1">
+                    <nav className="hidden md:flex items-center gap-3">
                         {navLinks.map((link) => (
                             <NavLink
                                 key={link.to}
