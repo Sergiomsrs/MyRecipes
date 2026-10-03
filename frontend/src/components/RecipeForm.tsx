@@ -149,11 +149,10 @@ export default function RecipeForm({
                                         onClick={() =>
                                             setFormData({ ...formData, category })
                                         }
-                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                                            selected
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${selected
                                                 ? "bg-primary/10 text-primary font-medium"
                                                 : "text-on-surface-variant hover:bg-surface-container-low"
-                                        }`}
+                                            }`}
                                     >
                                         <span aria-hidden="true">{meta.emoji}</span>
                                         {meta.label}
@@ -197,11 +196,10 @@ export default function RecipeForm({
                                         onClick={() =>
                                             setFormData({ ...formData, status })
                                         }
-                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                                            selected
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${selected
                                                 ? "bg-primary/10 text-primary font-medium"
                                                 : "text-on-surface-variant hover:bg-surface-container-low"
-                                        }`}
+                                            }`}
                                     >
                                         <span aria-hidden="true">{meta.emoji}</span>
                                         {meta.label}
@@ -226,18 +224,17 @@ export default function RecipeForm({
                                     favorite: !formData.favorite,
                                 })
                             }
-                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                                formData.favorite
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${formData.favorite
                                     ? "bg-amber-500/10 text-amber-600 font-medium"
                                     : "text-on-surface-variant hover:bg-surface-container-low"
-                            }`}
+                                }`}
                         >
                             <svg
                                 className="w-4 h-4"
                                 fill={formData.favorite ? "currentColor" : "none"}
                                 stroke="currentColor"
                                 strokeWidth={formData.favorite ? 0 : 1.6}
-                                viewBox="0 0 20 20"
+                                viewBox="0 0 24 24"
                                 aria-hidden="true"
                             >
                                 <path
