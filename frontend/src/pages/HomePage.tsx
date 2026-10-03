@@ -188,9 +188,6 @@ export default function HomePage() {
                     <Link to="/recipes" className="btn-primary max-w-xs mx-auto">
                         Empezar ahora
                     </Link>
-                    <p className="text-xs text-on-surface-variant mt-6">
-                        Recetas en el servidor · intentos en tu navegador
-                    </p>
                 </div>
             </section>
         </div>

@@ -22,6 +22,8 @@ public interface RecipeService {
 
     RecipeResponse updateRecipe(UUID recipeId, UpdateRecipeRequest request, UUID userId);
 
+    RecipeResponse updateRecipeFavorite(UUID recipeId, boolean favorite, UUID userId);
+
     RecipeVersionResponse getCurrentVersion(UUID recipeId, UUID userId);
 
     RecipeVersionResponse createVersion(UUID recipeId, CreateVersionRequest request, UUID userId);

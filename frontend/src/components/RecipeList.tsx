@@ -1,6 +1,8 @@
 import type { Recipe } from "../types/recipe";
 import { useState } from "react";
 import { categoryMeta } from "../constants/categories";
+import FavoriteButton from "./FavoriteButton";
+import RecipeStatusBadge from "./RecipeStatusBadge";
 
 interface RecipeListProps {
     recipes: Recipe[];
@@ -9,6 +11,7 @@ interface RecipeListProps {
     onCancelPrefetch: (recipeId: string) => void;
     onEdit: (recipe: Recipe) => void;
     onDelete: (id: string) => void;
+    onToggleFavorite: (recipe: Recipe) => void;
 }
 
 export default function RecipeList({
@@ -18,6 +21,7 @@ export default function RecipeList({
     onCancelPrefetch,
     onEdit,
     onDelete,
+    onToggleFavorite,
 }: RecipeListProps) {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -81,8 +85,18 @@ export default function RecipeList({
                                         </span>
                                         {updatedLabel}
                                     </span>
+                                    <span className="mt-1">
+                                        <RecipeStatusBadge
+                                            status={recipe.status}
+                                        />
+                                    </span>
                                 </span>
                             </button>
+
+                            <FavoriteButton
+                                favorite={recipe.favorite}
+                                onToggle={() => onToggleFavorite(recipe)}
+                            />
 
                             <button
                                 type="button"

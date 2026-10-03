@@ -39,6 +39,12 @@
 --     "step_order" (no "order", que es palabra reservada).
 --   - quantity es numeric(38,2): maximo 2 decimales.
 --   - photos.url es varchar(255) en la BD aunque la API admita 1000.
+--   - recipes.favorite es boolean y recipes.status es varchar(20). Las dos
+--     columnas las anade sql/recipe-status.sql, que hay que ejecutar ANTES que
+--     este script. STATUS validos: EVOLUCION, DEFINITIVA (el enum Java es
+--     org.mendez.mr.myrecipesapi.enums.RecipeStatus). Aqui se siembran con
+--     valores distintos a proposito, para que los filtros del listado tengan
+--     algo que enseñar: una definitiva y favorita, otra en evolucion.
 --
 -- TABLA DE UUIDS (patron <N>a000000-...-0000000<vv><ii>)
 --   Receta 1  ....... 11111111-1111-4111-8111-000000000001
@@ -131,11 +137,13 @@ BEGIN
     --    updated_at va escalonado porque el listado se ordena updated_at DESC.
     -- -------------------------------------------------------------------------
     INSERT INTO recipes (id, user_id, title, description, category,
+                         favorite, status,
                          current_version_id, created_at, updated_at) VALUES
         ('11111111-1111-4111-8111-000000000001', v_user_id,
          'Tortilla de patatas',
          'Tortilla de patatas española, jugosa por dentro y dorada por fuera. Ración para 4 personas.',
          'MAIN_COURSE',
+         true, 'DEFINITIVA',
          NULL,
          now() - interval '45 days', now() - interval '2 days'),
 
@@ -143,6 +151,7 @@ BEGIN
          'Salsa verde',
          'Salsa verde de perejil y alcaparras. Perfecta para pescado a la plancha o patatas fritas.',
          'SAUCE',
+         false, 'EVOLUCION',
          NULL,
          now() - interval '60 days', now() - interval '10 days');
 

@@ -26,6 +26,8 @@ public final class RecipeMapper {
                 recipe.getTitle(),
                 recipe.getDescription(),
                 recipe.getCategory(),
+                recipe.isFavorite(),
+                recipe.getStatus(),
                 recipe.getCurrentVersionId(),
                 recipe.getCreatedAt(),
                 recipe.getUpdatedAt()

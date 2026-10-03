@@ -6,12 +6,16 @@ export type RecipeCategory =
     | "SAUCE"
     | "OTHER";
 
+export type RecipeStatus = "EVOLUCION" | "DEFINITIVA";
+
 export interface Recipe {
     id: string;
     userId: string;
     title: string;
     description?: string;
     category: RecipeCategory;
+    favorite: boolean;
+    status: RecipeStatus;
     currentVersionId: string;
     createdAt: string;
     updatedAt: string;
@@ -38,6 +42,8 @@ export interface RecipeFormData {
     steps: StepForm[];
     notes?: string;
     rating?: number;
+    status?: RecipeStatus;
+    favorite?: boolean;
 }
 
 export interface RecipeIngredient {
@@ -94,6 +100,8 @@ export interface CreateRecipePayload {
     title: string;
     description: string;
     category: RecipeCategory;
+    status?: RecipeStatus;
+    favorite?: boolean;
     summaryChanges?: string;
     notes?: string;
     rating?: number;
@@ -115,6 +123,12 @@ export interface UpdateRecipePayload {
     title: string;
     description: string;
     category: RecipeCategory;
+    status?: RecipeStatus;
+    favorite?: boolean;
+}
+
+export interface UpdateFavoritePayload {
+    favorite: boolean;
 }
 
 export interface RecipeWithCurrentVersion {

@@ -90,9 +90,28 @@ Su responsabilidad es identificar la receta y mantener la referencia a la versi�
 - title
 - description
 - category
+- favorite
+- status
 - currentVersionId
 - createdAt
 - updatedAt
+
+### Estados de una receta
+
+El atributo `status` indica en qué punto del proceso está la receta. Es un enum con dos valores:
+
+- `EVOLUCION`: la receta se sigue iterando.
+- `DEFINITIVA`: la receta se ha cerrado por ahora.
+
+El enum Java es `org.mendez.mr.myrecipesapi.enums.RecipeStatus`, persistido como `varchar(20)` con `@Enumerated(EnumType.STRING)`. El texto de la base de datos y el del enum tienen que coincidir exactamente.
+
+Cuando se crea una versión nueva, la receta vuelve a `EVOLUCION` automáticamente. Añadir una versión significa que la receta se ha vuelto a tocar, así que reabrirla es la consecuencia esperada y no hace falta marcarla antes.
+
+### Recetas favoritas
+
+El atributo `favorite` es un `boolean` independiente del estado. Es un campo aparte y no parte de `status` porque son cosas ortogonales: una receta puede ser definitiva y favorita a la vez, y una puede evolucionar siendo favorita.
+
+Entre ambos atributos sostienen los filtros del listado (Todas, En evolución, Versión definitiva, Favoritas).
 
 ---
 

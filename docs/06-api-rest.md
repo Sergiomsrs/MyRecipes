@@ -258,6 +258,8 @@ Cada elemento tiene esta forma:
     "title": "Tortilla de patatas",
     "description": "Receta tradicional",
     "category": "MAIN_COURSE",
+    "favorite": true,
+    "status": "EVOLUCION",
     "currentVersionId": "uuid",
     "createdAt": "2025-01-01T10:00:00Z",
     "updatedAt": "2025-01-02T10:00:00Z"
@@ -299,6 +301,8 @@ Ejemplo:
 - title
 - description
 - category
+- favorite
+- status
 - currentVersionId
 - createdAt
 - updatedAt
@@ -313,6 +317,8 @@ POST /api/v1/recipes
 
 Crea una nueva receta junto con su primera versión.
 
+Acepta `title`, `description` y `category` obligatorias, más los ingredientes y pasos. Opcionalmente `status` (por defecto `EVOLUCION`) y `favorite` (por defecto `false`).
+
 ---
 
 ## Actualizar receta
@@ -324,6 +330,40 @@ PUT /api/v1/recipes/{id}
 Permite modificar únicamente la información propia de la receta.
 
 No modifica ingredientes ni pasos.
+
+Acepta `title`, `description` y `category` obligatorias, y opcionalmente `status` y `favorite`.
+
+Si no se envía `status` o `favorite`, se conservan los valores que ya tuviera la receta.
+
+---
+
+## Marcar o desmarcar como favorita
+
+```
+PATCH /api/v1/recipes/{id}/favorite
+```
+
+Alterna la marca de favorita sin tocar el resto de campos. Existe para que el interruptor de la estrella no tenga que reenviar la receta entera, ya que `PUT` exige `title` y `category`.
+
+Cuerpo:
+
+```json
+{
+  "favorite": true
+}
+```
+
+`favorite` es obligatorio.
+
+Devuelve la receta completa actualizada.
+
+---
+
+## Nota sobre el estado al crear una versión
+
+Al crear una versión nueva, la receta vuelve al estado `EVOLUCION` automáticamente. Si estaba en `DEFINITIVA`, reabrirla es la consecuencia de haberla vuelto a tocar, así que no hace falta desmarcarlo antes.
+
+Esto lo aplica `RecipeServiceImpl.createVersion`, no la base de datos: no hay trigger.
 
 ---
 

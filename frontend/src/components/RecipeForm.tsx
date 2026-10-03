@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { categories, categoryMeta } from "../constants/categories";
+import { recipeStatuses, statusMeta } from "../constants/recipes";
 import type { IngredientForm, Recipe, RecipeFormData } from "../types/recipe";
 
 interface RecipeFormProps {
@@ -20,11 +21,15 @@ export default function RecipeForm({
         title: recipe?.title || "",
         description: recipe?.description || "",
         category: recipe?.category || "MAIN_COURSE",
+        status: recipe?.status || "EVOLUCION",
+        favorite: recipe?.favorite ?? false,
         ingredients: [{ id: "1", name: "", quantity: "", unit: "" }],
         steps: [{ id: "1", order: 1, description: "" }],
         notes: "",
         rating: 5,
     });
+
+    const selectedStatus = formData.status ?? "EVOLUCION";
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -171,6 +176,80 @@ export default function RecipeForm({
                             rows={2}
                             placeholder="De dónde viene, qué la hace especial..."
                         />
+                    </div>
+                </div>
+            </div>
+
+            <div className="py-5 border-b border-outline-variant">
+                <div className="lg:grid lg:grid-cols-2 lg:gap-8">
+                    <div>
+                        <label className="section-label block mb-3">Estado</label>
+                        <div className="flex flex-wrap gap-2">
+                            {recipeStatuses.map((status) => {
+                                const meta = statusMeta[status];
+                                const selected = formData.status === status;
+                                return (
+                                    <button
+                                        key={status}
+                                        type="button"
+                                        aria-pressed={selected}
+                                        title={meta.hint}
+                                        onClick={() =>
+                                            setFormData({ ...formData, status })
+                                        }
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                                            selected
+                                                ? "bg-primary/10 text-primary font-medium"
+                                                : "text-on-surface-variant hover:bg-surface-container-low"
+                                        }`}
+                                    >
+                                        <span aria-hidden="true">{meta.emoji}</span>
+                                        {meta.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <p className="mt-2 text-xs text-on-surface-variant">
+                            {statusMeta[selectedStatus].hint}
+                        </p>
+                    </div>
+                    <div className="flex-1 pt-5 lg:pt-0">
+                        <label className="section-label block mb-3">
+                            Favorita
+                        </label>
+                        <button
+                            type="button"
+                            aria-pressed={formData.favorite}
+                            onClick={() =>
+                                setFormData({
+                                    ...formData,
+                                    favorite: !formData.favorite,
+                                })
+                            }
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                                formData.favorite
+                                    ? "bg-amber-500/10 text-amber-600 font-medium"
+                                    : "text-on-surface-variant hover:bg-surface-container-low"
+                            }`}
+                        >
+                            <svg
+                                className="w-4 h-4"
+                                fill={formData.favorite ? "currentColor" : "none"}
+                                stroke="currentColor"
+                                strokeWidth={formData.favorite ? 0 : 1.6}
+                                viewBox="0 0 20 20"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                            {formData.favorite
+                                ? "En tus favoritas"
+                                : "Marcar como favorita"}
+                        </button>
                     </div>
                 </div>
             </div>

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.mendez.mr.myrecipesapi.enums.RecipeCategory;
+import org.mendez.mr.myrecipesapi.enums.RecipeStatus;
 
 import java.util.List;
 
@@ -22,6 +23,10 @@ public record CreateRecipeRequest(
 
         @NotNull(message = "category es obligatoria")
         RecipeCategory category,
+
+        RecipeStatus status,
+
+        Boolean favorite,
 
         @Size(max = 500, message = "summaryChanges no puede superar 500 caracteres")
         String summaryChanges,

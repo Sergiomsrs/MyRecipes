@@ -1,6 +1,8 @@
 import type { Recipe, RecipeVersion } from "../types/recipe";
 import { categoryMeta } from "../constants/categories";
 import VersionTimeline from "./VersionTimeline";
+import FavoriteButton from "./FavoriteButton";
+import RecipeStatusBadge from "./RecipeStatusBadge";
 
 interface RecipeDetailProps {
     recipe: Recipe;
@@ -13,6 +15,7 @@ interface RecipeDetailProps {
     onSelectVersion: (version: RecipeVersion) => void;
     onBackToCurrentVersion: () => void;
     onEdit: (recipe: Recipe) => void;
+    onToggleFavorite: (recipe: Recipe) => void;
     onBack: () => void;
     onNewVersion: () => void;
 }
@@ -28,6 +31,7 @@ export default function RecipeDetail({
     onSelectVersion,
     onBackToCurrentVersion,
     onEdit,
+    onToggleFavorite,
     onBack,
     onNewVersion,
 }: RecipeDetailProps) {
@@ -70,13 +74,19 @@ export default function RecipeDetail({
                     </svg>
                     <span className="text-sm">Recetas</span>
                 </button>
-                <button
-                    type="button"
-                    onClick={() => onEdit(recipe)}
-                    className="text-sm text-primary hover:underline transition-colors"
-                >
-                    Editar
-                </button>
+                <div className="flex items-center gap-1">
+                    <FavoriteButton
+                        favorite={recipe.favorite}
+                        onToggle={() => onToggleFavorite(recipe)}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => onEdit(recipe)}
+                        className="text-sm text-primary hover:underline transition-colors"
+                    >
+                        Editar
+                    </button>
+                </div>
             </div>
 
             <div className="page-container py-5 md:py-8">
@@ -104,6 +114,10 @@ export default function RecipeDetail({
                     <span className="mx-1.5" aria-hidden="true">·</span>
                     Actualizada {updatedLabel}
                 </p>
+
+                <div className="mt-3">
+                    <RecipeStatusBadge status={recipe.status} />
+                </div>
 
                 <button
                     type="button"

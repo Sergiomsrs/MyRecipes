@@ -96,9 +96,9 @@ Ampliación del sistema de organización.
 Posibles funcionalidades:
 
 - Etiquetas personalizadas.
-- Recetas favoritas.
-- Estado de una receta.
 - Organización avanzada.
+
+Las recetas favoritas y el estado de una receta ya están implementados: viven en `Recipe.favorite` y `Recipe.status`.
 
 ---
 

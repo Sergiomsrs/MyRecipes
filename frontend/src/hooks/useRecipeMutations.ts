@@ -4,11 +4,13 @@ import {
     createVersion,
     deleteRecipe,
     updateRecipe,
+    updateRecipeFavorite,
 } from "../api/recipes";
 import { recipeKeys } from "../api/queries";
 import type {
     CreateIngredientPayload,
     CreateStepPayload,
+    Recipe,
     RecipeFormData,
 } from "../types/recipe";
 
@@ -48,6 +50,8 @@ export function useCreateRecipe() {
                 title: data.title,
                 description: data.description,
                 category: data.category,
+                status: data.status,
+                favorite: data.favorite,
                 notes: data.notes,
                 rating: data.rating,
                 ingredients: toIngredientPayloads(data),
@@ -66,8 +70,41 @@ export function useUpdateRecipe() {
                 title: data.title,
                 description: data.description,
                 category: data.category,
+                status: data.status,
+                favorite: data.favorite,
             }),
         onSuccess: () => invalidateRecipes(queryClient),
+    });
+}
+
+export function useToggleFavorite() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, favorite }: { id: string; favorite: boolean }) =>
+            updateRecipeFavorite(id, favorite),
+        onMutate: async ({ id, favorite }) => {
+            await queryClient.cancelQueries({ queryKey: recipeKeys.list() });
+            const previous = queryClient.getQueryData<Recipe[]>(
+                recipeKeys.list()
+            );
+
+            queryClient.setQueryData<Recipe[]>(recipeKeys.list(), (recipes) =>
+                recipes?.map((recipe) =>
+                    recipe.id === id ? { ...recipe, favorite } : recipe
+                )
+            );
+
+            return { previous };
+        },
+        onError: (_error, _variables, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(recipeKeys.list(), context.previous);
+                return;
+            }
+            void queryClient.invalidateQueries({ queryKey: recipeKeys.all });
+        },
+        onSettled: () => invalidateRecipes(queryClient),
     });
 }
 

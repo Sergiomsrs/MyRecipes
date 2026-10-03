@@ -6,6 +6,7 @@ import org.mendez.mr.myrecipesapi.dto.CreateVersionRequest;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeVersionResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeWithCurrentVersionResponse;
+import org.mendez.mr.myrecipesapi.dto.UpdateFavoriteRequest;
 import org.mendez.mr.myrecipesapi.dto.UpdateRecipeRequest;
 import org.mendez.mr.myrecipesapi.security.service.CustomUserDetails;
 import org.mendez.mr.myrecipesapi.service.RecipeService;
@@ -61,6 +62,17 @@ public class RecipeController {
     ) {
         UUID userId = getCurrentUserId();
         return ResponseEntity.ok(recipeService.updateRecipe(id, request, userId));
+    }
+
+    @PatchMapping("/{id}/favorite")
+    public ResponseEntity<RecipeResponse> updateRecipeFavorite(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateFavoriteRequest request
+    ) {
+        UUID userId = getCurrentUserId();
+        return ResponseEntity.ok(
+                recipeService.updateRecipeFavorite(id, request.favorite(), userId)
+        );
     }
 
     @GetMapping("/{id}/versions/current")

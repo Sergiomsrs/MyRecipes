@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.mendez.mr.myrecipesapi.enums.RecipeCategory;
+import org.mendez.mr.myrecipesapi.enums.RecipeStatus;
 
 public record UpdateRecipeRequest(
 
@@ -15,7 +16,11 @@ public record UpdateRecipeRequest(
         String description,
 
         @NotNull(message = "category es obligatoria")
-        RecipeCategory category
+        RecipeCategory category,
+
+        RecipeStatus status,
+
+        Boolean favorite
 
 ) {
 }

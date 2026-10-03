@@ -5,6 +5,7 @@ import type {
     Recipe,
     RecipeVersion,
     RecipeWithCurrentVersion,
+    UpdateFavoritePayload,
     UpdateRecipePayload,
 } from "../types/recipe";
 
@@ -49,6 +50,18 @@ export async function updateRecipe(
     payload: UpdateRecipePayload
 ): Promise<Recipe> {
     const { data } = await api.put<Recipe>(`${RECIPES_BASE}/${id}`, payload);
+    return data;
+}
+
+export async function updateRecipeFavorite(
+    id: string,
+    favorite: boolean
+): Promise<Recipe> {
+    const payload: UpdateFavoritePayload = { favorite };
+    const { data } = await api.patch<Recipe>(
+        `${RECIPES_BASE}/${id}/favorite`,
+        payload
+    );
     return data;
 }
 

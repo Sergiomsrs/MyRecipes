@@ -5,17 +5,21 @@ import org.mendez.mr.myrecipesapi.dto.CreatePhotoRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeIngredientRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeRequest;
 import org.mendez.mr.myrecipesapi.dto.CreateRecipeStepRequest;
+import org.mendez.mr.myrecipesapi.dto.CreateVersionRequest;
 import org.mendez.mr.myrecipesapi.dto.PhotoResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeIngredientResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeStepResponse;
 import org.mendez.mr.myrecipesapi.dto.RecipeWithCurrentVersionResponse;
+import org.mendez.mr.myrecipesapi.dto.UpdateRecipeRequest;
 import org.mendez.mr.myrecipesapi.entity.Recipe;
 import org.mendez.mr.myrecipesapi.entity.RecipeIngredient;
 import org.mendez.mr.myrecipesapi.entity.RecipeStep;
 import org.mendez.mr.myrecipesapi.entity.RecipeVersion;
 import org.mendez.mr.myrecipesapi.entity.User;
 import org.mendez.mr.myrecipesapi.enums.RecipeCategory;
+import org.mendez.mr.myrecipesapi.enums.RecipeStatus;
+import org.mendez.mr.myrecipesapi.exception.ResourceNotFoundException;
 import org.mendez.mr.myrecipesapi.repository.RecipeRepository;
 import org.mendez.mr.myrecipesapi.repository.RecipeVersionRepository;
 import org.mendez.mr.myrecipesapi.repository.UserRepository;
@@ -28,6 +32,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -58,6 +63,8 @@ class RecipeServiceTest {
                 "Tortilla de patatas",
                 "Receta tradicional",
                 RecipeCategory.MAIN_COURSE,
+                null,
+                null,
                 "Versión inicial",
                 null,
                 null,
@@ -140,6 +147,8 @@ class RecipeServiceTest {
                         "Bizcocho de limón",
                         "Receta de sobremesa",
                         RecipeCategory.DESSERT,
+                        null,
+                        null,
                         "Versión inicial",
                         "Muy esponjoso",
                         9,
@@ -220,5 +229,142 @@ class RecipeServiceTest {
                 recipeService.getRecipesWithCurrentVersion(UUID.randomUUID());
 
         assertThat(entries).isEmpty();
+    }
+
+    @Test
+    void shouldCreateRecipeEvolvingAndNotFavoriteByDefault() {
+
+        UUID userId = createUser();
+
+        RecipeResponse response = recipeService.createRecipe(buildRequest(), userId);
+
+        assertThat(response.status()).isEqualTo(RecipeStatus.EVOLUCION);
+        assertThat(response.favorite()).isFalse();
+    }
+
+    @Test
+    void shouldCreateRecipeWithTheGivenStatusAndFavorite() {
+
+        UUID userId = createUser();
+
+        RecipeResponse response = recipeService.createRecipe(
+                requestWith(RecipeStatus.DEFINITIVA, true),
+                userId
+        );
+
+        assertThat(response.status()).isEqualTo(RecipeStatus.DEFINITIVA);
+        assertThat(response.favorite()).isTrue();
+    }
+
+    @Test
+    void shouldKeepStatusAndFavoriteWhenUpdateDoesNotSendThem() {
+
+        UUID userId = createUser();
+
+        RecipeResponse created = recipeService.createRecipe(
+                requestWith(RecipeStatus.DEFINITIVA, true),
+                userId
+        );
+
+        RecipeResponse updated = recipeService.updateRecipe(
+                created.id(),
+                new UpdateRecipeRequest(
+                        "Tortilla de patatas",
+                        "Receta tradicional",
+                        RecipeCategory.MAIN_COURSE,
+                        null,
+                        null
+                ),
+                userId
+        );
+
+        assertThat(updated.status()).isEqualTo(RecipeStatus.DEFINITIVA);
+        assertThat(updated.favorite()).isTrue();
+    }
+
+    @Test
+    void shouldToggleFavoriteWithoutTouchingTheRest() {
+
+        UUID userId = createUser();
+
+        RecipeResponse created = recipeService.createRecipe(
+                requestWith(RecipeStatus.DEFINITIVA, false),
+                userId
+        );
+
+        RecipeResponse favorited = recipeService.updateRecipeFavorite(created.id(), true, userId);
+
+        assertThat(favorited.favorite()).isTrue();
+        assertThat(favorited.status()).isEqualTo(RecipeStatus.DEFINITIVA);
+        assertThat(favorited.title()).isEqualTo(created.title());
+
+        RecipeResponse unfavorited = recipeService.updateRecipeFavorite(created.id(), false, userId);
+
+        assertThat(unfavorited.favorite()).isFalse();
+    }
+
+    @Test
+    void shouldReturnRecipeToEvolvingWhenANewVersionIsCreated() {
+
+        UUID userId = createUser();
+
+        RecipeResponse created = recipeService.createRecipe(
+                requestWith(RecipeStatus.DEFINITIVA, true),
+                userId
+        );
+
+        recipeService.createVersion(created.id(), newVersionRequest(), userId);
+
+        RecipeResponse reloaded = recipeService.getRecipe(created.id(), userId);
+
+        assertThat(reloaded.status()).isEqualTo(RecipeStatus.EVOLUCION);
+    }
+
+    @Test
+    void shouldNotLetOneUserFavoriteTheRecipeOfAnother() {
+
+        UUID userId = createUser();
+        UUID otherUserId = createUser();
+
+        RecipeResponse created = recipeService.createRecipe(buildRequest(), userId);
+
+        assertThatThrownBy(() ->
+                recipeService.updateRecipeFavorite(created.id(), true, otherUserId)
+        ).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    private CreateRecipeRequest requestWith(RecipeStatus status, boolean favorite) {
+        return new CreateRecipeRequest(
+                "Tortilla de patatas",
+                "Receta tradicional",
+                RecipeCategory.MAIN_COURSE,
+                status,
+                favorite,
+                "Versión inicial",
+                null,
+                null,
+                List.of(
+                        new CreateRecipeIngredientRequest("Patatas", new BigDecimal("500"), "g", 1)
+                ),
+                List.of(
+                        new CreateRecipeStepRequest(1, "Pelar y cortar las patatas.")
+                ),
+                List.of()
+        );
+    }
+
+    private CreateVersionRequest newVersionRequest() {
+        return new CreateVersionRequest(
+                "Menos sal",
+                "Queda mejor reposando",
+                9,
+                List.of(
+                        new CreateRecipeIngredientRequest("Patatas", new BigDecimal("500"), "g", 1)
+                ),
+                List.of(
+                        new CreateRecipeStepRequest(1, "Pelar y cortar las patatas.")
+                ),
+                List.of()
+        );
     }
 }

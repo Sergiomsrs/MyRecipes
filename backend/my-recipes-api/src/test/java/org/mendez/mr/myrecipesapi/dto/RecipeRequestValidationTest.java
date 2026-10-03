@@ -90,6 +90,8 @@ class RecipeRequestValidationTest {
                 "Spaghetti a la carbonara",
                 "Pasta con salsa de huevo",
                 RecipeCategory.MAIN_COURSE,
+                null,
+                null,
                 "Versión inicial",
                 "Servir bien caliente",
                 9,

@@ -3,6 +3,7 @@ package org.mendez.mr.myrecipesapi.entity;
 
 import jakarta.persistence.*;
 import org.mendez.mr.myrecipesapi.enums.RecipeCategory;
+import org.mendez.mr.myrecipesapi.enums.RecipeStatus;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -32,6 +33,14 @@ public class Recipe {
     @Column(nullable = false)
     private RecipeCategory category;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean favorite;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20,
+            columnDefinition = "varchar(20) default 'EVOLUCION'")
+    private RecipeStatus status = RecipeStatus.EVOLUCION;
+
     private UUID currentVersionId;
 
     @CreatedDate
@@ -51,10 +60,23 @@ public class Recipe {
             String description,
             RecipeCategory category
     ) {
+        this(userId, title, description, category, false, RecipeStatus.EVOLUCION);
+    }
+
+    public Recipe(
+            UUID userId,
+            String title,
+            String description,
+            RecipeCategory category,
+            boolean favorite,
+            RecipeStatus status
+    ) {
         this.userId = userId;
         this.title = title;
         this.description = description;
         this.category = category;
+        this.favorite = favorite;
+        this.status = status == null ? RecipeStatus.EVOLUCION : status;
     }
 
     public UUID getId() {
@@ -95,6 +117,22 @@ public class Recipe {
 
     public void setCategory(RecipeCategory category) {
         this.category = category;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    public RecipeStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RecipeStatus status) {
+        this.status = status;
     }
 
     public UUID getCurrentVersionId() {

@@ -15,6 +15,7 @@ import org.mendez.mr.myrecipesapi.entity.RecipeIngredient;
 import org.mendez.mr.myrecipesapi.entity.RecipeStep;
 import org.mendez.mr.myrecipesapi.entity.RecipeVersion;
 import org.mendez.mr.myrecipesapi.entity.User;
+import org.mendez.mr.myrecipesapi.enums.RecipeStatus;
 import org.mendez.mr.myrecipesapi.exception.ResourceNotFoundException;
 import org.mendez.mr.myrecipesapi.mapper.RecipeMapper;
 import org.mendez.mr.myrecipesapi.repository.PhotoRepository;
@@ -169,7 +170,9 @@ public class RecipeServiceImpl implements RecipeService {
                 userId,
                 request.title(),
                 request.description(),
-                request.category()
+                request.category(),
+                request.favorite() != null && request.favorite(),
+                request.status()
         );
 
         recipe = recipeRepository.save(recipe);
@@ -191,6 +194,24 @@ public class RecipeServiceImpl implements RecipeService {
         recipe.setTitle(request.title());
         recipe.setDescription(request.description());
         recipe.setCategory(request.category());
+
+        if (request.status() != null) {
+            recipe.setStatus(request.status());
+        }
+
+        if (request.favorite() != null) {
+            recipe.setFavorite(request.favorite());
+        }
+
+        return RecipeMapper.toResponse(recipeRepository.save(recipe));
+    }
+
+    @Override
+    public RecipeResponse updateRecipeFavorite(UUID recipeId, boolean favorite, UUID userId) {
+
+        Recipe recipe = findOwned(recipeId, userId);
+
+        recipe.setFavorite(favorite);
 
         return RecipeMapper.toResponse(recipeRepository.save(recipe));
     }
@@ -262,6 +283,9 @@ public class RecipeServiceImpl implements RecipeService {
         version = recipeVersionRepository.save(version);
 
         recipe.setCurrentVersionId(version.getId());
+
+        recipe.setStatus(RecipeStatus.EVOLUCION);
+
         recipeRepository.save(recipe);
 
         return RecipeMapper.toVersionResponse(version);

@@ -10,6 +10,7 @@ import {
     useCreateRecipe,
     useCreateVersion,
     useDeleteRecipe,
+    useToggleFavorite,
     useUpdateRecipe,
 } from "../hooks/useRecipeMutations";
 import { useAuth } from "../hooks/useAuth";
@@ -29,6 +30,13 @@ const filterLabels: Record<FilterType, string> = {
     favoritas: "Favoritas",
 };
 
+function matchesFilter(recipe: Recipe, filter: FilterType): boolean {
+    if (filter === "evolucion") return recipe.status === "EVOLUCION";
+    if (filter === "definitiva") return recipe.status === "DEFINITIVA";
+    if (filter === "favoritas") return recipe.favorite;
+    return true;
+}
+
 export default function RecipesPage() {
     const {
         data: recipes,
@@ -45,6 +53,7 @@ export default function RecipesPage() {
     const updateRecipeMutation = useUpdateRecipe();
     const deleteRecipeMutation = useDeleteRecipe();
     const createVersionMutation = useCreateVersion();
+    const toggleFavoriteMutation = useToggleFavorite();
     const { user } = useAuth();
     const [currentView, setCurrentView] = useState<View>("list");
     const [showNewVersionModal, setShowNewVersionModal] = useState(false);
@@ -80,15 +89,23 @@ export default function RecipesPage() {
         return () => window.removeEventListener("fab-click", handler);
     }, [handleFabClick]);
 
-    const filteredRecipes = recipeList.filter((recipe) => {
-        if (activeFilter === "all") return true;
-        if (activeFilter === "favoritas") return recipe.category === "DESSERT";
-        if (activeFilter === "definitiva")
-            return recipe.title.toLowerCase().includes("definitiva") || recipe.category === "MAIN_COURSE";
-        if (activeFilter === "evolucion")
-            return recipe.title.toLowerCase().includes("evolución") || recipe.category === "STARTER";
-        return true;
-    });
+    const filteredRecipes = recipeList.filter((recipe) =>
+        matchesFilter(recipe, activeFilter)
+    );
+
+    const filterCounts = (Object.keys(filterLabels) as FilterType[]).reduce(
+        (counts, key) => {
+            counts[key] = recipeList.filter((recipe) =>
+                matchesFilter(recipe, key)
+            ).length;
+            return counts;
+        },
+        {} as Record<FilterType, number>
+    );
+
+    const evolucionCount = filterCounts.evolucion;
+    const definitivaCount = filterCounts.definitiva;
+    const favoritaCount = filterCounts.favoritas;
 
     const visibleRecipes = [...filteredRecipes].sort((a, b) => {
         if (sortOrder === "oldest") {
@@ -130,6 +147,13 @@ export default function RecipesPage() {
         setSelectedRecipeId(recipe.id);
         setSelectedVersionId(recipe.currentVersionId);
         setCurrentView("detail");
+    };
+
+    const handleToggleFavorite = (recipe: Recipe) => {
+        toggleFavoriteMutation.mutate({
+            id: recipe.id,
+            favorite: !recipe.favorite,
+        });
     };
 
     const handleSelectVersion = (version: RecipeVersion) => {
@@ -245,8 +269,7 @@ export default function RecipesPage() {
                                 </div>
 
                                 <p className="mt-4 text-sm text-stone-600">
-                                    {recipeList.length} recetas vivas · {recipeList.length} cocinados
-                                    documentados
+                                    {recipeList.length} recetas en tu bitácora
                                 </p>
                             </header>
 
@@ -261,13 +284,17 @@ export default function RecipesPage() {
                                                 Laboratorio de sabores
                                             </p>
                                             <h2 className="mt-1 text-base font-semibold text-stone-800 md:text-lg">
-                                                {recipeList.length} recetas afinándose esta semana
+                                                {evolucionCount}{" "}
+                                                {evolucionCount === 1
+                                                    ? "receta en evolución"
+                                                    : "recetas en evolución"}
                                             </h2>
                                         </div>
                                     </div>
 
                                     <div className="rounded-full border border-amber-200 bg-white/60 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
-                                        +{Math.max(recipeList.length, 0)} en prueba
+                                        {definitivaCount} definitivas ·{" "}
+                                        {favoritaCount} favoritas
                                     </div>
                                 </div>
                             </section>
@@ -276,28 +303,7 @@ export default function RecipesPage() {
                                 <div className="flex flex-col gap-4">
                                     <div className="inline-flex w-full flex-wrap items-center gap-2 rounded-2xl bg-stone-100 p-1.5 shadow-[inset_0_1px_0_rgba(0,0,0,0.02)] md:w-auto">
                                         {(Object.keys(filterLabels) as FilterType[]).map((key) => {
-                                            const count =
-                                                key === "all"
-                                                    ? recipeList.length
-                                                    : recipeList.filter((r) => {
-                                                        if (key === "favoritas")
-                                                            return r.category === "DESSERT";
-                                                        if (key === "definitiva")
-                                                            return (
-                                                                r.title
-                                                                    .toLowerCase()
-                                                                    .includes("definitiva") ||
-                                                                r.category === "MAIN_COURSE"
-                                                            );
-                                                        if (key === "evolucion")
-                                                            return (
-                                                                r.title
-                                                                    .toLowerCase()
-                                                                    .includes("evolución") ||
-                                                                r.category === "STARTER"
-                                                            );
-                                                        return true;
-                                                    }).length;
+                                            const count = filterCounts[key];
 
                                             const active = activeFilter === key;
 
@@ -394,6 +400,7 @@ export default function RecipesPage() {
                                     onCancelPrefetch={cancelRecipePrefetch}
                                     onEdit={handleEditRecipe}
                                     onDelete={handleDeleteRecipe}
+                                    onToggleFavorite={handleToggleFavorite}
                                 />
                             </section>
                         </div>
@@ -439,6 +446,7 @@ export default function RecipesPage() {
                             onSelectVersion={handleSelectVersion}
                             onBackToCurrentVersion={handleBackToCurrentVersion}
                             onEdit={handleEditRecipe}
+                            onToggleFavorite={handleToggleFavorite}
                             onBack={handleBackToList}
                             onNewVersion={() => setShowNewVersionModal(true)}
                         />
