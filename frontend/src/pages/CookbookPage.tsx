@@ -18,6 +18,16 @@ export default function CookbookPage() {
     const [shareError, setShareError] = useState("");
     const shareRef = useRef<HTMLDivElement>(null);
     const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+    const shareCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(
+        () => () => {
+            if (shareCloseTimerRef.current) {
+                clearTimeout(shareCloseTimerRef.current);
+            }
+        },
+        []
+    );
 
     useEffect(() => {
         if (!entries || entries.length === 0) {
@@ -63,6 +73,10 @@ export default function CookbookPage() {
     }, [entries]);
 
     const handleShare = (recipe: Recipe, version?: RecipeVersion | null) => {
+        if (shareCloseTimerRef.current) {
+            clearTimeout(shareCloseTimerRef.current);
+            shareCloseTimerRef.current = null;
+        }
         setShareTarget({ recipe, version });
         setShareMessage("");
         setShareError("");
@@ -70,9 +84,21 @@ export default function CookbookPage() {
 
     const closeShareDialog = () => {
         if (isExporting) return;
+        if (shareCloseTimerRef.current) {
+            clearTimeout(shareCloseTimerRef.current);
+            shareCloseTimerRef.current = null;
+        }
         setShareTarget(null);
         setShareMessage("");
         setShareError("");
+    };
+
+    const closeShareDialogAfterSuccess = () => {
+        shareCloseTimerRef.current = setTimeout(() => {
+            setShareTarget(null);
+            setShareMessage("");
+            shareCloseTimerRef.current = null;
+        }, 1500);
     };
 
     const exportRecipeImage = async (action: "copy" | "download") => {
@@ -124,6 +150,7 @@ export default function CookbookPage() {
                     new ClipboardItem({ "image/png": blob }),
                 ]);
                 setShareMessage("Imagen copiada al portapapeles.");
+                closeShareDialogAfterSuccess();
             } else {
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement("a");
@@ -138,6 +165,7 @@ export default function CookbookPage() {
                 document.body.removeChild(link);
                 window.setTimeout(() => URL.revokeObjectURL(url), 1000);
                 setShareMessage("Descarga de la imagen iniciada.");
+                closeShareDialogAfterSuccess();
             }
         } catch (error) {
             setShareError(
