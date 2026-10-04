@@ -457,9 +457,87 @@ body {
 }
 
 .recipe-book-shell {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 1rem;
+}
+
+.recipe-book-mobile-index {
+    display: grid;
+    gap: 0.4rem;
+    color: var(--color-on-surface-variant);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.recipe-book-mobile-index select {
+    width: 100%;
+    min-height: 2.9rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 80%, transparent);
+    border-radius: 0.75rem;
+    background: var(--color-surface-container-lowest);
+    color: var(--color-on-surface);
+    font: inherit;
+    font-size: 0.9rem;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.recipe-book-index {
+    display: none;
+}
+
+.recipe-book-index ol {
+    display: grid;
+    gap: 0.2rem;
+    max-height: min(70vh, 48rem);
+    overflow-y: auto;
+    margin: 0.75rem 0 0;
+    padding: 0 0.3rem 0 0;
+    list-style: none;
+    scrollbar-color: color-mix(in srgb, var(--color-outline) 45%, transparent) transparent;
+}
+
+.recipe-book-index-button {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1.9rem minmax(0, 1fr);
+    gap: 0.55rem;
+    align-items: start;
+    padding: 0.65rem 0.55rem;
+    border: 0;
+    border-radius: 0.65rem;
+    background: transparent;
+    color: var(--color-on-surface-variant);
+    text-align: left;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    transition: background-color var(--duration-fast), color var(--duration-fast);
+}
+
+.recipe-book-index-button:hover {
+    background: color-mix(in srgb, var(--color-surface-container) 65%, transparent);
+    color: var(--color-on-surface);
+}
+
+.recipe-book-index-button[aria-current="page"] {
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.recipe-book-index-button > span:first-child {
+    padding-top: 0.08rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.recipe-book-main {
+    min-width: 0;
 }
 
 .recipe-book-page-frame {
@@ -1156,6 +1234,29 @@ body {
 
     .recipe-book-content-grid {
         grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .recipe-book-shell {
+        grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
+        align-items: start;
+        gap: 1.5rem;
+    }
+
+    .recipe-book-mobile-index {
+        display: none;
+    }
+
+    .recipe-book-index {
+        position: sticky;
+        top: 1.5rem;
+        display: block;
+        padding-top: 1rem;
+    }
+
+    .recipe-book-index > .section-label {
+        padding-inline: 0.55rem;
     }
 }
 

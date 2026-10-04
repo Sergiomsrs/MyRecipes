@@ -281,47 +281,83 @@ export default function CookbookPage() {
                 </header>
 
                 <div className="recipe-book-shell">
-                    <div
-                        className="recipe-book-page-frame"
-                        onTouchStart={handleTouchStart}
-                        onTouchEnd={handleTouchEnd}
-                        onTouchCancel={() => {
-                            touchStartRef.current = null;
-                        }}
-                    >
-                        <RecipeBookPage
-                            recipe={currentEntry.recipe}
-                            version={currentEntry.currentVersion}
-                            onShare={handleShare}
-                        />
-                    </div>
-
-                    <nav
-                        className="recipe-book-navigation"
-                        aria-label="Navegación del recetario"
-                    >
-                        <button
-                            type="button"
-                            className="recipe-book-nav-button"
-                            onClick={goToPrevious}
-                            aria-label="Receta anterior"
+                    <label className="recipe-book-mobile-index">
+                        <span>Ir directamente a</span>
+                        <select
+                            value={currentIndex}
+                            onChange={(event) => setCurrentIndex(Number(event.target.value))}
+                            aria-label="Seleccionar receta del recetario"
                         >
-                            ‹ Anterior
-                        </button>
+                            {entries.map((entry, index) => (
+                                <option key={entry.recipe.id} value={index}>
+                                    {String(index + 1).padStart(2, "0")} · {entry.recipe.title}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
 
-                        <div className="recipe-book-indicator" aria-live="polite">
-                            {currentIndex + 1} / {entries.length}
+                    <aside className="recipe-book-index" aria-label="Índice de recetas">
+                        <p className="section-label">Índice</p>
+                        <ol>
+                            {entries.map((entry, index) => (
+                                <li key={entry.recipe.id}>
+                                    <button
+                                        type="button"
+                                        className="recipe-book-index-button"
+                                        aria-current={index === currentIndex ? "page" : undefined}
+                                        onClick={() => setCurrentIndex(index)}
+                                    >
+                                        <span>{String(index + 1).padStart(2, "0")}</span>
+                                        <span>{entry.recipe.title}</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ol>
+                    </aside>
+
+                    <div className="recipe-book-main">
+                        <div
+                            className="recipe-book-page-frame"
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={handleTouchEnd}
+                            onTouchCancel={() => {
+                                touchStartRef.current = null;
+                            }}
+                        >
+                            <RecipeBookPage
+                                recipe={currentEntry.recipe}
+                                version={currentEntry.currentVersion}
+                                onShare={handleShare}
+                            />
                         </div>
 
-                        <button
-                            type="button"
-                            className="recipe-book-nav-button"
-                            onClick={goToNext}
-                            aria-label="Receta siguiente"
+                        <nav
+                            className="recipe-book-navigation"
+                            aria-label="Navegación del recetario"
                         >
-                            Siguiente ›
-                        </button>
-                    </nav>
+                            <button
+                                type="button"
+                                className="recipe-book-nav-button"
+                                onClick={goToPrevious}
+                                aria-label="Receta anterior"
+                            >
+                                ‹ Anterior
+                            </button>
+
+                            <div className="recipe-book-indicator" aria-live="polite">
+                                {currentIndex + 1} / {entries.length}
+                            </div>
+
+                            <button
+                                type="button"
+                                className="recipe-book-nav-button"
+                                onClick={goToNext}
+                                aria-label="Receta siguiente"
+                            >
+                                Siguiente ›
+                            </button>
+                        </nav>
+                    </div>
                 </div>
             </div>
 
