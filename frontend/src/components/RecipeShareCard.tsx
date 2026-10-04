@@ -17,45 +17,63 @@ export default function RecipeShareCard({ recipe, version }: RecipeShareCardProp
     const heroPhoto = version?.photos?.[0];
 
     return (
-        <article className="recipe-share-card">
-            <div className="recipe-share-card__media">
-                {heroPhoto ? (
+        <article
+            className={`recipe-share-card${heroPhoto ? "" : " recipe-share-card--without-photo"}`}
+        >
+            {heroPhoto ? (
+                <div className="recipe-share-card__media">
                     <img src={heroPhoto.url} alt={heroPhoto.caption || recipe.title} />
-                ) : (
-                    <div className="recipe-share-card__placeholder" aria-label="Sin fotografía">
-                        <span>{meta.emoji}</span>
-                        <p>{recipe.title}</p>
+                    <div className="recipe-share-card__media-caption">
+                        <span>{meta.label}</span>
+                        {version && <span>Versión {version.versionNumber}</span>}
                     </div>
-                )}
-            </div>
+                </div>
+            ) : (
+                <div className="recipe-share-card__cover">
+                    <p className="recipe-share-card__brand">MyRecipes <span>·</span> Recetario personal</p>
+                    <p className="recipe-share-card__category">{meta.label}</p>
+                    <h2>{recipe.title}</h2>
+                </div>
+            )}
 
             <div className="recipe-share-card__content">
-                <header className="recipe-share-card__header">
-                    <p className="section-label">
-                        {meta.emoji} {meta.label}
+                {heroPhoto && (
+                    <header className="recipe-share-card__title-block">
+                        <h2>{recipe.title}</h2>
+                        {recipe.description && <p>{recipe.description}</p>}
+                    </header>
+                )}
+                {!heroPhoto && recipe.description && (
+                    <p className="recipe-share-card__description">
+                        {recipe.description}
                     </p>
-                    {version && (
-                        <span className="recipe-share-card__version">
-                            v{version.versionNumber}
-                        </span>
-                    )}
-                </header>
-
-                <h2>{recipe.title}</h2>
+                )}
 
                 <div className="recipe-share-card__meta">
-                    <span>{recipe.description || "Receta casera"}</span>
-                    {version?.rating ? (
-                        <span>Valoración {version.rating}/10</span>
-                    ) : (
-                        <span>Recetario MyRecipes</span>
+                    {version && (
+                        <span>
+                            <small>Versión</small>
+                            <strong>{version.versionNumber}</strong>
+                        </span>
+                    )}
+                    {version?.rating && (
+                        <span>
+                            <small>Valoración</small>
+                            <strong>{version.rating}/10</strong>
+                        </span>
+                    )}
+                    {!version && (
+                        <span>
+                            <small>Receta</small>
+                            <strong>De casa</strong>
+                        </span>
                     )}
                 </div>
 
                 <div className="recipe-share-card__body">
                     {ingredients.length > 0 && (
-                        <section>
-                            <p className="section-label">Ingredientes</p>
+                        <section className="recipe-share-card__section recipe-share-card__section--ingredients">
+                            <h3><span>01</span> Ingredientes</h3>
                             <ul>
                                 {ingredients.map((ingredient) => (
                                     <li key={ingredient.id}>
@@ -70,12 +88,14 @@ export default function RecipeShareCard({ recipe, version }: RecipeShareCardProp
                     )}
 
                     {steps.length > 0 && (
-                        <section>
-                            <p className="section-label">Preparación</p>
+                        <section className="recipe-share-card__section recipe-share-card__section--steps">
+                            <h3><span>02</span> Preparación</h3>
                             <ol>
                                 {steps.map((step, index) => (
                                     <li key={step.id}>
-                                        <span>{String(index + 1).padStart(2, "0")}</span>
+                                        <span>
+                                            <span>{String(index + 1).padStart(2, "0")}</span>
+                                        </span>
                                         <p>{step.description}</p>
                                     </li>
                                 ))}
@@ -85,7 +105,20 @@ export default function RecipeShareCard({ recipe, version }: RecipeShareCardProp
                 </div>
 
                 <footer className="recipe-share-card__footer">
-                    MyRecipes · Sergio Méndez
+                    <span className="recipe-share-card__footer-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M5 18V6l7 8 7-8v12"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                    </span>
+                    <span>MyRecipes</span>
+                    <i aria-hidden="true" />
+                    <span>Sergio Méndez</span>
                 </footer>
             </div>
         </article>
