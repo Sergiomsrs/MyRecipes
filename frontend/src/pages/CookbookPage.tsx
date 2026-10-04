@@ -1,9 +1,195 @@
+import { useEffect, useRef, useState } from "react";
 import { useCookbook } from "../hooks/useRecipes";
 import { getErrorMessage } from "../api/errors";
-import RecipeCard from "../components/RecipeCard";
+import RecipeBookPage from "../components/RecipeBookPage";
+import RecipeShareCard from "../components/RecipeShareCard";
+import html2canvas from "html2canvas";
+import type { Recipe, RecipeVersion } from "../types/recipe";
 
 export default function CookbookPage() {
     const { data: entries, isPending, error, refetch } = useCookbook();
+    const [shareTarget, setShareTarget] = useState<{
+        recipe: Recipe;
+        version?: RecipeVersion | null;
+    } | null>(null);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isExporting, setIsExporting] = useState(false);
+    const [shareMessage, setShareMessage] = useState("");
+    const [shareError, setShareError] = useState("");
+    const shareRef = useRef<HTMLDivElement>(null);
+    const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+    useEffect(() => {
+        if (!entries || entries.length === 0) {
+            setCurrentIndex(0);
+            return;
+        }
+
+        setCurrentIndex((prev) => Math.min(prev, entries.length - 1));
+    }, [entries]);
+
+    useEffect(() => {
+        if (!entries || entries.length <= 1) {
+            return;
+        }
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            const target = event.target as HTMLElement | null;
+            const isFormElement =
+                target &&
+                ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+
+            if (isFormElement) {
+                return;
+            }
+
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                setCurrentIndex((prev) =>
+                    prev === 0 ? entries.length - 1 : prev - 1
+                );
+            }
+
+            if (event.key === "ArrowRight") {
+                event.preventDefault();
+                setCurrentIndex((prev) =>
+                    prev === entries.length - 1 ? 0 : prev + 1
+                );
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [entries]);
+
+    const handleShare = (recipe: Recipe, version?: RecipeVersion | null) => {
+        setShareTarget({ recipe, version });
+        setShareMessage("");
+        setShareError("");
+    };
+
+    const closeShareDialog = () => {
+        if (isExporting) return;
+        setShareTarget(null);
+        setShareMessage("");
+        setShareError("");
+    };
+
+    const exportRecipeImage = async (action: "copy" | "download") => {
+        if (!shareTarget || isExporting) return;
+
+        const { recipe } = shareTarget;
+        setIsExporting(true);
+        setShareMessage("");
+        setShareError("");
+
+        await new Promise((resolve) => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(resolve);
+            });
+        });
+
+        const node = shareRef.current;
+        if (!node) {
+            setShareError("No se pudo preparar la imagen de la receta.");
+            setIsExporting(false);
+            return;
+        }
+
+        try {
+            const canvas = await html2canvas(node, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: null,
+            });
+
+            const blob = await new Promise<Blob>((resolve, reject) => {
+                canvas.toBlob((result) => {
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        reject(new Error("No se pudo crear el archivo PNG."));
+                    }
+                }, "image/png");
+            });
+
+            if (action === "copy") {
+                if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
+                    throw new Error(
+                        "Este navegador no permite copiar imágenes al portapapeles. Puedes descargarla."
+                    );
+                }
+
+                await navigator.clipboard.write([
+                    new ClipboardItem({ "image/png": blob }),
+                ]);
+                setShareMessage("Imagen copiada al portapapeles.");
+            } else {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                const safeTitle = recipe.title
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-|-$/g, "");
+                link.href = url;
+                link.download = `receta-${safeTitle || recipe.id}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                setShareMessage("Descarga de la imagen iniciada.");
+            }
+        } catch (error) {
+            setShareError(
+                error instanceof Error
+                    ? error.message
+                    : "No se pudo exportar la imagen de la receta."
+            );
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const goToPrevious = () => {
+        if (!entries || entries.length === 0) return;
+        setCurrentIndex((prev) =>
+            prev === 0 ? entries.length - 1 : prev - 1
+        );
+    };
+
+    const goToNext = () => {
+        if (!entries || entries.length === 0) return;
+        setCurrentIndex((prev) =>
+            prev === entries.length - 1 ? 0 : prev + 1
+        );
+    };
+
+    const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+        if (event.touches.length !== 1) {
+            touchStartRef.current = null;
+            return;
+        }
+
+        const touch = event.touches[0];
+        touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+        const start = touchStartRef.current;
+        touchStartRef.current = null;
+        if (!start || event.changedTouches.length !== 1) return;
+
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - start.x;
+        const deltaY = touch.clientY - start.y;
+        if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+
+        if (deltaX > 0) {
+            goToPrevious();
+        } else {
+            goToNext();
+        }
+    };
 
     if (error) {
         return (
@@ -54,29 +240,165 @@ export default function CookbookPage() {
         );
     }
 
+    const currentEntry = entries[currentIndex];
+
     return (
         <div className="min-h-full bg-surface">
             <div className="page-container pt-6 pb-24 md:pb-8">
-                <header className="mb-8">
-                    <h1 className="font-serif text-2xl text-on-surface">
-                        Tu recetario
+                <header className="recipe-book-hero">
+                    <p className="section-label">Mi recetario</p>
+                    <h1 className="font-serif text-3xl md:text-4xl text-on-surface">
+                        MyRecipes
                     </h1>
-                    <p className="text-sm text-on-surface-variant mt-0.5">
-                        {entries.length === 1
-                            ? "1 versión final · lista para cocinar"
-                            : `${entries.length} versiones finales · listas para cocinar`}
-                    </p>
                 </header>
 
-                <div className="cookbook-grid grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-start">
-                    {entries.map((entry) => (
-                        <RecipeCard
-                            key={entry.recipe.id}
-                            recipe={entry.recipe}
-                            version={entry.currentVersion}
+                <div className="recipe-book-shell">
+                    <div
+                        className="recipe-book-page-frame"
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
+                        onTouchCancel={() => {
+                            touchStartRef.current = null;
+                        }}
+                    >
+                        <RecipeBookPage
+                            recipe={currentEntry.recipe}
+                            version={currentEntry.currentVersion}
+                            onShare={handleShare}
                         />
-                    ))}
+                    </div>
+
+                    <nav
+                        className="recipe-book-navigation"
+                        aria-label="Navegación del recetario"
+                    >
+                        <button
+                            type="button"
+                            className="recipe-book-nav-button"
+                            onClick={goToPrevious}
+                            aria-label="Receta anterior"
+                        >
+                            ‹ Anterior
+                        </button>
+
+                        <div className="recipe-book-indicator" aria-live="polite">
+                            {currentIndex + 1} / {entries.length}
+                        </div>
+
+                        <button
+                            type="button"
+                            className="recipe-book-nav-button"
+                            onClick={goToNext}
+                            aria-label="Receta siguiente"
+                        >
+                            Siguiente ›
+                        </button>
+                    </nav>
                 </div>
+            </div>
+
+            {shareTarget && (
+                <>
+                    <button
+                        type="button"
+                        className="fixed inset-0 z-40 bg-on-surface/40"
+                        aria-label="Cerrar opciones para compartir"
+                        onClick={closeShareDialog}
+                        disabled={isExporting}
+                    />
+                    <div className="fixed inset-0 z-50 flex items-end justify-center p-3 md:items-center md:p-4">
+                        <section
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="recipe-share-dialog-title"
+                            className="plane w-full max-w-md rounded-t-2xl p-5 shadow-xl md:rounded-xl"
+                        >
+                            <div className="mb-5 flex items-start justify-between gap-4">
+                                <div>
+                                    <h2
+                                        id="recipe-share-dialog-title"
+                                        className="font-serif text-xl text-on-surface"
+                                    >
+                                        Compartir receta
+                                    </h2>
+                                    <p className="mt-1 text-sm text-on-surface-variant">
+                                        {shareTarget.recipe.title}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={closeShareDialog}
+                                    disabled={isExporting}
+                                    className="rounded-md p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface disabled:opacity-50"
+                                    aria-label="Cerrar"
+                                >
+                                    <svg
+                                        className="h-5 w-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <button
+                                    type="button"
+                                    className="btn-primary"
+                                    onClick={() => void exportRecipeImage("copy")}
+                                    disabled={isExporting}
+                                >
+                                    Copiar imagen
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-outline"
+                                    onClick={() => void exportRecipeImage("download")}
+                                    disabled={isExporting}
+                                >
+                                    Descargar PNG
+                                </button>
+                            </div>
+
+                            {isExporting && (
+                                <p className="mt-4 text-sm text-on-surface-variant" role="status">
+                                    Preparando la imagen...
+                                </p>
+                            )}
+                            {shareMessage && (
+                                <p className="mt-4 text-sm text-secondary" role="status">
+                                    {shareMessage}
+                                </p>
+                            )}
+                            {shareError && (
+                                <p className="mt-4 text-sm text-error" role="alert">
+                                    {shareError}
+                                </p>
+                            )}
+                        </section>
+                    </div>
+                </>
+            )}
+
+            <div
+                aria-hidden="true"
+                className="fixed -left-[9999px] top-0 pointer-events-none"
+                ref={shareRef}
+            >
+                {shareTarget && (
+                    <RecipeShareCard
+                        recipe={shareTarget.recipe}
+                        version={shareTarget.version}
+                    />
+                )}
             </div>
         </div>
     );

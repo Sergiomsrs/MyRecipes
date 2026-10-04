@@ -1,13 +1,16 @@
 import type { Recipe, RecipeVersion } from "../types/recipe";
+import { useState } from "react";
 import { categoryMeta } from "../constants/categories";
 
 interface RecipeCardProps {
     recipe: Recipe;
     version?: RecipeVersion | null;
     error?: string;
+    onShare?: (recipe: Recipe, version?: RecipeVersion | null) => void;
 }
 
-export default function RecipeCard({ recipe, version, error }: RecipeCardProps) {
+export default function RecipeCard({ recipe, version, error, onShare }: RecipeCardProps) {
+    const [copied, setCopied] = useState(false);
     const meta = categoryMeta[recipe.category];
     const updatedLabel = new Date(recipe.updatedAt).toLocaleDateString("es-ES", {
         day: "numeric",
@@ -25,15 +28,66 @@ export default function RecipeCard({ recipe, version, error }: RecipeCardProps) 
                 />
             )}
 
-            <div className="flex items-baseline justify-between gap-3 mb-2">
-                <p className="section-label">
-                    {meta.emoji} {meta.label}
-                </p>
-                {version && (
-                    <p className="text-xs text-primary font-medium tabular-nums">
-                        v{version.versionNumber}
+            <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-baseline gap-3">
+                    <p className="section-label">
+                        {meta.emoji} {meta.label}
                     </p>
-                )}
+                    {version && (
+                        <p className="text-xs text-primary font-medium tabular-nums">
+                            v{version.versionNumber}
+                        </p>
+                    )}
+                </div>
+                <button
+                    type="button"
+                    aria-label="Compartir receta como imagen"
+                    className="p-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container/60 transition-colors disabled:opacity-60"
+                    disabled={copied}
+                    onClick={() => {
+                        if (onShare) {
+                            onShare(recipe, version);
+                        }
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 1200);
+                    }}
+                >
+                    {copied ? (
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                    ) : (
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="18" cy="5" r="3" />
+                            <circle cx="6" cy="12" r="3" />
+                            <circle cx="18" cy="19" r="3" />
+                            <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+                            <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+                        </svg>
+                    )}
+                </button>
             </div>
 
             <h2 className="font-serif text-xl tracking-tight leading-snug text-on-surface mb-1.5">
