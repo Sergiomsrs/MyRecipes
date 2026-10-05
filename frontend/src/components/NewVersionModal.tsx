@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type {
     IngredientForm,
     RecipeFormData,
@@ -37,6 +38,45 @@ export default function NewVersionModal({
         notes: currentVersion.notes || "",
         rating: currentVersion.rating || 5,
     });
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const scrollY = window.scrollY;
+        const body = document.body;
+        const previousStyles = {
+            position: body.style.position,
+            top: body.style.top,
+            left: body.style.left,
+            right: body.style.right,
+            width: body.style.width,
+            overflow: body.style.overflow,
+            paddingRight: body.style.paddingRight,
+        };
+        const scrollbarWidth =
+            window.innerWidth - document.documentElement.clientWidth;
+
+        body.style.position = "fixed";
+        body.style.top = `-${scrollY}px`;
+        body.style.left = "0";
+        body.style.right = "0";
+        body.style.width = "100%";
+        body.style.overflow = "hidden";
+        if (scrollbarWidth > 0) {
+            body.style.paddingRight = `${scrollbarWidth}px`;
+        }
+
+        return () => {
+            body.style.position = previousStyles.position;
+            body.style.top = previousStyles.top;
+            body.style.left = previousStyles.left;
+            body.style.right = previousStyles.right;
+            body.style.width = previousStyles.width;
+            body.style.overflow = previousStyles.overflow;
+            body.style.paddingRight = previousStyles.paddingRight;
+            window.scrollTo(0, scrollY);
+        };
+    }, [isOpen]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -122,15 +162,21 @@ export default function NewVersionModal({
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <>
             <div
-                className="fixed inset-0 bg-on-surface/40 z-40"
+                className="fixed inset-0 z-[60] bg-on-surface/40"
+                aria-hidden="true"
                 onClick={onClose}
             />
 
-            <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-4 pointer-events-none">
-                <div className="plane w-full md:max-w-2xl max-h-[90vh] rounded-t-xl md:rounded-lg pointer-events-auto overflow-y-auto">
+            <div className="fixed inset-0 z-[61] flex items-end justify-center pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] pointer-events-none md:items-center md:p-4">
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="new-version-dialog-title"
+                    className="plane w-full md:max-w-2xl max-h-[calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] md:max-h-[calc(100dvh-2rem)] rounded-t-xl md:rounded-lg pointer-events-auto overflow-y-auto overscroll-contain"
+                >
                     <div className="flex justify-center pt-3 pb-1 md:hidden">
                         <div className="w-10 h-1 bg-outline-variant rounded-full" />
                     </div>
@@ -140,7 +186,10 @@ export default function NewVersionModal({
                         className="px-5 md:px-6 pb-6 pt-2 md:pt-6"
                     >
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="font-serif text-lg text-on-surface">
+                            <h2
+                                id="new-version-dialog-title"
+                                className="font-serif text-lg text-on-surface"
+                            >
                                 Nueva versión
                             </h2>
                             <button
@@ -369,6 +418,7 @@ export default function NewVersionModal({
                     </form>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 }
