@@ -24,6 +24,7 @@ export default function RecipeList({
     onToggleFavorite,
 }: RecipeListProps) {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
 
     if (recipes.length === 0) {
         return (
@@ -133,13 +134,7 @@ export default function RecipeList({
                                         type="button"
                                         onClick={() => {
                                             setOpenMenuId(null);
-                                            if (
-                                                window.confirm(
-                                                    `¿Eliminar la receta "${recipe.title}"?`
-                                                )
-                                            ) {
-                                                onDelete(recipe.id);
-                                            }
+                                            setRecipeToDelete(recipe);
                                         }}
                                         className="w-full text-left px-4 py-2 text-sm text-error hover:bg-surface-container-low transition-colors"
                                     >
@@ -151,6 +146,58 @@ export default function RecipeList({
                     </article>
                 );
             })}
+
+            {recipeToDelete && (
+                <>
+                    <button
+                        type="button"
+                        className="fixed inset-0 z-40 bg-on-surface/40"
+                        aria-label="Cancelar eliminación"
+                        onClick={() => setRecipeToDelete(null)}
+                    />
+                    <div className="fixed inset-0 z-50 flex items-end justify-center p-3 md:items-center md:p-4">
+                        <section
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="delete-recipe-dialog-title"
+                            className="plane w-full max-w-md rounded-t-2xl p-5 shadow-xl md:rounded-xl"
+                        >
+                            <div className="mb-5">
+                                <h2
+                                    id="delete-recipe-dialog-title"
+                                    className="font-serif text-xl text-on-surface"
+                                >
+                                    Eliminar receta
+                                </h2>
+                                <p className="mt-1 text-sm text-on-surface-variant">
+                                    ¿Seguro que quieres eliminar “{recipeToDelete.title}”?
+                                    Esta acción no se puede deshacer.
+                                </p>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <button
+                                    type="button"
+                                    className="btn-outline"
+                                    onClick={() => setRecipeToDelete(null)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-primary"
+                                    onClick={() => {
+                                        onDelete(recipeToDelete.id);
+                                        setRecipeToDelete(null);
+                                    }}
+                                >
+                                    Eliminar receta
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                </>
+            )}
         </div>
     );
 }
