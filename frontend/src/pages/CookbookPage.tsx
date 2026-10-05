@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useCookbook } from "../hooks/useRecipes";
 import { getErrorMessage } from "../api/errors";
 import RecipeBookPage from "../components/RecipeBookPage";
@@ -28,6 +29,45 @@ export default function CookbookPage() {
         },
         []
     );
+
+    useEffect(() => {
+        if (!shareTarget) return;
+
+        const scrollY = window.scrollY;
+        const body = document.body;
+        const previousStyles = {
+            position: body.style.position,
+            top: body.style.top,
+            left: body.style.left,
+            right: body.style.right,
+            width: body.style.width,
+            overflow: body.style.overflow,
+            paddingRight: body.style.paddingRight,
+        };
+        const scrollbarWidth =
+            window.innerWidth - document.documentElement.clientWidth;
+
+        body.style.position = "fixed";
+        body.style.top = `-${scrollY}px`;
+        body.style.left = "0";
+        body.style.right = "0";
+        body.style.width = "100%";
+        body.style.overflow = "hidden";
+        if (scrollbarWidth > 0) {
+            body.style.paddingRight = `${scrollbarWidth}px`;
+        }
+
+        return () => {
+            body.style.position = previousStyles.position;
+            body.style.top = previousStyles.top;
+            body.style.left = previousStyles.left;
+            body.style.right = previousStyles.right;
+            body.style.width = previousStyles.width;
+            body.style.overflow = previousStyles.overflow;
+            body.style.paddingRight = previousStyles.paddingRight;
+            window.scrollTo(0, scrollY);
+        };
+    }, [shareTarget]);
 
     useEffect(() => {
         if (!entries || entries.length === 0) {
@@ -361,96 +401,98 @@ export default function CookbookPage() {
                 </div>
             </div>
 
-            {shareTarget && (
-                <>
-                    <button
-                        type="button"
-                        className="fixed inset-0 z-40 bg-on-surface/40"
-                        aria-label="Cerrar opciones para compartir"
-                        onClick={closeShareDialog}
-                        disabled={isExporting}
-                    />
-                    <div className="fixed inset-0 z-50 flex items-end justify-center p-3 md:items-center md:p-4">
-                        <section
-                            role="dialog"
-                            aria-modal="true"
-                            aria-labelledby="recipe-share-dialog-title"
-                            className="plane w-full max-w-md rounded-t-2xl p-5 shadow-xl md:rounded-xl"
-                        >
-                            <div className="mb-5 flex items-start justify-between gap-4">
-                                <div>
-                                    <h2
-                                        id="recipe-share-dialog-title"
-                                        className="font-serif text-xl text-on-surface"
+            {shareTarget &&
+                createPortal(
+                    <>
+                        <button
+                            type="button"
+                            className="fixed inset-0 z-[60] bg-on-surface/40"
+                            aria-label="Cerrar opciones para compartir"
+                            onClick={closeShareDialog}
+                            disabled={isExporting}
+                        />
+                        <div className="fixed inset-0 z-[61] flex items-center justify-center p-3">
+                            <section
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby="recipe-share-dialog-title"
+                                className="plane w-full max-w-md max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain rounded-xl p-5 shadow-xl"
+                            >
+                                <div className="mb-5 flex items-start justify-between gap-4">
+                                    <div>
+                                        <h2
+                                            id="recipe-share-dialog-title"
+                                            className="font-serif text-xl text-on-surface"
+                                        >
+                                            Compartir receta
+                                        </h2>
+                                        <p className="mt-1 text-sm text-on-surface-variant">
+                                            {shareTarget.recipe.title}
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={closeShareDialog}
+                                        disabled={isExporting}
+                                        className="rounded-md p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface disabled:opacity-50"
+                                        aria-label="Cerrar"
                                     >
-                                        Compartir receta
-                                    </h2>
-                                    <p className="mt-1 text-sm text-on-surface-variant">
-                                        {shareTarget.recipe.title}
-                                    </p>
+                                        <svg
+                                            className="h-5 w-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M6 18L18 6M6 6l12 12"
+                                            />
+                                        </svg>
+                                    </button>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={closeShareDialog}
-                                    disabled={isExporting}
-                                    className="rounded-md p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface disabled:opacity-50"
-                                    aria-label="Cerrar"
-                                >
-                                    <svg
-                                        className="h-5 w-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        aria-hidden="true"
+
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    <button
+                                        type="button"
+                                        className="btn-primary"
+                                        onClick={() => void exportRecipeImage("copy")}
+                                        disabled={isExporting}
                                     >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M6 18L18 6M6 6l12 12"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
+                                        Copiar imagen
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn-outline"
+                                        onClick={() => void exportRecipeImage("download")}
+                                        disabled={isExporting}
+                                    >
+                                        Descargar PNG
+                                    </button>
+                                </div>
 
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                <button
-                                    type="button"
-                                    className="btn-primary"
-                                    onClick={() => void exportRecipeImage("copy")}
-                                    disabled={isExporting}
-                                >
-                                    Copiar imagen
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn-outline"
-                                    onClick={() => void exportRecipeImage("download")}
-                                    disabled={isExporting}
-                                >
-                                    Descargar PNG
-                                </button>
-                            </div>
-
-                            {isExporting && (
-                                <p className="mt-4 text-sm text-on-surface-variant" role="status">
-                                    Preparando la imagen...
-                                </p>
-                            )}
-                            {shareMessage && (
-                                <p className="mt-4 text-sm text-secondary" role="status">
-                                    {shareMessage}
-                                </p>
-                            )}
-                            {shareError && (
-                                <p className="mt-4 text-sm text-error" role="alert">
-                                    {shareError}
-                                </p>
-                            )}
-                        </section>
-                    </div>
-                </>
-            )}
+                                {isExporting && (
+                                    <p className="mt-4 text-sm text-on-surface-variant" role="status">
+                                        Preparando la imagen...
+                                    </p>
+                                )}
+                                {shareMessage && (
+                                    <p className="mt-4 text-sm text-secondary" role="status">
+                                        {shareMessage}
+                                    </p>
+                                )}
+                                {shareError && (
+                                    <p className="mt-4 text-sm text-error" role="alert">
+                                        {shareError}
+                                    </p>
+                                )}
+                            </section>
+                        </div>
+                    </>,
+                    document.body
+                )}
 
             <div
                 aria-hidden="true"
