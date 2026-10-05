@@ -150,7 +150,13 @@ export default function RecipeDetail({
             )}
 
             <div className="page-container">
-                <div className="lg:grid lg:grid-cols-[12rem_1fr] lg:gap-8">
+                <div
+                    className={
+                        versions.length > 1
+                            ? "lg:grid lg:grid-cols-[12rem_1fr] lg:gap-8"
+                            : ""
+                    }
+                >
                     {/* Timeline sidebar — desktop */}
                     {versions.length > 1 && (
                         <aside className="hidden lg:block">
