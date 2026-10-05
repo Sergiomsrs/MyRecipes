@@ -292,17 +292,6 @@ export default function RecipeDetail({
                 </div>
             </div>
 
-            <div className="fixed-bar md:hidden">
-                <div className="page-container">
-                    <button
-                        type="button"
-                        onClick={onNewVersion}
-                        className="w-full py-3.5 btn-primary"
-                    >
-                        Nueva versión
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }
